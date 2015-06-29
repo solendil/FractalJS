@@ -1,0 +1,57 @@
+<html>
+<body>
+</body>
+<script>
+var t1 = {op:"mul",terms:["a","b","c"]}
+var t2 = {op:"add",terms:["d","e","f"]}
+var t3 = {op:"mul",terms:[
+	{op:"add",terms:["a","bi"]},
+	{op:"add",terms:["a","bi"]}
+]}
+
+function distribute(t) {
+	var t1 = t.terms[0]
+	var t2 = t.terms[1]
+	var tr = {op:"add",terms:[]}
+	//console.log(t1, t2)
+	for (var i=0; i<t1.terms.length; i++) {
+		for (var j=0; j<t2.terms.length; j++) {
+			var tadd = {op:"mul", terms:[t1.terms[i], t2.terms[j]]}
+			//console.log(tadd)
+			tr.terms.push(tadd)
+		}
+	}
+	return tr
+}
+
+function toStr(exp) {
+	if (typeof exp == 'string')
+		return exp
+	if (exp.op == "mul") {
+		var res = ""
+		for (var i=0; i<exp.terms.length; i++) {
+			res+=toStr(exp.terms[i])
+			if (i<exp.terms.length-1)
+				res+="*"
+		}
+		return res
+	}		
+	if (exp.op == "add") {
+		var res = "("
+		for (var i=0; i<exp.terms.length; i++) {
+			res+=toStr(exp.terms[i])
+			if (i<exp.terms.length-1)
+				res+="+"
+		}
+		res+=")"
+		return res
+	}		
+}
+
+console.log(toStr(t1))
+console.log(toStr(t2))
+console.log(toStr(t3))
+console.log(toStr(distribute(t3)))
+
+</script>
+</html>

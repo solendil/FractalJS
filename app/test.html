@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fractal.js</title>
+    <link href="css/fractal.css" rel="stylesheet">
+  </head>
+  <body>
+    <style>
+      body {margin:0;}
+      canvas {display:inline-block;}
+      #maincanvas {
+        display:block;
+        position:fixed;
+        z-index: -1;
+      }
+    </style>
+    <canvas id="maincanvas"></canvas>
+    <canvas id="canvas2"></canvas>
+    <canvas id="canvas3"></canvas>
+    <script src="scripts/lib/require.js"></script>
+    <script>
+    require.config({
+      baseUrl:"scripts",
+      paths: {
+        jquery: 'lib/jquery-2.1.3.min'
+      }
+    });
+    require(["fractal"], function(Fractal) {
+      new Fractal({
+        canvas:document.getElementById("maincanvas"),
+        fractalDesc:{
+          x:-0.11868198698315306, 
+          y:-0.9697078596477062, 
+          w:5.439e-14, 
+          i: 500,
+          /*
+          x:-0.7, 
+          y:0.0, 
+          w:2.5, 
+          i:500
+          */
+        },
+        palette:{
+          resolution:10,
+          stops:[
+          {index:0.1,r:255,b:0,g:0},
+          {index:0.5,r:0,b:0,g:255},
+          ]
+        },
+        renderer:{
+          numberOfTiles:100
+        },
+        controller:{
+          fitToWindow:true
+        }
+      })
+
+      new Fractal({
+        canvas:document.getElementById("canvas2"),
+        fractalDesc:{
+          x:-1.217434278579772,
+          y:-0.3348717787137565,
+          w: 0.13252815215473338,
+          i: 100
+        },
+      })
+
+      new Fractal({
+        canvas:document.getElementById("canvas3"),
+        fractalDesc:{
+          x:-1.7639182100678121,
+          y:0.000826276024854138,
+          w: 0.06076105241849479,
+          iter: 130
+        },
+        palette:{
+          resolution:100,
+          stops:[
+          {index:0,r:0,b:128,g:0},
+          {index:0.4,r:100,b:200,g:128},
+          {index:0.8,r:0,b:255,g:0}
+          ]
+        },
+        controller:{
+          mouseControl:false
+        }
+      })
+
+
+    })
+    </script>
+  </body>
+</html>

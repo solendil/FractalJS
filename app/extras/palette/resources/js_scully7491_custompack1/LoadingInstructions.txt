@@ -1,0 +1,23 @@
+How To Load Custom Gradients:
+
+Note: You must have Apophysis for these gradients to work, they are not formatted for Photoshop or any other graphics program.  
+A full version of Apophysis can be downloaded FREE at : http://www.apophysis.org
+
+Download the file to a place you can remember and then unzip it (also to a place you can remember lol).  You can get unzipping programs
+all over the web or winzip.com.
+
+1. Load Apopysis (duh lol)
+2. Press CTRL and G to open the gradient menu (or go to the top of the screen where the icons are and press the button that has
+a square with stripes colored blue white and orange)
+3. At the bottom of the gradient menu there is a slidebar and to the far right 4 icons.  Click on the third icon (should say "Gradient Browser" 
+when the mouse is hovered over it).
+4. A new menu will open; go once again to the bottom right and click on the folder.  Locate the file you downloaded and load it.
+5. Double click on the title of the gradient (ie Alien) to load it in Apophysis.
+
+IF you use anywhere (website, Deviant Art, Sheezy Art etc) you must provide credit in the form of a link back to: 
+
+http://scully7491.deviantart.com
+
+Thanks for Downloading!
+
+Jenn B. 
