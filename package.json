@@ -1,21 +1,21 @@
 {
-  "name": "fractal.js",
+  "name": "FractalJS",
   "version": "1.0.0",
-  "description": "A fractal explorer in the browser",
+  "description": "Browse fractals !",
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/solendil/fractal.js.git"
+    "url": "https://github.com/solendil/FractalJS.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/solendil/fractal.js/issues"
+    "url": "https://github.com/solendil/FractalJS/issues"
   },
-  "homepage": "https://github.com/solendil/fractal.js",
+  "homepage": "https://github.com/solendil/FractalJS",
   "devDependencies": {
     "grunt": "~0.4.5",
     "grunt-contrib-clean": "^0.6.0",
