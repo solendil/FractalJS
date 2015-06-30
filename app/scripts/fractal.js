@@ -36,6 +36,12 @@ function(Renderer, Controller, util) {
  */
 return function(params) {
 
+//-------- check browser version
+
+if (!document.addEventListener) {
+	console.error("This browser cannot run FractalJS");
+}
+
 //-------- private members
 
 var renderer, controller;

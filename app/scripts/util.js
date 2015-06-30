@@ -1,10 +1,13 @@
 define([], function() {
 "use strict";
 
-//-------- initialization code 
+//-------- polyfills 
 
-if (typeof String.prototype.startsWith != 'function') {
-  // see below for better implementation!
+Math.trunc = Math.trunc || function(x) {
+  return x < 0 ? Math.ceil(x) : Math.floor(x);
+}
+
+	if (typeof String.prototype.startsWith != 'function') {
   String.prototype.startsWith = function (str){
     return this.indexOf(str) === 0;
   };

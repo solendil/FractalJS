@@ -56,8 +56,9 @@ if (params.mouseControl) {
 	});
 
 	$(canvas).bind('wheel', function(e){
-		var mousex = e.originalEvent.offsetX;
-		var mousey = e.originalEvent.offsetY;
+		//console.log(e)
+		var mousex = e.originalEvent.clientX;
+		var mousey = e.originalEvent.clientY;
 
 	    var startDesc = renderer.getFractalDesc();
 	    var c = renderer.getFractalDesc();
@@ -73,7 +74,7 @@ if (params.mouseControl) {
 		c = renderer.setFractalDesc(c);
 	    var vector = {sx:mousex,sy:mousey};
 
-	    if(e.originalEvent.wheelDelta > 0) {
+	    if(e.originalEvent.deltaY > 0) {
 	        c.w /= zoomFactor;
 			c.x -= pax / zoomFactor;
 			c.y -= pay / zoomFactor;

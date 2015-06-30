@@ -136,13 +136,15 @@ setFractalDesc: function(desc) {
 },
 
 getFractalDesc: function() {
-	return {
+	var res = {
 		x:x, y:y, w:w, iter:iter,
+		testx:x, testy:y,
 		pixelOnP:pixelOnP, 
 		swidth:swidth, sheight:sheight,
 		pxmin:pxmin, pymin:pymin,
 		type:type,
 	};
+	return res;
 },
 
 drawTile: function(tile) {
