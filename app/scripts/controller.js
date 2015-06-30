@@ -13,7 +13,7 @@ var zoomFactor = 1.3;
 
 var isDragging;			// is the user dragging ?
 var dragX, dragY;		// start dragging point
-var dragStartDesc;		// start fractal desc
+var dragStartDesc;		// start fractal description
 var ldragX, ldragY;		// last dragging point
 
 var callbacks = {		// external callbacks

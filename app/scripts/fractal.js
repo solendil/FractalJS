@@ -108,7 +108,7 @@ drawPalette: function() {
 },
 
 on: function(event, callback) {
-	if (event=="frame.end" || event=="frame.start" )
+	if (event=="frame.end" || event=="frame.start" || event=="iter.change" )
 		renderer.on(event, callback);
 	else if (event=="mouse.control" )
 		controller.on(event, callback);
