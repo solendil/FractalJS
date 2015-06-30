@@ -7,10 +7,25 @@ Math.trunc = Math.trunc || function(x) {
   return x < 0 ? Math.ceil(x) : Math.floor(x);
 }
 
-	if (typeof String.prototype.startsWith != 'function') {
+if (typeof String.prototype.startsWith != 'function') {
   String.prototype.startsWith = function (str){
     return this.indexOf(str) === 0;
   };
+}
+
+if ("performance" in window == false) {
+	window.performance = {};
+}
+  
+// https://gist.github.com/paulirish/5438650
+if ("now" in window.performance == false){
+	var nowOffset = Date.now();
+	if (performance.timing && performance.timing.navigationStart){
+	  nowOffset = performance.timing.navigationStart
+	}
+	window.performance.now = function now(){
+	  return Date.now() - nowOffset;
+	}
 }
 
 //-------- private functions
