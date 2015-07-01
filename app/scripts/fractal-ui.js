@@ -1,5 +1,5 @@
-define(["jquery"], 
-function($) {
+define([], 
+function() {
 "use strict";
 
 /*
@@ -61,13 +61,13 @@ var readUrl = function() {
 				y:doubleArray[2],
 				w:doubleArray[3],
 				iter:intArray[1]
-			}
+			};
 
 			console.log("Initialization", desc);
 			fractal.setFractalDesc(desc);
 		}
 	} catch(e) {
-		console.error("Could not initialize view")
+		console.error("Could not initialize view");
 	}
 };
 

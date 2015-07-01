@@ -91,9 +91,8 @@ module.exports = function (grunt) {
       compile: {
         options: {
           baseUrl: "app/scripts",
-          mainConfigFile: "app/scripts/config.js",
-          name: "fractal",
-          out: "dist/build/out.fractal.js",
+          name: "main",
+          out: "dist/scripts/main.js",
           optimize: "uglify",
         },      
       }
@@ -108,7 +107,8 @@ module.exports = function (grunt) {
           cwd: 'app',
           dest: 'dist',
           src: [
-            '{,**/}*.{html,js,css}',
+            '{,**/}*.{html,css}',
+            'scripts/lib/*.js',
           ]
         }]
       },
@@ -135,6 +135,7 @@ module.exports = function (grunt) {
   grunt.registerTask('build', [
     'clean:dist',
     'copy:dist',
+    'requirejs',
   ]);
 
   grunt.registerTask('default', [

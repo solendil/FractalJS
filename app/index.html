@@ -5,7 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FractalJS</title>
-    <!-- <link rel="stylesheet" href="css/normalize.css" /> -->
+    <script src="scripts/lib/jquery-2.1.3.min.js"></script>
+    <script data-main="scripts/main" src="scripts/lib/require.js"></script>
     <style>
       body {
         -webkit-user-select: none;
@@ -55,42 +56,6 @@
   <a href="https://github.com/solendil/FractalJS">github</a>
 </div>
 
-<script src="scripts/lib/require.js"></script>
-<script>
-    require.config({
-      baseUrl:"scripts",
-      paths: {
-        jquery: 'lib/jquery-2.1.3.min'
-      }
-    });
-    require(["fractal", "fractal-ui"], 
-    function(Fractal, FractalUI) {
-      var f = new Fractal({
-        canvas:document.getElementById("maincanvas"),
-        fractalDesc:{
-          type:'mandel',
-          x:-0.7, 
-          y:0.0, 
-          w:2.5, 
-          i:50
-        },
-        palette:{
-          resolution:500,
-          stops:"0#080560;0.2#2969CB;0.40#F1FEFE;0.60#FCA425;0.85#000000"
-        },
-        renderer:{
-          numberOfTiles:100,
-          drawAfterInit:false,  // postpone first drawing after UI is initialized
-        },
-        controller:{
-          fitToWindow:true
-        }
-      });
-
-      var ui = new FractalUI(f);
-      f.draw();
-    })
-</script>
 <script type="text/javascript">
 if (document.location.hostname.search("solendil.github.io") !== -1) {
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

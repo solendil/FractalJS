@@ -96,12 +96,12 @@ var callbackEndFrame = function() {
 	if (percInSet > 1 && percFringe10p>1) {
 		engine.setFractalDesc({iter:fractalDesc.iter*1.5});
 		public_methods.draw();
-		util.callbackHelp(callbacks["iter.change"])
+		util.callbackHelp(callbacks["iter.change"]);
 	}
 	if (percInSet > 1 && percFringe10p<0.2) {
 		engine.setFractalDesc({iter:fractalDesc.iter/1.5});
 		// public_methods.draw();
-		util.callbackHelp(callbacks["iter.change"])
+		util.callbackHelp(callbacks["iter.change"]);
 	}
 };
 
