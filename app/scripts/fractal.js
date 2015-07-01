@@ -1,40 +1,5 @@
-define([
-	"renderer", 
-	"controller", 
-	"util"], 
-function(Renderer, Controller, util) {
-"use strict";
-
-/*
- * The main fractal module:
- * - receives one single object describing a fractal to display/manipulate
- * - provides additional methods and callbacks
- * - configuration object:
-
-{
-    canvas : <DOM canvas node>		// mandatory canvas
-    fractalDesc	: <JSON object>		// mandatory fractal description (see engine.js)
-    palette : {						// the default palette object
-		stops : [
-			{index:0,r:0,g:0,b:0},
-			{index:0.5,r:255,g:255,b:255},
-		],
-		resolution : 100,
-		offset : 0,
-		modulo : 0
-    }
-    renderer : {
-		numberOfTiles : 1,			// number of tiles to draw (approximate)
-		drawAfterInit : true,		// should the fractal be drawn after init
-    },
-	controller : {
-		mouseControl : true,		// allow mouse navigation in canvas
-		fitToWindow : false,		// fit the canvas to the window
-	}    
-}
-
- */
-return function(params) {
+FractalJS.create = function(params) {
+	"use strict";
 
 //-------- check browser version
 
@@ -45,6 +10,7 @@ if (!document.addEventListener) {
 //-------- private members
 
 var renderer, controller;
+var util = FractalJS.util;
 
 //-------- constructor
 
@@ -78,9 +44,9 @@ params.controller = util.defaultProps(params.controller, {
 	fitToWindow: false
 });
 
-renderer = new Renderer(params);
+renderer = new FractalJS.Renderer(params);
 
-controller = new Controller(renderer, params.canvas, params.controller);
+controller = new FractalJS.Controller(renderer, params.canvas, params.controller);
 
 if (params.renderer.drawAfterInit)
 	renderer.draw();
@@ -124,7 +90,6 @@ on: function(event, callback) {
 		throw "Unknown event " + event;
 }
 
+};	
 };
 
-};
-});

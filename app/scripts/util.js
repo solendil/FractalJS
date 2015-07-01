@@ -1,4 +1,6 @@
-define([], function() {
+window.FractalJS = window.FractalJS || {};
+
+FractalJS.util = (function(){
 "use strict";
 
 //-------- polyfills 
@@ -112,4 +114,4 @@ getHashColor: function(r, g, b) {
 
 };
 
-});
+})();

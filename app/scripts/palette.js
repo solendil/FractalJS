@@ -1,13 +1,5 @@
-define(["util"], function(util) {
+FractalJS.Palette = function(params) {
 "use strict";
-
-/*
- * The palette:
- * - is a looping gradient in the range [0,1[
- * - the gradient is mapped to fractal iterations using a resolution and an offset
- * - there must be at least one stop, a stop is an index and an RGB color
- */
-return function(params) {
 
 //-------- private members
 
@@ -182,5 +174,5 @@ on: function(event, callback) {
 };
 
 };
-});
+
 

@@ -1,11 +1,4 @@
-define(["util"], function(util) {
-"use strict";
-
-/*
- * The controller:
- * - capture events related to the canvas and modify the view accordingly
- */
-return function(renderer, canvas, params) {
+FractalJS.Controller = function(renderer, canvas, params) {
 
 //-------- private members
 
@@ -24,18 +17,21 @@ var callbacks = {		// external callbacks
 
 if (params.mouseControl) {
 
-	$(canvas).mousedown(function(e) {
+	canvas.onmousedown = function(e) {
+		if (!e) e = window.event;
 		isDragging = true;
 		dragX = ldragX = e.screenX;
 		dragY = ldragY = e.screenY;
 		dragStartDesc = renderer.getFractalDesc();
-	});
+	};
 
-	$(window).mouseup(function(e) {
+	window.onmouseup = function(e) {
+		if (!e) e = window.event;
 		isDragging = false;
-	});
+	};
 
-	$(window).mousemove(function(e) {
+	window.onmousemove = function(e) {
+		if (!e) e = window.event;
 		if (isDragging) {
 			var vecx = e.screenX-dragX;
 			var vecy = e.screenY-dragY;
@@ -48,17 +44,17 @@ if (params.mouseControl) {
 	        var vfy = e.screenY - ldragY;  
 	        var vector = {x:vfx,y:vfy,mvt:"pan"};     
 			renderer.draw(vector);
-			util.callbackHelp(callbacks["mouse.control"], vector);
+			FractalJS.util.callbackHelp(callbacks["mouse.control"], vector);
 
 	        ldragX = e.screenX;
 	        ldragY = e.screenY;
 		}
-	});
+	};
 
-	$(canvas).bind('wheel', function(e){
-		//console.log(e)
-		var mousex = e.originalEvent.clientX;
-		var mousey = e.originalEvent.clientY;
+	canvas.onwheel = function(e) {
+		if (!e) e = window.event;
+		var mousex = e.clientX;
+		var mousey = e.clientY;
 
 	    var startDesc = renderer.getFractalDesc();
 	    var c = renderer.getFractalDesc();
@@ -74,7 +70,7 @@ if (params.mouseControl) {
 		c = renderer.setFractalDesc(c);
 	    var vector = {sx:mousex,sy:mousey};
 
-	    if(e.originalEvent.deltaY > 0) {
+	    if(e.deltaY > 0) {
 	        c.w /= zoomFactor;
 			c.x -= pax / zoomFactor;
 			c.y -= pay / zoomFactor;
@@ -93,22 +89,22 @@ if (params.mouseControl) {
 	    vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
 	    vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
 		renderer.draw(vector);
-		util.callbackHelp(callbacks["mouse.control"], vector);
-	});
+		FractalJS.util.callbackHelp(callbacks["mouse.control"], vector);
+	};
 
 }
 
 if (params.fitToWindow) {
-	
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 	renderer.resize();
-	$(window).resize(function() {
+	window.onresize = function() {
+		if (!e) e = window.event;
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
 		renderer.resize();
 		renderer.draw();
-	});
+	};
 }
 
 //-------- private methods
@@ -125,4 +121,3 @@ on: function(event, callback) {
 };
 
 };
-});

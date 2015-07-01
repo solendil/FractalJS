@@ -1,11 +1,5 @@
-define([], 
-function() {
+FractalJS.FractalUI = function(fractal) {
 "use strict";
-
-/*
- * The fractal UI:
- */
-return function(fractal) {
 
 //-------- private members
 
@@ -87,4 +81,3 @@ return {
 };
 
 };
-});

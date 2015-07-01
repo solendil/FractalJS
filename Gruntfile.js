@@ -62,6 +62,12 @@ module.exports = function (grunt) {
       }
     },
 
+env : {
+    dist: {
+        NODE_ENV : 'PRODUCTION'
+    }
+},
+
     // Empties folders to start fresh
     clean: {
       dist: {
@@ -83,18 +89,31 @@ module.exports = function (grunt) {
       },
       all: [
         'app/scripts/*.js',
-        '!app/scripts/lib/*',
       ]
     },
 
-    requirejs: {
-      compile: {
-        options: {
-          baseUrl: "app/scripts",
-          name: "main",
-          out: "dist/scripts/main.js",
-          optimize: "uglify",
-        },      
+    concat: {
+      options: {
+          separator: ';',
+        }, 
+       dist: {
+          src: [
+            'app/scripts/util.js',
+            'app/scripts/engine.js',
+            'app/scripts/palette.js',
+            'app/scripts/renderer.js',
+            'app/scripts/controller.js',
+            'app/scripts/fractal.js',
+          ],
+          dest: 'dist/scripts/fractal.js',
+        },
+      },
+    
+    uglify: {
+      dist: {
+        files: {
+        'dist/scripts/fractal.min.js':['dist/scripts/fractal.js']
+        }
       }
     },
 
@@ -107,12 +126,19 @@ module.exports = function (grunt) {
           cwd: 'app',
           dest: 'dist',
           src: [
-            '{,**/}*.{html,css}',
-            'scripts/lib/*.js',
+//            '{,**/}*.{html,css}',
+            'scripts/fractal-ui.js',
           ]
         }]
       },
     },
+
+    preprocess : {
+      dist: {
+        src : 'app/index.html',
+        dest : 'dist/index.html'
+      }
+    }
 
     // Run some tasks in parallel to speed up build process
   });
@@ -133,9 +159,12 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('build', [
+    'env',
     'clean:dist',
     'copy:dist',
-    'requirejs',
+    'preprocess',
+    'concat',
+    'uglify',
   ]);
 
   grunt.registerTask('default', [

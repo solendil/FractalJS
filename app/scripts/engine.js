@@ -1,13 +1,5 @@
-define([], function() {
+FractalJS.Engine = function(desc) {
 "use strict";
-
-/*
- * The fractal engine:
- * - knows complex plane (P) and screen (S) size, coordinates and transforms
- * - handles the computation backbuffer
- * - performs fractal computations in tiles
- */
-return function(desc) {
 
 //-------- private members
 
@@ -177,5 +169,5 @@ publicMethods.setFractalDesc(desc);
 return publicMethods;
 
 };
-});
+
 

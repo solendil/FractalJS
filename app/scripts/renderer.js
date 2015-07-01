@@ -1,13 +1,5 @@
-define(["engine", "palette", "util"], function(Engine, Palette, util) {
-"use strict";
-
-/*
- * The renderer:
- * - knows a fractal engine, a palette and a canvas
- * - can draw a frame, knows the movement vector if applicable
- * - splits renderings into "draw items", can cancel frames
- */
-return function(params) {
+FractalJS.Renderer = function(params) {
+var util = FractalJS.util;
 
 //-------- private members
 
@@ -38,8 +30,8 @@ idata32 = new Uint32Array(imageData.data.buffer);
 params.fractalDesc.swidth = canvas.width;
 params.fractalDesc.sheight = canvas.height;
 
-engine = new Engine(params.fractalDesc);
-palette = new Palette(params.palette);
+engine = new FractalJS.Engine(params.fractalDesc);
+palette = new FractalJS.Palette(params.palette);
 
 //-------- private methods
 
@@ -163,9 +155,12 @@ draw: function(vector) {
 	if (vector) {
 		var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 		// TODO : cache to improve speed
-		var newCanvas = $("<canvas>")
-		    .attr("width", imageData.width)
-		    .attr("height", imageData.height)[0];
+		// http://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
+		var div = document.createElement('div');
+		div.innerHTML = "<canvas width='"+imageData.width+"' "+
+			"height='"+imageData.height+"'> </canvas>";
+		var newCanvas = div.firstChild;
+
 		newCanvas.getContext("2d").putImageData(imageData, 0, 0);
 		context.scale(vector.z, vector.z);
 		context.translate(vector.x, vector.y);
@@ -266,4 +261,3 @@ on: function(event, callback) {
 return public_methods;
 
 };
-});
