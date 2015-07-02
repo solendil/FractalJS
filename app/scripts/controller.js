@@ -51,7 +51,7 @@ if (params.mouseControl) {
 		}
 	};
 
-	canvas.onwheel = function(e) {
+	var wheelFunction = function(e) {
 		if (!e) e = window.event;
 		var mousex = e.clientX;
 		var mousey = e.clientY;
@@ -70,7 +70,9 @@ if (params.mouseControl) {
 		c = renderer.setFractalDesc(c);
 	    var vector = {sx:mousex,sy:mousey};
 
-	    if(e.deltaY > 0) {
+	    var delta = e.deltaY || e.wheelDelta; // IE11 special
+
+	    if(delta > 0) {
 	        c.w /= zoomFactor;
 			c.x -= pax / zoomFactor;
 			c.y -= pay / zoomFactor;
@@ -90,7 +92,15 @@ if (params.mouseControl) {
 	    vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
 		renderer.draw(vector);
 		FractalJS.util.callbackHelp(callbacks["mouse.control"], vector);
+
+		e.preventDefault();
 	};
+
+	// IE11 special
+	if ("onwheel" in canvas) 
+		canvas.onwheel = wheelFunction
+	else 
+		canvas.onmousewheel = wheelFunction
 
 }
 
@@ -99,7 +109,6 @@ if (params.fitToWindow) {
 	canvas.height = window.innerHeight;
 	renderer.resize();
 	window.onresize = function() {
-		if (!e) e = window.event;
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
 		renderer.resize();

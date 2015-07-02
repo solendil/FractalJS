@@ -11,14 +11,15 @@ Explore the [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) right
 * [Lightning](http://solendil.github.io/fractaljs/#AAQBLAAAAAABak2fL7lP0v2qO+hJfqda*j4+bSQ2YnT8_)
 * [Cat's eye](http://solendil.github.io/fractaljs/#AAQBfAwAAAAAc+4EF7dPSP1q02Z9WYY6*6UN7vifqCz8_)
 
+Explore them all in [one place](http://solendil.github.io/fractaljs/embed.html)
+
 ### Project goals
 
 * To be a realtime fractal explorer working right in the browser
-* To become reasonably complete while remaining dead simple to use
-* To be a platform to share places and pictures of fractal sets
+* To be reasonably complete while remaining dead **simple** to use
+* To be a platform to **share** places and pictures of fractal sets
 * To be a showcase for the power of Javascript and Web technologies
-
-Help is welcome!
+* To be a **simple** and welcoming Open-Source project
 
 ### Compatibility
 
