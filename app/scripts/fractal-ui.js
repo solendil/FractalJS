@@ -1,3 +1,8 @@
+/*
+ * The FractalUI :
+ * - is not part of the fractal.js file
+ * - is the code for the FractalJS user interface
+ */
 FractalJS.FractalUI = function(fractal) {
 "use strict";
 
@@ -24,21 +29,12 @@ var updateUrl = function() {
 	base64String = base64String.split("/").join("*");
 	base64String = base64String.split("=").join("_");
 
-	document.location.hash="A"+base64String;
+	history.replaceState("", "", "#A"+base64String);
+	//document.location.hash="A"+base64String;
 	//console.log("Updating URL", {x:desc.x,y:desc.y,w:desc.w,iter:desc.iter});
 };
 
 var readUrl = function() {
-	// http://stackoverflow.com/questions/21797299/convert-base64-string-to-arraybuffer
-	function _base64ToArrayBuffer(base64) {
-	    var binary_string =  window.atob(base64);
-	    var len = binary_string.length;
-	    var bytes = new Uint8Array( len );
-	    for (var i = 0; i < len; i++)        {
-	        bytes[i] = binary_string.charCodeAt(i);
-	    }
-	    return bytes.buffer;
-	}
 	try {
 		var url = document.location.hash;
 		if (url.startsWith("#A")) {
@@ -46,7 +42,7 @@ var readUrl = function() {
 			base64String = base64String.split("*").join("/");
 			base64String = base64String.split("_").join("=");
 
-			var buffer = _base64ToArrayBuffer(base64String);
+			var buffer = FractalJS.util.base64ToArrayBuffer(base64String);
 			var intArray = new Uint16Array(buffer);
 			var doubleArray = new Float64Array(buffer);
 
@@ -57,11 +53,11 @@ var readUrl = function() {
 				iter:intArray[1]
 			};
 
-			console.log("Initialization", desc);
+			//console.log("Initialization", desc);
 			fractal.setFractalDesc(desc);
 		}
 	} catch(e) {
-		console.error("Could not initialize view");
+		console.error("Could not read URL");
 	}
 };
 

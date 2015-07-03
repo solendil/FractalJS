@@ -31,10 +31,6 @@ FractalJS has been tested with:
 
 # Technical details
 
-### Dependencies
-
-FractalJS depends on [jQuery](https://jquery.com/) and [RequireJS](http://requirejs.org/).
-
 ### Build system
 
 FractalJS is designed as a no-setup project. You can just download it, open /app/index.html in your browser and start editing the javascript. 
@@ -42,5 +38,5 @@ FractalJS is designed as a no-setup project. You can just download it, open /app
 There is a build system however, based on [Grunt](http://gruntjs.com/), providing:
 * auto-reload
 * [JSHint](http://jshint.com/) code quality
-* [RequireJS](http://requirejs.org/) optimization and minification
+* JS concatenation and minification
 

@@ -1,5 +1,12 @@
+/*
+ * Definition of the FractalJS global object that contains all the rest
+ */
 window.FractalJS = window.FractalJS || {};
 
+/*
+ * Some global initialization methods (polyfills)
+ * Some utility methods
+ */
 FractalJS.util = (function(){
 "use strict";
 
@@ -110,6 +117,17 @@ callbackHelp: function(cblist, _param) {
 
 getHashColor: function(r, g, b) {
 		return "#" + toHex2(r) + toHex2(g) + toHex2(b);
+},
+
+// http://stackoverflow.com/questions/21797299/convert-base64-string-to-arraybuffer
+base64ToArrayBuffer: function (base64) {
+    var binary_string =  window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array( len );
+    for (var i = 0; i < len; i++)        {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
 }
 
 };
