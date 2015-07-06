@@ -21,15 +21,30 @@ var callbacks = {		// external callbacks
 
 //-------- private methods
 
+/*
+ * If first letter of URL hash is an 'A'
+ * Decode rest of hash using base64, build three arrays on the buffer:
+ *   Uint8Array, Uint16Array, Float64Array
+ * --bytes ------ array -------------	usage --------------------
+ *   0,1          Uint16Array[0]		version of hash
+ *   2,3          Uint16Array[1]		number of iterations
+ *   4            Uint8Array[4]	        type of fractal
+ *   5,6,7        reserved
+ *   8-11         Float64Array[1]		x 
+ *   12-15        Float64Array[1]		y
+ *   16-19        Float64Array[1]		w (extent) 
+ */
 var updateUrl = function() {
 	var desc = renderer.getFractalDesc();
 
 	// create a buffer and two views on it to store fractal parameters
 	var buffer = new ArrayBuffer(32);
+	var byteArray = new Uint8Array(buffer);
 	var intArray = new Uint16Array(buffer);
 	var doubleArray = new Float64Array(buffer);
 	intArray[0] = 1; // version number
 	intArray[1] = desc.iter;
+	byteArray[4] = desc.typeid;
 	doubleArray[1] = desc.x;
 	doubleArray[2] = desc.y;
 	doubleArray[3] = desc.w;
@@ -54,6 +69,7 @@ var readUrl = function() {
 			base64String = base64String.split("_").join("=");
 
 			var buffer = FractalJS.util.base64ToArrayBuffer(base64String);
+			var byteArray = new Uint8Array(buffer);
 			var intArray = new Uint16Array(buffer);
 			var doubleArray = new Float64Array(buffer);
 
@@ -61,7 +77,8 @@ var readUrl = function() {
 				x:doubleArray[1],
 				y:doubleArray[2],
 				w:doubleArray[3],
-				iter:intArray[1]
+				iter:intArray[1],
+				typeid:byteArray[4],
 			};
 
 			//console.log("Initialization", desc);

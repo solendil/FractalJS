@@ -95,8 +95,20 @@ pre {
 
 <div id='menu'>
   <div class='item brand' name='reset'>FractalJS</div>
+  <div class='item action tab' name='type'>Type</div>
   <div class='item action tab' name='share'>Share</div>
   <div class='item action tab' name='about'>About</div>
+</div>
+
+<div class='pane' name='type'>
+<div class="buttonrow">
+<button class="btn btn-default btn-lg fractaltype" name="mandel">
+Mandebrot</button>
+<button class="btn btn-default btn-lg fractaltype" name="burningship">
+Burning Ship</button>
+<button class="btn btn-default btn-lg fractaltype" name="mandel3">
+Multibrot <sup>3</sup></button>
+</div>
 </div>
 
 <div class='pane' name='share'>
@@ -153,7 +165,37 @@ var updateShare = function() {
   $(".twitter-share-button").attr("href", "https://twitter.com/intent/tweet?url="+encodeURIComponent(document.location.href)+"&text=Check%20this%20nice%20%23fractaljs%20!")
 }
 
+var typeList = {
+  "mandel" : {
+    type:'mandel',
+    x:-0.7, 
+    y:0.0, 
+    w:2.5, 
+    i:50
+  },
+  "mandel3" : {
+    type:'mandel3',
+    x:0.0, 
+    y:0.0, 
+    w:3.0, 
+    i:50
+  },
+  "burningship" : {
+    type:'burningship',
+    x:-0.4, 
+    y:-0.7, 
+    w:3, 
+    i:50
+  }
+};
+
 $(function() {
+  // type buttons
+  $(".fractaltype").click(function(e) {
+    var name = $(this).attr("name");
+    fractal.setFractalDesc(typeList[name]);
+    fractal.draw();
+  })
   // share buttons
   $(".share").click(function(e) {
     var name = $(this).attr("name");
@@ -191,6 +233,9 @@ $(function() {
     console.log($(this))
     $(this).context.href = dataURL;
   });
+  fractal.events.on("frame.end", function(res) {
+    console.log("finished drawing", res.fractalDesc, "time in ms", res.time)
+  })
 })
 
 fractal = FractalJS.create ({

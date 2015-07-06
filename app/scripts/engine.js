@@ -40,6 +40,9 @@ var project = function() {
 var logBase = 1.0 / Math.log(2.0);
 var logHalfBase = Math.log(0.5)*logBase;
 
+// what a mess! this part will need some love & refactoring
+var fractalTypeById = {0:'mandel',1:'mandel3',2:'burningship'};
+var fractalIdByType = {'mandel':0,'mandel3':1,'burningship':2};
 var fractalFunctionList = {
 	'mandelsmooth' : function(cx,cy) {
 		var znx=0, zny=0, sqx=0, sqy=0, i=0, j=0;
@@ -71,29 +74,33 @@ var fractalFunctionList = {
 		return i;	
 	},
 	'mandel3' : function(cx,cy) {
-		var zx=0, zy=0, i=0, znx, zny;
+		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
 		while (true) {
-			znx = zx*zx*zx-3*zx*zy*zy+cx;
-			zny = 3*zx*zx*zy-zy*zy*zy+cy;
+			znx = sqx*zx-3*zx*sqy+cx;
+			zny = 3*sqx*zy-sqy*zy+cy;
 			zx = znx;
 			zy = zny;
 			if (++i>=iter)
 				break;
-			if (zx*zx+zy*zy>escape)
+			sqx = zx*zx;
+			sqy = zy*zy;
+			if (sqx+sqy>escape)
 				break;
 		}		
 		return i;
 	},
 	'burningship' : function(cx,cy) {
-		var zx=0, zy=0, i=0, znx, zny;
+		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
 		while (true) {
-			znx = zx*zx-zy*zy+cx;
-			zny = 2*zx*zy+cy;
+			zny = (zx+zx)*zy+cy;
+			znx = sqx-sqy+cx;
 			zx = Math.abs(znx);
 			zy = Math.abs(zny);
 			if (++i>=iter)
 				break;
-			if (zx*zx+zy*zy>escape)
+			sqx = zx*zx;
+			sqy = zy*zy;
+			if (sqx+sqy>escape)
 				break;
 		}		
 		return i;
@@ -116,6 +123,11 @@ setFractalDesc: function(desc) {
 		iter = Math.round(desc.i);
 	if (desc.iter)
 		iter = Math.round(desc.iter);
+	if (desc.typeid) {
+		if (!(desc.typeid in fractalTypeById))
+			throw "Invalid fractal type " + desc.typeid;
+		desc.type = fractalTypeById[desc.typeid];
+	}
 	if (desc.type) {
 		if (!(desc.type in fractalFunctionList))
 			throw "Invalid fractal function " + desc.type;
@@ -140,7 +152,7 @@ getFractalDesc: function() {
 		pixelOnP:pixelOnP, 
 		swidth:swidth, sheight:sheight,
 		pxmin:pxmin, pymin:pymin,
-		type:type,
+		type:type,typeid:fractalIdByType[type]
 	};
 	return res;
 },
@@ -175,5 +187,4 @@ publicMethods.setFractalDesc(desc);
 return publicMethods;
 
 };
-
 
