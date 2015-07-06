@@ -1,177 +1,125 @@
-'use strict';
-
 module.exports = function (grunt) {
+"use strict";
 
-  // Time how long tasks take. Can help when optimizing build times
-  require('time-grunt')(grunt);
+require('time-grunt')(grunt);
 
-  // Load grunt tasks automatically
-  require('load-grunt-tasks')(grunt);
+grunt.initConfig({
 
-  // Define the configuration for all the tasks
-  grunt.initConfig({
-
-    // Project settings
-    config: {},
-
-    // Watches files for changes and runs tasks based on the changed files
-    watch: {
-      js: {
-        files: ['app/scripts/*.js'],
-        tasks: ['jshint'],
-        options: {
-          livereload: true
-        }
-      },
-      gruntfile: {
-        files: ['Gruntfile.js']
-      },
-      livereload: {
-        options: {
-          livereload: '<%= connect.options.livereload %>'
-        },
-        files: [
-          'app/*.html',
-          'app/css/*.css',
-        ]
-      }
-    },
-
-    // The actual grunt server settings
-    connect: {
-      options: {
-        port: 9000,
-        open: true,
-        livereload: 35729,
-        hostname: '0.0.0.0'
-      },
-      livereload: {
-        options: {
-          middleware: function(connect) {
-            return [
-              connect.static('app')
-            ];
-          }
-        }
-      },
-      dist: {
-        options: {
-          base: 'dist',
-          livereload: false
-        }
-      }
-    },
-
-env : {
-    dist: {
-        NODE_ENV : 'PRODUCTION'
+connect: {
+  app: {
+    options: {
+      port: 9000,
+      base: 'app',
+      open: true, // open a browser
+      livereload: true, // inject live reloading script
     }
+  },
 },
 
-    // Empties folders to start fresh
-    clean: {
-      dist: {
-        files: [{
-          dot: true,
-          src: [
-            'dist/*',
-            '!dist/.git*'
-          ]
-        }]
-      },
+watch: {
+  scripts: {
+    files: 'app/**/*.*',
+    options: {
+      livereload: true,
     },
+  },
+},
 
-    // Make sure code styles are up to par and there are no obvious mistakes
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc',
-        reporter: require('jshint-stylish')
-      },
-      all: [
-        'app/scripts/*.js',
-      ]
-    },
+// define a variable that will be used by the preprocessor to conditionally replace HTML parts
+env : {
+  dist: {
+    NODE_ENV : 'PRODUCTION'
+  }
+},
 
-    concat: {
-      options: {
-          separator: ';',
-        }, 
-       dist: {
-          src: [
-            'app/scripts/util.js',
-            'app/scripts/engine.js',
-            'app/scripts/palette.js',
-            'app/scripts/renderer.js',
-            'app/scripts/controller.js',
-            'app/scripts/fractal.js',
-          ],
-          dest: 'dist/scripts/fractal.js',
-        },
-      },
-    
-    uglify: {
-      dist: {
-        files: {
-        'dist/scripts/fractal.min.js':['dist/scripts/fractal.js']
-        }
-      }
-    },
+jshint: {
+  options: {
+    jshintrc: '.jshintrc',
+    reporter: require('jshint-stylish')
+  },
+  all: [
+    'app/scripts/*.js',
+  ]
+},
 
-    // Copies remaining files to places other tasks can use
-    copy: {
-      dist: {
-        files: [{
-          expand: true,
-          dot: true,
-          cwd: 'app',
-          dest: 'dist',
-          src: [
-//            '{,**/}*.{html,css}',
-            'scripts/fractal-ui.js',
-          ]
-        }]
-      },
-    },
+clean: {
+  options: { force: true },
+  dist: ['dist/*'],
+  web: ['../solendil.github.io/fractaljs/*']
+},
 
-    preprocess : {
-      dist: {
-        src : '*.html',
-        ext: '.html',
-        cwd: 'app',
-        dest : 'dist',
-        expand: true
-      }
+concat: {
+  options: {
+    separator: ';',
+  }, 
+  dist: {
+    src: [
+      'app/scripts/util.js',
+      'app/scripts/events.js',
+      'app/scripts/engine.js',
+      'app/scripts/palette.js',
+      'app/scripts/renderer.js',
+      'app/scripts/controller.js',
+      'app/scripts/fractal.js',
+    ],
+    dest: 'dist/scripts/fractal.js',
+  },
+},
+
+uglify: {
+  dist: {
+    files: {
+     'dist/scripts/fractal.min.js':['dist/scripts/fractal.js']
     }
+  }
+},
 
-    // Run some tasks in parallel to speed up build process
-  });
+// copy HTML files while applying preprocessing
+preprocess : {
+  dist: {
+    src : '*.html',
+    ext: '.html',
+    cwd: 'app',
+    dest : 'dist',
+    expand: true
+  }
+},
 
+copy: {
+  web: {
+    expand: true,
+    cwd: 'dist/',
+    src: '**',
+    dest: '../solendil.github.io/fractaljs/',
+  },
+},
 
-  grunt.registerTask('serve', 'start the server and preview your app, --allow-remote for remote access', function (target) {
-    if (grunt.option('allow-remote')) {
-      grunt.config.set('connect.options.hostname', '0.0.0.0');
-    }
-    if (target === 'dist') {
-      return grunt.task.run(['build', 'connect:dist:keepalive']);
-    }
+});
 
-    grunt.task.run([
-      'connect:livereload',
-      'watch'
-    ]);
-  });
+grunt.loadNpmTasks('grunt-env');
+grunt.loadNpmTasks('grunt-contrib-clean');
+grunt.loadNpmTasks('grunt-contrib-watch');
+grunt.loadNpmTasks('grunt-contrib-connect');
+grunt.loadNpmTasks('grunt-contrib-concat');
+grunt.loadNpmTasks('grunt-contrib-jshint');
+grunt.loadNpmTasks('grunt-contrib-uglify');
+grunt.loadNpmTasks('grunt-contrib-copy');
+grunt.loadNpmTasks('grunt-preprocess');
 
-  grunt.registerTask('build', [
+grunt.registerTask('serve', [
+    'connect:app',
+    'watch',
+  ]);
+
+grunt.registerTask('build', [
+    'jshint',
     'env',
     'clean:dist',
-    'copy:dist',
-    'preprocess',
     'concat',
     'uglify',
+    'preprocess',
+    'clean:web',
+    'copy:web',
   ]);
 
-  grunt.registerTask('default', [
-    'jshint',
-    'build'
-  ]);
 };
