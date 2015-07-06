@@ -10,6 +10,7 @@
     <title>FractalJS</title>
     <!-- @if NODE_ENV == 'DEVELOPMENT' -->
     <script src="scripts/util.js"></script>
+    <script src="scripts/events.js"></script>
     <script src="scripts/engine.js"></script>
     <script src="scripts/palette.js"></script>
     <script src="scripts/renderer.js"></script>
@@ -19,7 +20,6 @@
     <!-- @if NODE_ENV == 'PRODUCTION' -->
     <script src="scripts/fractal.min.js"></script>
     <!-- @endif -->
-    <script src="scripts/fractal-ui.js"></script>
     <style>
       body {
         -webkit-user-select: none;
@@ -92,7 +92,6 @@ var f = FractalJS.create ({
       fitToWindow:true
     }
 });
-var ui = new FractalJS.FractalUI(f);
 f.draw();
 var openFull = function() {
   window.open("index.html"+window.location.hash, "_parent");

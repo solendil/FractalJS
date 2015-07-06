@@ -1,4 +1,12 @@
-FractalJS.Renderer = function(params) {
+/*
+ * The renderer:
+ * - knows a fractal engine, a palette and a canvas
+ * - can draw a frame, knows the movement vector if applicable
+ * - splits renderings into "draw items", can cancel frames
+ */
+ FractalJS.Renderer = function(params, events) {
+"use strict";
+
 var util = FractalJS.util;
 
 //-------- private members
@@ -10,12 +18,6 @@ var palette; 			// palette
 
 var drawList = [];		// list of remaining items to be drawn 
 var nextCallback;		// id of the next callback for the draw list
-
-var callbacks = {		// external callbacks
-	"frame.end":[],
-	"frame.start":[],
-	"iter.change":[]
-};
 
 var public_methods;
 var startFrameMs;
@@ -37,14 +39,14 @@ palette = new FractalJS.Palette(params.palette);
 
 var callbackNewFrame = function() {
 	startFrameMs = performance.now();
-	util.callbackHelp(callbacks["frame.start"], function() {
+	events.send("frame.start", function() {
 		return {fractalDesc:engine.getFractalDesc()};
 	});
 };
 
 var callbackEndFrame = function() {
 	var endFrameMs = performance.now();
-	util.callbackHelp(callbacks["frame.end"], function() {
+	events.send("frame.end", function() {
 		return {
 			fractalDesc : engine.getFractalDesc(),
 			buffer : engine.getBuffer(),
@@ -88,12 +90,12 @@ var callbackEndFrame = function() {
 	if (percInSet > 1 && percFringe10p>1) {
 		engine.setFractalDesc({iter:fractalDesc.iter*1.5});
 		public_methods.draw();
-		util.callbackHelp(callbacks["iter.change"]);
+		events.send("iter.change");
 	}
 	if (percInSet > 1 && percFringe10p<0.2) {
 		engine.setFractalDesc({iter:fractalDesc.iter/1.5});
 		// public_methods.draw();
-		util.callbackHelp(callbacks["iter.change"]);
+		events.send("iter.change");
 	}
 };
 
@@ -250,10 +252,6 @@ getFractalDesc: function () {
 
 getPalette: function () {
 	return palette;
-},
-
-on: function(event, callback) {
-	callbacks[event].push(callback);
 }
 
 };

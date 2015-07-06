@@ -1,16 +1,40 @@
-FractalJS.create = function(params) {
-	"use strict";
+/*
+ * The main fractal module:
+ * - receives one single object describing a fractal to display/manipulate
+ * - provides additional methods and callbacks
+ * - configuration object:
 
-//-------- check browser version
-
-if (!document.addEventListener) {
-	console.error("This browser cannot run FractalJS");
+{
+    canvas : <DOM canvas node>		// mandatory canvas
+    fractalDesc	: <JSON object>		// mandatory fractal description (see engine.js)
+    palette : {						// the default palette object
+		stops : [
+			{index:0,r:0,g:0,b:0},
+			{index:0.5,r:255,g:255,b:255},
+		],
+		resolution : 100,
+		offset : 0,
+		modulo : 0
+    }
+    renderer : {
+		numberOfTiles : 1,			// number of tiles to draw (approximate)
+		drawAfterInit : true,		// should the fractal be drawn after init
+    },
+	controller : {
+		mouseControl : true,		// allow mouse navigation in canvas
+		fitToWindow : false,		// fit the canvas to the window
+	}    
 }
+
+ */
+FractalJS.create = function(params) {
+"use strict";
 
 //-------- private members
 
 var renderer, controller;
 var util = FractalJS.util;
+var events = FractalJS.Events();
 
 //-------- constructor
 
@@ -44,9 +68,9 @@ params.controller = util.defaultProps(params.controller, {
 	fitToWindow: false
 });
 
-renderer = new FractalJS.Renderer(params);
+renderer = new FractalJS.Renderer(params, events);
 
-controller = new FractalJS.Controller(renderer, params.canvas, params.controller);
+controller = new FractalJS.Controller(renderer, params.canvas, params.controller, events);
 
 if (params.renderer.drawAfterInit)
 	renderer.draw();
@@ -60,6 +84,7 @@ return {
 
 setFractalDesc: function (desc) {
 	var res = renderer.setFractalDesc(desc);
+	events.send("api.change");
 	return res;
 },
 
@@ -79,16 +104,7 @@ drawPalette: function() {
 	renderer.drawPalette();
 },
 
-on: function(event, callback) {
-	if (event=="frame.end" || event=="frame.start" || event=="iter.change" )
-		renderer.on(event, callback);
-	else if (event=="mouse.control" )
-		controller.on(event, callback);
-	else if (event=="palette.change" )
-		renderer.getPalette().on(event, callback);
-	else
-		throw "Unknown event " + event;
-}
+events: events,
 
 };	
 };

@@ -5,8 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FractalJS</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
     <!-- @if NODE_ENV == 'DEVELOPMENT' -->
     <script src="scripts/util.js"></script>
+    <script src="scripts/events.js"></script>
     <script src="scripts/engine.js"></script>
     <script src="scripts/palette.js"></script>
     <script src="scripts/renderer.js"></script>
@@ -16,41 +20,72 @@
     <!-- @if NODE_ENV == 'PRODUCTION' -->
     <script src="scripts/fractal.min.js"></script>
     <!-- @endif -->
-    <script src="scripts/fractal-ui.js"></script>
     <style>
-      body {
-        -webkit-user-select: none;
-        font-family:  Verdana, sans-serif;
-        margin: 0;
-      }
-      canvas {
-        display:block;
-      }
-      #infobox {
-        font-size:14px;
-        color:#AAA;
-        position:absolute;
-        box-sizing: border-box;
-        bottom:1em; right:1em;
-        padding:0.5em;
-        background: rgba(0,0,0,0.5);
-        border-radius:10px;
-      }
-      a {
-        color:#AAA;
-        text-decoration:none;
-      }     
-      a:hover {
-        color:#FFF;
-        text-decoration:underline;
-      }
-      em {
-        font-size:120%;
-        color:#DDD;
-        font-style:normal;
-      }
+* {
+  box-sizing: border-box;  
+  margin: 0;
+}
+body {
+  -webkit-user-select: none;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color:#AAA;
+  font-size:20px;
+  line-height:120%;
+}
+canvas {
+  display:block;
+  position:absolute;
+  z-index: -1;
+}
+a {
+  color: #337ab7;
+  text-decoration: none;
+}
+a:focus, a:hover {
+  color: #70A2CD;
+  text-decoration: underline;
+}
+#menu .item {
+  color:#999;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
+  padding:0.5em 0.8em;
+  display:inline-block;
+  cursor:pointer;
+}
+#menu .item.brand {
+  font-size:24px;
+  padding-right:1em;
+  letter-spacing:1px;
+}
+#menu .item:hover {
+  color:#FFF;
+}
+#menu .item.selected {
+  color:#FFF;
+  background: rgba(0,0,0,0.66); 
+}
+.pane {
+  padding:1em 2em;
+  background: rgba(0,0,0,0.66); 
+  display:none;
+}
+.pane.selected {
+  display:block;
+}
+.sharepane {
+  display:none;
+}
+.sharepane.selected {
+  display:block;
+}
+pre {
+  -webkit-user-select: text;
+}
+.buttonrow {
+  margin:0.5em 0em 1em 0em; 
+}
     </style>
-  </head>
+    </head>
   <body>
 
 <canvas id="maincanvas">
@@ -58,8 +93,107 @@
   Maybe you should <a href="http://browsehappy.com/">upgrade it</a>.
 </canvas>
 
+<div id='menu'>
+  <div class='item brand' name='reset'>FractalJS</div>
+  <div class='item action tab' name='share'>Share</div>
+  <div class='item action tab' name='about'>About</div>
+</div>
+
+<div class='pane' name='share'>
+
+<div class="buttonrow">
+<button class="btn btn-default btn-lg share" name="link">
+<i class="fa fa-link fa-lg"></i>
+Share as link</button>
+
+<button class="btn btn-default btn-lg share" name="picture">
+<i class="fa fa-file-picture-o fa-lg"></i>
+Download picture</button>
+
+<button class="btn btn-default btn-lg share" name="iframe">
+<i class="fa fa-image fa-lg"></i>
+Embed as &lt;iFrame&gt;</button>
+
+<a class="btn btn-default btn-lg twitter-share-button" href="https://twitter.com/intent/tweet?url=http://example.com;text=Hello%20world" target="_blank">
+<i class="fa fa-twitter fa-lg"></i>
+Tweet</a>
+</div>
+
+<div class='sharepane' name='link'>
+Just bookmark or share the current page, or copy and paste <span id='share_link'></span>.
+</div>
+
+<div class='sharepane' name='picture'>
+<a href="#" id='share_image' download="fractal.png">Click here</a> to download this fractal as a picture on your computer.<br />
+</div>
+
+<div class='sharepane' name='iframe'>
+Use this HTML code to embed an interactive browser of this fractal in your webpage.
+<pre><span id='share_embed'></span></pre>
+</div>
+
+</div>
+
+
+
+<div class='pane' name='about'>
+<p>FractalJS lets you explore the Mandelbrot set.</p>
+<p>Click and drag the mouse, and scroll the wheel to explore the fractal set.</p>
+<br />
+<p><a href="https://github.com/solendil/FractalJS">View the open-source project at Github</p>
+</div>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
 <script>
-var f = FractalJS.create ({
+var fractal;
+var updateShare = function() {
+  var url = document.location.href;
+  $("#share_link").html("<a href='"+url+"'>this link</a>")
+  $("#share_embed").html("&lt;iframe onmousewheel=''<br/>src='http://solendil.github.io/fractaljs/iframe.html"+window.location.hash+"'><br/>&lt;/iframe>");
+  $(".twitter-share-button").attr("href", "https://twitter.com/intent/tweet?url="+encodeURIComponent(document.location.href)+"&text=Check%20this%20nice%20%23fractaljs%20!")
+}
+
+$(function() {
+  // share buttons
+  $(".share").click(function(e) {
+    var name = $(this).attr("name");
+    $(".sharepane").removeClass("selected");
+    $(".sharepane[name='"+name+"']").addClass("selected");
+  })
+  // reset button
+  $(".item[name='reset']").click(function() {
+    fractal.setFractalDesc({type:'mandel',x:-0.7,y:0.0,w:2.5,i:50});
+    $(".item.tab").removeClass("selected");
+    $(".pane").removeClass("selected");
+    fractal.draw();
+  });
+  // open/close tabs
+  $(".item.tab").click(function(e) {
+    var name = $(this).attr("name");
+    if ($(this).hasClass("selected"))
+      var hide = true;
+    $(".item.tab").removeClass("selected");
+    $(".pane").removeClass("selected");
+    if (!hide) {
+      $(".item.tab[name='"+name+"']").addClass("selected");
+      $(".pane[name='"+name+"']").addClass("selected");
+      updateShare();
+    }
+  });
+  // update "share" panel if it is opened
+  fractal.events.on(["iter.change","mouse.control","api.change"], function(){
+    if ($(".pane[name='share']").hasClass("selected")) {
+      updateShare();
+    }
+  })
+  $("#share_image").click(function() {
+    var dataURL = document.getElementById("maincanvas").toDataURL('image/png');
+    console.log($(this))
+    $(this).context.href = dataURL;
+  });
+})
+
+fractal = FractalJS.create ({
     canvas:document.getElementById("maincanvas"),
     fractalDesc:{
       type:'mandel',
@@ -74,23 +208,14 @@ var f = FractalJS.create ({
     },
     renderer:{
       numberOfTiles:100,
-      drawAfterInit:false,  // postpone first drawing after UI is initialized
+      drawAfterInit:false, 
     },
     controller:{
       fitToWindow:true
     }
 });
-var ui = new FractalJS.FractalUI(f);
-f.draw();
+fractal.draw();
 </script>
-
-<div id="infobox">
-  <em>FractalJS</em><br>
-  mousewheel &amp; drag<br>
-  bookmark &amp; share<br>
-  <a href=".">reset</a> - 
-  <a href="https://github.com/solendil/FractalJS">github</a>
-</div>
 
 <script type="text/javascript">
 if (document.location.hostname.search("solendil.github.io") !== -1) {

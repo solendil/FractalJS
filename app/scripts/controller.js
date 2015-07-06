@@ -1,4 +1,10 @@
-FractalJS.Controller = function(renderer, canvas, params) {
+/*
+ * The controller:
+ * - capture events related to the canvas and modify the view accordingly
+ * - loads the URL parameters and updates the URL in relatime
+ */
+FractalJS.Controller = function(renderer, canvas, params, events) {
+"use strict";
 
 //-------- private members
 
@@ -13,6 +19,59 @@ var callbacks = {		// external callbacks
 	"mouse.control":[],
 };
 
+//-------- private methods
+
+var updateUrl = function() {
+	var desc = renderer.getFractalDesc();
+
+	// create a buffer and two views on it to store fractal parameters
+	var buffer = new ArrayBuffer(32);
+	var intArray = new Uint16Array(buffer);
+	var doubleArray = new Float64Array(buffer);
+	intArray[0] = 1; // version number
+	intArray[1] = desc.iter;
+	doubleArray[1] = desc.x;
+	doubleArray[2] = desc.y;
+	doubleArray[3] = desc.w;
+
+	// encode as base64 and put in the URL
+	// https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string/11562550#11562550
+	var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
+	base64String = base64String.split("/").join("*");
+	base64String = base64String.split("=").join("_");
+
+	history.replaceState("", "", "#A"+base64String);
+	//document.location.hash="A"+base64String;
+	//console.log("Updating URL", {x:desc.x,y:desc.y,w:desc.w,iter:desc.iter});
+};
+
+var readUrl = function() {
+	try {
+		var url = document.location.hash;
+		if (url.startsWith("#A")) {
+			var base64String = url.substr(2);
+			base64String = base64String.split("*").join("/");
+			base64String = base64String.split("_").join("=");
+
+			var buffer = FractalJS.util.base64ToArrayBuffer(base64String);
+			var intArray = new Uint16Array(buffer);
+			var doubleArray = new Float64Array(buffer);
+
+			var desc = {
+				x:doubleArray[1],
+				y:doubleArray[2],
+				w:doubleArray[3],
+				iter:intArray[1]
+			};
+
+			//console.log("Initialization", desc);
+			renderer.setFractalDesc(desc);
+		}
+	} catch(e) {
+		console.error("Could not read URL");
+	}
+};
+
 //-------- event catchers
 
 if (params.mouseControl) {
@@ -25,12 +84,12 @@ if (params.mouseControl) {
 		dragStartDesc = renderer.getFractalDesc();
 	};
 
-	window.onmouseup = function(e) {
+	window.addEventListener("mouseup", function(e) {
 		if (!e) e = window.event;
 		isDragging = false;
-	};
+	});
 
-	window.onmousemove = function(e) {
+	window.addEventListener("mousemove", function(e) {
 		if (!e) e = window.event;
 		if (isDragging) {
 			var vecx = e.screenX-dragX;
@@ -44,12 +103,11 @@ if (params.mouseControl) {
 	        var vfy = e.screenY - ldragY;  
 	        var vector = {x:vfx,y:vfy,mvt:"pan"};     
 			renderer.draw(vector);
-			FractalJS.util.callbackHelp(callbacks["mouse.control"], vector);
-
+			events.send("mouse.control");
 	        ldragX = e.screenX;
 	        ldragY = e.screenY;
 		}
-	};
+	});
 
 	var wheelFunction = function(e) {
 		if (!e) e = window.event;
@@ -91,16 +149,15 @@ if (params.mouseControl) {
 	    vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
 	    vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
 		renderer.draw(vector);
-		FractalJS.util.callbackHelp(callbacks["mouse.control"], vector);
-
+		events.send("mouse.control");
 		e.preventDefault();
 	};
 
 	// IE11 special
 	if ("onwheel" in canvas) 
-		canvas.onwheel = wheelFunction
+		canvas.onwheel = wheelFunction;
 	else 
-		canvas.onmousewheel = wheelFunction
+		canvas.onmousewheel = wheelFunction;
 
 }
 
@@ -116,17 +173,14 @@ if (params.fitToWindow) {
 	};
 }
 
-//-------- private methods
+//-------- constructor & jquery callbacks
 
+readUrl();
+events.on("iter.change", updateUrl);
+events.on("mouse.control", updateUrl);
+events.on("api.change", updateUrl);
 
 //-------- public methods
-
-return {
-
-on: function(event, callback) {
-	callbacks[event].push(callback);
-}
-
-};
+// none :)
 
 };
