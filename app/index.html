@@ -108,6 +108,8 @@ Mandebrot</button>
 Burning Ship</button>
 <button class="btn btn-default btn-lg fractaltype" name="mandel3">
 Multibrot <sup>3</sup></button>
+<button class="btn btn-default btn-lg fractaltype" name="tippetts">
+Tippetts</button>
 </div>
 </div>
 
@@ -149,7 +151,7 @@ Use this HTML code to embed an interactive browser of this fractal in your webpa
 
 
 <div class='pane' name='about'>
-<p>FractalJS lets you explore the Mandelbrot set.</p>
+<p>FractalJS lets you explore famous fractal sets.</p>
 <p>Click and drag the mouse, and scroll the wheel to explore the fractal set.</p>
 <br />
 <p><a href="https://github.com/solendil/FractalJS">View the open-source project at Github</p>
@@ -166,6 +168,13 @@ var updateShare = function() {
 }
 
 var typeList = {
+  "tippetts" : {
+    type:'tippetts',
+    x:-0.2, 
+    y:0.0, 
+    w:4, 
+    i:50
+  },
   "mandel" : {
     type:'mandel',
     x:-0.7, 

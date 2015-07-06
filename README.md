@@ -2,7 +2,13 @@
 
 [![](static/banner.png)](http://solendil.github.io/fractaljs/)
 
-Explore the [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) right in your browser. Try it out by clicking the banner above.
+Explore fractals right in your browser. Try it out by clicking the banner above.
+
+Available fractals:
+* the [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set)
+* a [Multibrot 3](https://en.wikipedia.org/wiki/Multibrot_set)
+* the [Burning Ship](https://en.wikipedia.org/wiki/Burning_Ship_fractal)
+* [John Tippetts Mandelbrot](http://paulbourke.net/fractals/tippetts/)
 
 ### Some nice places to visit in the Mandelbrot set 
 
@@ -36,7 +42,8 @@ FractalJS has been tested with:
 FractalJS is designed as a no-setup project. You can just download it, open /app/index.html in your browser and start editing the javascript. 
 
 There is a build system however, based on [Grunt](http://gruntjs.com/), providing:
-* auto-reload
+* auto-reload during development
 * [JSHint](http://jshint.com/) code quality
 * JS concatenation and minification
+
 

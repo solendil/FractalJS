@@ -41,8 +41,8 @@ var logBase = 1.0 / Math.log(2.0);
 var logHalfBase = Math.log(0.5)*logBase;
 
 // what a mess! this part will need some love & refactoring
-var fractalTypeById = {0:'mandel',1:'mandel3',2:'burningship'};
-var fractalIdByType = {'mandel':0,'mandel3':1,'burningship':2};
+var fractalTypeById = {0:'mandel',1:'mandel3',2:'burningship',3:'tippetts'};
+var fractalIdByType = {'mandel':0,'mandel3':1,'burningship':2,'tippetts':3};
 var fractalFunctionList = {
 	'mandelsmooth' : function(cx,cy) {
 		var znx=0, zny=0, sqx=0, sqy=0, i=0, j=0;
@@ -70,6 +70,16 @@ var fractalFunctionList = {
 			znx = sqx-sqy + cx;
 			sqx = znx*znx;
 			sqy = zny*zny;
+		}
+		return i;	
+	},
+	'tippetts' : function(cx,cy) {
+		var zx=0, zy=0, sqx=0, sqy=0, i=0;
+		for(;i<iter && sqx+sqy<=escape; ++i) {
+			zx = sqx-sqy+cx;
+			zy = (zx+zx)*zy+cy;
+			sqx = zx*zx;
+			sqy = zy*zy;
 		}
 		return i;	
 	},
