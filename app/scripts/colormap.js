@@ -12,19 +12,12 @@ FractalJS.Colormap = function(params) {
 
 var buffer = new Int32Array(params.buffer);
 var offset = params.offset || 0.0;
-var density = params.density || 1;
+var density = params.density || 20;
 var resolution = buffer.length;
-var factor;
 
 //-------- private methds
 
-var project = function() {
-	factor = resolution/density;
-};
-
 //-------- constructor
-
-project();
 
 //-------- public methods
 
@@ -33,7 +26,7 @@ return {
 getColorForIter: function(iter) {
 	if (iter===0)
 		return 0xFF000000;
-	var res = buffer[Math.trunc((iter*density+offset*resolution)%resolution)];
+	var res = buffer[Math.floor((iter*density+offset*resolution)%resolution)];
 	return res;
 },
 
@@ -44,7 +37,8 @@ buffer: function() {
 getDesc: function() {
 	return {
 		offset:offset,
-		density:density
+		density:density,
+		buffer:buffer,
 	};
 },
 
@@ -54,7 +48,6 @@ setDesc: function(cmap) {
 		offset = cmap.offset;
 	if (cmap.density)
 		density = cmap.density;
-	project();
 }
 
 };

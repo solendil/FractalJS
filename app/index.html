@@ -303,7 +303,7 @@ $(function() {
     var value = slider_offset.noUiSlider.get();
     if (!fractal) return
     fractal.setColorDesc({offset:value});
-    fractal.drawPalette();
+    fractal.refreshColormap();
   });
   
   var dens = fractal.getColorDesc().density
@@ -316,7 +316,7 @@ $(function() {
     var value = slider_density.noUiSlider.get();
     if (!fractal) return
     fractal.setColorDesc({density:(1/20)*Math.pow(increment,value)});
-    fractal.drawPalette();
+    fractal.refreshColormap();
   });
 })
 

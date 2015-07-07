@@ -78,8 +78,8 @@ draw: function() {
 	renderer.draw();
 },
 
-drawPalette: function() {
-	renderer.drawPalette();
+refreshColormap: function() {
+	renderer.refreshColormap();
 },
 
 setColorDesc: function(cmap) {
