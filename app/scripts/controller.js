@@ -15,10 +15,6 @@ var dragX, dragY;		// start dragging point
 var dragStartDesc;		// start fractal description
 var ldragX, ldragY;		// last dragging point
 
-var callbacks = {		// external callbacks
-	"mouse.control":[],
-};
-
 //-------- private methods
 
 /*
@@ -29,25 +25,33 @@ var callbacks = {		// external callbacks
  *   0,1          Uint16Array[0]		version of hash
  *   2,3          Uint16Array[1]		number of iterations
  *   4            Uint8Array[4]	        type of fractal
- *   5,6,7        reserved
- *   8-11         Float64Array[1]		x 
- *   12-15        Float64Array[1]		y
- *   16-19        Float64Array[1]		w (extent) 
+ *   5            Uint8Array[5]	        type of gradient
+ *   6,7          Uint16Array[3]		color offset (times 10000)
+ *   8-15         Float64Array[1]		x 
+ *   16-23        Float64Array[2]		y
+ *   24-31        Float64Array[3]		w (extent) 
+ *   32-35        Float32Array[8]		color density (if present, 20 if not)
+ *   36-39        reserved
  */
 var updateUrl = function() {
 	var desc = renderer.getFractalDesc();
+	var color = renderer.getColorDesc();
 
 	// create a buffer and two views on it to store fractal parameters
-	var buffer = new ArrayBuffer(32);
+	var buffer = new ArrayBuffer(40);
 	var byteArray = new Uint8Array(buffer);
 	var intArray = new Uint16Array(buffer);
 	var doubleArray = new Float64Array(buffer);
+	var floatArray = new Float32Array(buffer);
 	intArray[0] = 1; // version number
 	intArray[1] = desc.iter;
 	byteArray[4] = desc.typeid;
+	byteArray[5] = color.typeid;
+	intArray[3] = color.offset*10000;
 	doubleArray[1] = desc.x;
 	doubleArray[2] = desc.y;
 	doubleArray[3] = desc.w;
+	floatArray[8] = color.density;
 
 	// encode as base64 and put in the URL
 	// https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string/11562550#11562550
@@ -72,6 +76,7 @@ var readUrl = function() {
 			var byteArray = new Uint8Array(buffer);
 			var intArray = new Uint16Array(buffer);
 			var doubleArray = new Float64Array(buffer);
+			var floatArray = new Float32Array(buffer);
 
 			var desc = {
 				x:doubleArray[1],
@@ -81,8 +86,15 @@ var readUrl = function() {
 				typeid:byteArray[4],
 			};
 
-			//console.log("Initialization", desc);
+			var color = {
+				offset:intArray[3]/10000.0,
+				density:byteArray.length>32?floatArray[8]:20,
+				typeid:byteArray[5],
+			};
+
+			//console.log("Initialization", desc, color);
 			renderer.setFractalDesc(desc);
+			renderer.setColorDesc(color);
 		}
 	} catch(e) {
 		console.error("Could not read URL");

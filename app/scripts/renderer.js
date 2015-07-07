@@ -1,6 +1,6 @@
 /*
  * The renderer:
- * - knows a fractal engine, a palette and a canvas
+ * - knows a fractal engine, a colormap and a canvas
  * - can draw a frame, knows the movement vector if applicable
  * - splits renderings into "draw items", can cancel frames
  */
@@ -14,7 +14,7 @@ var util = FractalJS.util;
 var canvas, context;	// the canvas on which to display 
 var imageData, idata32; // canvas backbuffer and view as 32bit-int array
 var engine;				// the fractal engine
-var palette; 			// palette
+var colormap; 			// color map
 
 var drawList = [];		// list of remaining items to be drawn 
 var nextCallback;		// id of the next callback for the draw list
@@ -33,7 +33,7 @@ params.fractalDesc.swidth = canvas.width;
 params.fractalDesc.sheight = canvas.height;
 
 engine = new FractalJS.Engine(params.fractalDesc);
-palette = new FractalJS.Palette(params.palette);
+colormap = params.colormap;
 
 //-------- private methods
 
@@ -107,7 +107,7 @@ var drawPalette = function() {
 	var iterbuffer = engine.getBuffer();
 	var limit = canvas.height*canvas.width;
 	for (var i=0; i<limit; i++) 
-		idata32[i] = palette.getColorForIter(iterbuffer[i]);
+		idata32[i] = colormap.getColorForIter(iterbuffer[i]);
 	context.putImageData(imageData, 0, 0, 0, 0, canvas.width, canvas.height);
 };
 
@@ -119,7 +119,7 @@ var drawItem = function() {
 		var dx = sy*canvas.width+tile.x1;
 		for (var sx=tile.x1; sx<tile.x2; sx++) {
 			var iter = iterbuffer[dx];
-			var color = palette.getColorForIter(iter);
+			var color = colormap.getColorForIter(iter);
 			idata32[dx++] = color;
 		}
 	}
@@ -250,8 +250,16 @@ getFractalDesc: function () {
 	return engine.getFractalDesc();
 },
 
-getPalette: function () {
-	return palette;
+getColormap: function() {
+	return colormap;
+},
+
+getColorDesc: function() {
+	return colormap.getDesc();
+},
+
+setColorDesc: function(cmap) {
+	return colormap.setDesc(cmap);
 }
 
 };

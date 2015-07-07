@@ -7,15 +7,6 @@
 {
     canvas : <DOM canvas node>		// mandatory canvas
     fractalDesc	: <JSON object>		// mandatory fractal description (see engine.js)
-    palette : {						// the default palette object
-		stops : [
-			{index:0,r:0,g:0,b:0},
-			{index:0.5,r:255,g:255,b:255},
-		],
-		resolution : 100,
-		offset : 0,
-		modulo : 0
-    }
     renderer : {
 		numberOfTiles : 1,			// number of tiles to draw (approximate)
 		drawAfterInit : true,		// should the fractal be drawn after init
@@ -43,20 +34,11 @@ if (!params.canvas || !params.canvas.width)
 if (!params.fractalDesc) 
 	throw "Fractal Description is not set";
 
-if (!params.palette) 
-	params.palette = {
-		stops : [
-			{index:0,r:0,g:0,b:0},
-			{index:0.5,r:255,g:255,b:255},
-		],
-    };
-
-params.palette = util.defaultProps(params.palette, {
-	stops: [],
-	resolution: 1000,
-	offset: 0,
-	modulo: 50,
-});
+if (!params.colormap) 
+	params.colormap = FractalJS.Colormapbuilder().fromstops({
+      resolution:1000,
+      stops:"0#080560;0.2#2969CB;0.40#F1FEFE;0.60#FCA425;0.85#000000",
+    });
 
 params.renderer = util.defaultProps(params.renderer, {
 	numberOfTiles: 1,
@@ -92,16 +74,22 @@ getFractalDesc: function () {
 	return renderer.getFractalDesc();
 },
 
-getPalette: function () {
-	return renderer.getPalette();
-},
-
 draw: function() {
 	renderer.draw();
 },
 
 drawPalette: function() {
 	renderer.drawPalette();
+},
+
+setColorDesc: function(cmap) {
+	var res = renderer.setColorDesc(cmap);
+	events.send("api.change");
+	return res;
+},
+
+getColorDesc: function() {
+	return renderer.getColorDesc();
 },
 
 events: events,

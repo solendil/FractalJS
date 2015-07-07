@@ -57,9 +57,10 @@ concat: {
       'app/scripts/util.js',
       'app/scripts/events.js',
       'app/scripts/engine.js',
-      'app/scripts/palette.js',
+      'app/scripts/colormap.js',
       'app/scripts/renderer.js',
       'app/scripts/controller.js',
+      'app/scripts/colormapbuilder.js',
       'app/scripts/fractal.js',
     ],
     dest: 'dist/scripts/fractal.js',
@@ -86,6 +87,12 @@ preprocess : {
 },
 
 copy: {
+  dist: {
+    expand: true,
+    cwd: 'app/nouislider',
+    src: '**',
+    dest: 'dist/nouislider/',
+  },
   web: {
     expand: true,
     cwd: 'dist/',
@@ -118,6 +125,7 @@ grunt.registerTask('build', [
     'concat',
     'uglify',
     'preprocess',
+    'copy:dist',
     'clean:web',
     'copy:web',
   ]);
