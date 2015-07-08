@@ -88,10 +88,11 @@ preprocess : {
 
 copy: {
   dist: {
-    expand: true,
-    cwd: 'app/nouislider',
-    src: '**',
-    dest: 'dist/nouislider/',
+    files: [
+    {expand: true,cwd: 'app/css',src: '**',dest: 'dist/css/',},
+    {expand: true,cwd: 'app/libs',src: '**',dest: 'dist/libs/',},
+    {expand: true,cwd: 'app/scripts',src: 'fractal-ui.js',dest: 'dist/scripts/',},
+    ]
   },
   web: {
     expand: true,

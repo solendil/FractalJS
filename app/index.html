@@ -8,10 +8,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
 
-<link href="nouislider/nouislider.min.css" rel="stylesheet">
-<script src="nouislider/nouislider.min.js"></script>
+<link href="libs/nouislider.min.css" rel="stylesheet">
+<script src="libs/nouislider.min.js"></script>
 
+<link rel="stylesheet" href="libs/flat-ui.min.css">
+<link rel="stylesheet" href="css/fractal-ui.css">
+ 
     <!-- @if NODE_ENV == 'DEVELOPMENT' -->
     <script src="scripts/util.js"></script>
     <script src="scripts/events.js"></script>
@@ -25,83 +29,7 @@
     <!-- @if NODE_ENV == 'PRODUCTION' -->
     <script src="scripts/fractal.min.js"></script>
     <!-- @endif -->
-    <style>
-* {
-  box-sizing: border-box;  
-  margin: 0;
-}
-body {
-  -webkit-user-select: none;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color:#AAA;
-  font-size:20px;
-  line-height:120%;
-}
-canvas {
-  display:block;
-  position:absolute;
-  z-index: -1;
-}
-a {
-  color: #337ab7;
-  text-decoration: none;
-}
-a:focus, a:hover {
-  color: #70A2CD;
-  text-decoration: underline;
-}
-#menu .item {
-  color:#999;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
-  padding:0.5em 0.8em;
-  display:inline-block;
-  cursor:pointer;
-}
-#menu .item.brand {
-  font-size:24px;
-  padding-right:1em;
-  letter-spacing:1px;
-}
-#menu .item:hover {
-  color:#FFF;
-}
-#menu .item.selected {
-  color:#FFF;
-  background: rgba(0,0,0,0.66); 
-}
-.pane {
-  padding:1em 2em;
-  background: rgba(0,0,0,0.66); 
-  display:none;
-}
-.pane.selected {
-  display:block;
-}
-.sharepane {
-  display:none;
-}
-.sharepane.selected {
-  display:block;
-}
-pre {
-  -webkit-user-select: text;
-}
-.buttonrow {
-  margin:0.5em 0em 1em 0em; 
-}
-#colorcanvas {
-  width:100%;
-  height:100px;
-  z-index: auto;
-  position:static;
-}
-.slider {
-  display:inline-block;
-  width:300px;
-  margin-left:1em;
-  margin-right:2em;
-}
-    </style>
+    <script src="scripts/fractal-ui.js"></script>
     </head>
   <body>
 
@@ -110,239 +38,101 @@ pre {
   Maybe you should <a href="http://browsehappy.com/">upgrade it</a>.
 </canvas>
 
-<div id='menu'>
-  <div class='item brand' name='reset'>FractalJS</div>
-  <div class='item action tab' name='type'>Type</div>
-  <div class='item action tab' name='colors'>Colors</div>
-  <div class='item action tab' name='share'>Share</div>
-  <div class='item action tab' name='about'>About</div>
-</div>
-
-<div class='pane' name='type'>
-<div class="buttonrow">
-<button class="btn btn-default btn-lg fractaltype" name="mandel">
-Mandebrot</button>
-<button class="btn btn-default btn-lg fractaltype" name="burningship">
-Burning Ship</button>
-<button class="btn btn-default btn-lg fractaltype" name="mandel3">
-Multibrot <sup>3</sup></button>
-<button class="btn btn-default btn-lg fractaltype" name="tippetts">
-Tippetts</button>
-</div>
-</div>
-
-<div class='pane' name='colors'>
-
-<div class="container-fluid">
-  <div class="row">
-    Offset :
-    <div id="slider.offset" class="slider"></div>
-    &nbsp;&nbsp;Density :
-    <div id="slider.density" class="slider"></div>
+<nav class="navbar navbar-inverse" role="navigation">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+      <span class="sr-only">Toggle navigation</span>
+    </button>
+    <a class="navbar-brand" href="#" onclick="javascript:return false">FractalJS</a>
   </div>
+  <div class="collapse navbar-collapse" id="navbar-collapse-01">
+    <ul class="nav navbar-nav">
+      <li><a href="#" name='type'>Type</a></li>
+      <li><a href="#" name='colors'>Colors</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="#" name='share'>Share</a></li>
+      <li><a href="#" name='about'>About</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<!-- *************** FRATCAL TYPE -->
+<div class='tabpane container-fluid' name='type'>
+<div class='row'><div class='col-md-12'>
+<button class="btn btn-primary btn-lg fractaltype" name="mandel">
+Mandebrot</button>
+<button class="btn btn-primary btn-lg fractaltype" name="burningship">
+Burning Ship</button>
+<button class="btn btn-primary btn-lg fractaltype" name="mandel3">
+Multibrot <sup>3</sup></button>
+<button class="btn btn-primary btn-lg fractaltype" name="tippetts">
+Tippetts</button>
+</div></div>
 </div>
 
-<script>
-var fractal;
-var slider_offset = document.getElementById("slider.offset")
-var slider_density = document.getElementById("slider.density")
-var increment = Math.pow(20/(1/20), 1/100)
-noUiSlider.create(slider_offset, {
-  start: [0],
-  range: {
-    'min': 0,
-    'max': 1
-  }
-});
-noUiSlider.create(slider_density, {
-  start: [0],
-  range: {
-    'min': 0,
-    'max': 100
-  }
-});
-</script>
+
+<!-- *************** COLORS -->
+<div class='tabpane container-fluid' name='colors'>
+<div class='row'><div class='col-md-12'>
+<div id='gradients'></div>
+</div></div>
+<div class='row'><div class='col-md-12'><br/>
+Offset 
+<div id="slider.offset" class="slider"></div>
+&nbsp;&nbsp;Density 
+<div id="slider.density" class="slider"></div>
+</div></div>
 </div>
 
-<div class='pane' name='share'>
 
-<div class="buttonrow">
-<button class="btn btn-default btn-lg share" name="link">
-<i class="fa fa-link fa-lg"></i>
-Share as link</button>
+<!-- *************** SHARE -->
+<div class='tabpane container-fluid' name='share'>
+<div class='row'><div class='col-md-12'>
 
-<button class="btn btn-default btn-lg share" name="picture">
-<i class="fa fa-file-picture-o fa-lg"></i>
-Download picture</button>
+<button class="btn btn-primary btn-lg sharebtn" name="link">
+<i class="fa fa-link fa-lg"></i> Share as link</button>
 
-<button class="btn btn-default btn-lg share" name="iframe">
-<i class="fa fa-image fa-lg"></i>
-Embed as &lt;iFrame&gt;</button>
+<button class="btn btn-primary btn-lg sharebtn" name="picture">
+<i class="fa fa-file-picture-o fa-lg"></i> Download picture</button>
 
-<a class="btn btn-default btn-lg twitter-share-button" href="https://twitter.com/intent/tweet?url=http://example.com;text=Hello%20world" target="_blank">
-<i class="fa fa-twitter fa-lg"></i>
-Tweet</a>
-</div>
+<button class="btn btn-primary btn-lg sharebtn" name="iframe">
+<i class="fa fa-image fa-lg"></i> Embed as &lt;iFrame&gt;</button>
+
+<a class="btn btn-info btn-lg twitter-share-button" href="https://twitter.com/intent/tweet?url=http://example.com;text=Hello%20world" target="_blank">
+<i class="fa fa-twitter fa-lg"></i> Tweet</a>
 
 <div class='sharepane' name='link'>
-Just bookmark or share the current page, or copy and paste <span id='share_link'></span>.
+<p>Just bookmark or share the current page, or copy and paste <span id='share_link'></span>.</p>
 </div>
 
 <div class='sharepane' name='picture'>
-<a href="#" id='share_image' download="fractal.png">Click here</a> to download this fractal as a picture on your computer.<br />
+<p><a href="#" id='share_image' download="fractal.png">Click here</a> to download this fractal as a picture on your computer.</p>
 </div>
 
 <div class='sharepane' name='iframe'>
-Use this HTML code to embed an interactive browser of this fractal in your webpage.
+<p>Use this HTML code to embed an interactive browser of this fractal in your webpage.</p>
 <pre><span id='share_embed'></span></pre>
 </div>
 
+</div></div>
 </div>
 
 
+<!-- *************** ABOUT -->
+<div class='tabpane container-fluid' name='about'>
+<div class='row'><div class='col-md-12'>
 
-<div class='pane' name='about'>
-<p>FractalJS lets you explore famous fractal sets.</p>
-<p>Click and drag the mouse, and scroll the wheel to explore the fractal set.</p>
-<br />
-<p><a href="https://github.com/solendil/FractalJS">View the open-source project at Github</p>
+<h3 style='margin-top:0px'>FractalJS</h3>
+<p>An open source javascript program that lets you explore and share famous fractal sets with the mouse and scrollwheel.</p>
+<a class='btn btn-primary' href="https://github.com/solendil/FractalJS">
+<i class="fa fa-github fa-lg"></i>
+View on Github</a>
+</div></div>
 </div>
 
-<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
-<script>
-var updateShare = function() {
-  var url = document.location.href;
-  $("#share_link").html("<a href='"+url+"'>this link</a>")
-  $("#share_embed").html("&lt;iframe onmousewheel=''<br/>src='http://solendil.github.io/fractaljs/iframe.html"+window.location.hash+"'><br/>&lt;/iframe>");
-  $(".twitter-share-button").attr("href", "https://twitter.com/intent/tweet?url="+encodeURIComponent(document.location.href)+"&text=Check%20this%20nice%20%23fractaljs%20!")
-}
 
-var typeList = {
-  "tippetts" : {
-    type:'tippetts',
-    x:-0.2, 
-    y:0.0, 
-    w:4, 
-    i:50
-  },
-  "mandel" : {
-    type:'mandel',
-    x:-0.7, 
-    y:0.0, 
-    w:2.5, 
-    i:50
-  },
-  "mandel3" : {
-    type:'mandel3',
-    x:0.0, 
-    y:0.0, 
-    w:3.0, 
-    i:50
-  },
-  "burningship" : {
-    type:'burningship',
-    x:-0.4, 
-    y:-0.7, 
-    w:3, 
-    i:50
-  }
-};
-
-$(function() {
-  // type buttons
-  $(".fractaltype").click(function(e) {
-    var name = $(this).attr("name");
-    fractal.setFractalDesc(typeList[name]);
-    fractal.draw();
-  })
-  // share buttons
-  $(".share").click(function(e) {
-    var name = $(this).attr("name");
-    $(".sharepane").removeClass("selected");
-    $(".sharepane[name='"+name+"']").addClass("selected");
-  })
-  // reset button
-  $(".item[name='reset']").click(function() {
-    fractal.setFractalDesc({type:'mandel',x:-0.7,y:0.0,w:2.5,i:50});
-    $(".item.tab").removeClass("selected");
-    $(".pane").removeClass("selected");
-    fractal.draw();
-  });
-  // open/close tabs
-  $(".item.tab").click(function(e) {
-    var name = $(this).attr("name");
-    if ($(this).hasClass("selected"))
-      var hide = true;
-    $(".item.tab").removeClass("selected");
-    $(".pane").removeClass("selected");
-    if (!hide) {
-      $(".item.tab[name='"+name+"']").addClass("selected");
-      $(".pane[name='"+name+"']").addClass("selected");
-      updateShare();
-    }
-  });
-  // update "share" panel if it is opened
-  fractal.events.on(["iter.change","mouse.control","api.change"], function(){
-    if ($(".pane[name='share']").hasClass("selected")) {
-      updateShare();
-    }
-  })
-  // build data URL for image downloading
-  $("#share_image").click(function() {
-    var dataURL = document.getElementById("maincanvas").toDataURL('image/png');
-    console.log($(this))
-    $(this).context.href = dataURL;
-  });
-  // log end of frame recap and time
-  fractal.events.on("frame.end", function(res) {
-    console.log("finished drawing", res.fractalDesc, "time in ms", res.time)
-  })
-  //
-  slider_offset.noUiSlider.set(fractal.getColorDesc().offset)
-  slider_offset.noUiSlider.on('update', function(){
-    var value = slider_offset.noUiSlider.get();
-    if (!fractal) return
-    fractal.setColorDesc({offset:value});
-    fractal.refreshColormap();
-  });
-  
-  var dens = fractal.getColorDesc().density
-  var val = Math.log(20*dens)/Math.log(increment)
-  //console.log("densval", fractal.getColorDesc(), dens, val)
-  slider_density.noUiSlider.set(val)
-
-  slider_density.noUiSlider.on('update', function(){
-    //console.log("value",value)
-    var value = slider_density.noUiSlider.get();
-    if (!fractal) return
-    fractal.setColorDesc({density:(1/20)*Math.pow(increment,value)});
-    fractal.refreshColormap();
-  });
-})
-
-fractal = FractalJS.create ({
-    canvas:document.getElementById("maincanvas"),
-    fractalDesc:{
-      type:'mandel',
-      x:-0.7, 
-      y:0.0, 
-      w:2.5, 
-      i:50
-    },
-    palette:{
-      resolution:500,
-      stops:"0#080560;0.2#2969CB;0.40#F1FEFE;0.60#FCA425;0.85#000000"
-    },
-    renderer:{
-      numberOfTiles:100,
-      drawAfterInit:false, 
-    },
-    controller:{
-      fitToWindow:true
-    }
-});
-fractal.draw();
-</script>
 
 <script type="text/javascript">
 if (document.location.hostname.search("solendil.github.io") !== -1) {

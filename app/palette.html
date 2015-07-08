@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FractalJS</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="scripts/util.js"></script>
+    <script src="scripts/colormap.js"></script>
+    <script src="scripts/colormapbuilder.js"></script>
+  </head>
+  <body>
+    Paste UGR palette<br/>
+    <textarea id='input' cols="100" rows="10"></textarea>
+    <canvas id='palette' width='600' height='300'></canvas>
+    <script>
+
+parseUGR = function(text) {
+  var lines = text.split("\n");
+  var collect = false;
+  var collected = "";
+  var parsecollected = function(data) {
+    console.log(data)
+    var tokens = data.split(" ");
+    var indices=[]
+    for (var i in tokens) {
+      var token = tokens[i]
+      var vals = token.split("=")
+      if (vals[0]==="index")
+        indices.push({index:(Number(vals[1])%400)/400})
+      if (vals[0]==="color")
+        indices[indices.length-1]["color"] = Number(vals[1]).toString(16)
+    }
+    console.log(indices)
+    indices.sort(function(a,b) {
+      return a.index-b.index
+    })
+    var res = ""
+    for (var i in indices) {
+      var index = indices[i];
+      var pad = "000000"
+      var ans = pad.substring(0, pad.length - index.color.length) + index.color
+      var ans2 = ans.substr(4,2)+ans.substr(2,2)+ans.substr(0,2)
+      console.log(index, ans, ans2)
+      res+=index.index+"#"+ans2+";"
+    }
+    console.log("###" + res.substring(0,res.length-1))
+
+    var builder = FractalJS.Colormapbuilder()
+    var colormap = builder.fromstops({
+      resolution:400,
+      stops:res.substring(0,res.length-1),
+    });
+    var canvas = document.getElementById("palette");
+    var ctx = canvas.getContext("2d");
+    var imageData = ctx.createImageData(canvas.width, 1);
+    var idata32 = new Uint32Array(imageData.data.buffer);
+    for (var x = 0; x<400; x++) {
+      idata32[x] = colormap.getDesc().buffer[x];
+      //console.log(x, idata32[x].toString(16))
+    }
+    for (var x = 400; x<600; x++) {
+      idata32[x] = colormap.getDesc().buffer[x-400];
+      //console.log(x, idata32[x].toString(16))
+    }
+    for (var y=0; y<canvas.height; y++)
+      ctx.putImageData(imageData, 0, y, 0, 0, canvas.width, 1);
+    }
+
+  for (var i in lines) {
+    var line = lines[i];
+    if ("gradient:" === line) {
+      collect = true;
+      collected = "";
+    } else if ("opacity:" === line || "}" === line ) {
+      collect = false;
+      parsecollected(collected);
+    } else if (collect) {
+      collected += line
+    }
+  }
+}
+
+/*
+0007ke {
+gradient:
+  title="0007ke" smooth=no rotation=-50 index=436 color=6319792
+  index=186 color=16644603 index=236 color=6693453 index=286
+  color=4210356 index=336 color=3418198 index=386 color=14146523
+opacity:
+  smooth=no index=0 opacity=255
+}
+*/
+
+
+    $("#input").bind('input propertychange', function(e) {
+      var val = e.target.value;
+      res = parseUGR(val);
+    });
+    </script>
+  </body>
+</html>

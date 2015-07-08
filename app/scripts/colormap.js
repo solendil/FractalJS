@@ -14,6 +14,7 @@ var buffer = new Int32Array(params.buffer);
 var offset = params.offset || 0.0;
 var density = params.density || 20;
 var resolution = buffer.length;
+var typeid = params.typeid;
 
 //-------- private methds
 
@@ -39,6 +40,7 @@ getDesc: function() {
 		offset:offset,
 		density:density,
 		buffer:buffer,
+		typeid:typeid,
 	};
 },
 
@@ -48,6 +50,12 @@ setDesc: function(cmap) {
 		offset = cmap.offset;
 	if (cmap.density)
 		density = cmap.density;
+	if (cmap.typeid)
+		typeid = cmap.typeid;
+	if (cmap.buffer) {
+		buffer = cmap.buffer;
+		resolution = cmap.buffer.length;
+	}
 }
 
 };

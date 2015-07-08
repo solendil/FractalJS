@@ -36,6 +36,7 @@ var ldragX, ldragY;		// last dragging point
 var updateUrl = function() {
 	var desc = renderer.getFractalDesc();
 	var color = renderer.getColorDesc();
+	//console.log(color)
 
 	// create a buffer and two views on it to store fractal parameters
 	var buffer = new ArrayBuffer(40);
@@ -90,6 +91,8 @@ var readUrl = function() {
 				offset:intArray[3]/10000.0,
 				density:byteArray.length>32?floatArray[8]:20,
 				typeid:byteArray[5],
+				resolution:1000,
+				buffer:FractalJS.Colormapbuilder().fromId(1000, byteArray[5]),
 			};
 
 			//console.log("Initialization", desc, color);
@@ -98,6 +101,7 @@ var readUrl = function() {
 		}
 	} catch(e) {
 		console.error("Could not read URL");
+		console.error(e);
 	}
 };
 

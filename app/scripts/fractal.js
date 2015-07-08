@@ -35,10 +35,11 @@ if (!params.fractalDesc)
 	throw "Fractal Description is not set";
 
 if (!params.colormap) 
-	params.colormap = FractalJS.Colormapbuilder().fromstops({
-      resolution:1000,
-      stops:"0#080560;0.2#2969CB;0.40#F1FEFE;0.60#FCA425;0.85#000000",
-    });
+	params.colormap = FractalJS.Colormap({
+      	typeid:0,
+      	resolution:1000,
+		buffer:FractalJS.Colormapbuilder().fromId(1000, 0)
+	});
 
 params.renderer = util.defaultProps(params.renderer, {
 	numberOfTiles: 1,
