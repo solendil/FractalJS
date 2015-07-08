@@ -168,13 +168,14 @@ $(function() {
   });
 
   // FractalJS "reset" button
-  /*$(".navbar-brand").click(function() {
+  $(".navbar-brand").click(function() {
     $(".navbar-nav li").removeClass("active");
     $(".tabpane").removeClass("active");
     $(".navbar-inverse").removeClass("active");
-    fractal.setFractalDesc({type:'mandel',x:-0.7,y:0.0,w:2.5,i:50});
-    fractal.draw();
-  });*/
+    /*fractal.setFractalDesc({type:'mandel',x:-0.7,y:0.0,w:2.5,i:50});
+    fractal.draw();*/
+    return false;
+  });
 
   // open/close tabs
   $(".navbar-nav a").click(function(e) {
