@@ -144,11 +144,21 @@ if (params.mouseControl) {
 
 	var wheelFunction = function(e) {
 		if (!e) e = window.event;
+		e.preventDefault();
+	    var delta = e.deltaY || e.wheelDelta; // IE11 special
 		var mousex = e.clientX;
 		var mousey = e.clientY;
 
 	    var startDesc = renderer.getFractalDesc();
 	    var c = renderer.getFractalDesc();
+
+	    // test if we're at the maximum possible resolution (1.11e-15/pixel)
+		var sminExtent = Math.min(c.swidth, c.sheight);
+		var limit = sminExtent*1.11e-15; 
+		if (c.w<=limit && delta > 0) {
+			events.send("zoom.limit.reached");
+			return;
+		}
 
 		// zoom in place, two steps : 
 		// 1) translate complex point under mouse to center
@@ -160,8 +170,6 @@ if (params.mouseControl) {
 		c.y += pay;
 		c = renderer.setFractalDesc(c);
 	    var vector = {sx:mousex,sy:mousey};
-
-	    var delta = e.deltaY || e.wheelDelta; // IE11 special
 
 	    if(delta > 0) {
 	        c.w /= zoomFactor;
@@ -183,7 +191,6 @@ if (params.mouseControl) {
 	    vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
 		renderer.draw(vector);
 		events.send("mouse.control");
-		e.preventDefault();
 	};
 
 	// IE11 special

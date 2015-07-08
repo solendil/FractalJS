@@ -77,3 +77,11 @@ canvas.gradient {
   position:fixed;
   z-index: auto;
 }
+
+.alertbox {
+  position:fixed;
+  width:40%;
+  bottom:0em;
+  left:1em;
+  display:none;
+}
