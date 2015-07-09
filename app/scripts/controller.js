@@ -114,12 +114,12 @@ if (params.mouseControl) {
 
 	canvas.onmousedown = function(e) {
 		if (!e) e = window.event;
-		if (e.button != 0) 
+		if (e.button !== 0) 
 			return;
 		isDragging = true;
 		dragX = ldragX = e.screenX;
 		dragY = ldragY = e.screenY;
-		if (e.button != 0) 
+		if (e.button !== 0) 
 			return;
 		dragStartDesc = renderer.getFractalDesc();
 	};
