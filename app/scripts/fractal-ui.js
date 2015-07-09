@@ -198,6 +198,7 @@ $(function() {
       $(".navbar-inverse").addClass("active");
       updateShare();
     }
+    return false;
   });
 
   fractal.events.on("zoom.limit.reached", function() {

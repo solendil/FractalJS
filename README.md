@@ -25,9 +25,9 @@ FractalJS is a web application written in Javascript, and one of the more friend
 
 ### How to setup
 
-In order to setup the FractalJS project at home, it is advised to use [Bower](http://bower.io/) :  ```bower install```. Alternatively, you can also install all dependencies (listed in ```bower.json```) by hand in ```app/libs```...
+In order to setup the FractalJS project at home, it is advised to use [Bower](http://bower.io/) :  `bower install`. Alternatively, you can also install all dependencies (listed in `bower.json`) by hand in `app/libs`...
 
-[Grunt](http://gruntjs.com/) is optionally used to compile, minify and distribute the project. Its usage is optional as the project is designed to run uncompiled directly from the ```src``` directory.
+[Grunt](http://gruntjs.com/) is optionally used to compile, minify and distribute the project. Its usage is optional as the project is designed to run uncompiled directly from the `src` directory.
 
 
 ### Technologies

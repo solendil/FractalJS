@@ -91,7 +91,7 @@ copy: {
     files: [
     {expand: true,cwd: 'app/css',src: '**',dest: 'dist/css/',},
     {expand: true,cwd: 'app/libs',src: 
-      ['**/*.css','**/*.js','!**/{src,docs,tests,grunt}/**'],
+      ['**/*.{css,js}', '**/font-awesome/fonts/**','!**/{src,docs,tests,grunt}/**'],
       dest: 'dist/libs/',},
     {expand: true,cwd: 'app/scripts',src: 'fractal-ui.js',dest: 'dist/scripts/',},
     ]
