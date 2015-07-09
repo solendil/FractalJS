@@ -2,7 +2,7 @@
 
 [![](static/button.png)](http://solendil.github.io/fractaljs/)
 
-FractalJS is a web application written in Javascript and one of the more friendly, fluid, colorful and spectacular fractal browsers available. Try it! Share it!
+FractalJS is a web application written in Javascript, and one of the more friendly, fluid, colorful and spectacular fractal browsers available. Try it! Share it!
 
 ### Project statement
 
@@ -34,5 +34,6 @@ The project is 100% percent Javascript, using the following technologies:
 * [canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API) to draw the nice picture
 * [typed arrays](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) and type conversion for image and color buffers manipulation
 * [web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) to split the computations across cores
+* more to come...
 
 
