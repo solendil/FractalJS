@@ -51,9 +51,15 @@ params.controller = util.defaultProps(params.controller, {
 	fitToWindow: false
 });
 
-renderer = new FractalJS.Renderer(params, events);
+renderer = new FractalJS.Renderer(params.canvas, params.renderer, events);
 
 controller = new FractalJS.Controller(renderer, params.canvas, params.controller, events);
+
+if (!controller.initFromUrl) {
+	renderer.setFractalDesc(params.fractalDesc);
+	renderer.setColorDesc(params.colormap);
+}
+
 
 if (params.renderer.drawAfterInit)
 	renderer.draw();
@@ -80,7 +86,7 @@ draw: function() {
 },
 
 refreshColormap: function() {
-	renderer.refreshColormap();
+	renderer.drawColors();
 },
 
 setColorDesc: function(cmap) {

@@ -2,28 +2,28 @@
 var fractal;
 var typeList = {
   "tippetts" : {
-    type:'tippetts',
+    typeid:3,
     x:-0.2, 
     y:0.0, 
     w:4, 
     i:50
   },
   "mandel" : {
-    type:'mandel',
+    typeid:0,
     x:-0.7, 
     y:0.0, 
     w:2.5, 
     i:50
   },
   "mandel3" : {
-    type:'mandel3',
+    typeid:1,
     x:0.0, 
     y:0.0, 
     w:3.0, 
     i:50
   },
   "burningship" : {
-    type:'burningship',
+    typeid:2,
     x:-0.4, 
     y:-0.7, 
     w:3, 
@@ -89,6 +89,11 @@ $(function() {
     },
     controller:{
       fitToWindow:true
+    },
+    colormap:{
+      typeid:0,
+      buffer:FractalJS.Colormapbuilder().fromId(1000,0),
+      density:20,
     }
   });
   fractal.draw();
@@ -199,7 +204,7 @@ $(function() {
     $(".alertbox").stop(true, true);
     $(".alertbox").fadeIn(0);
     $(".alertbox").delay(3000).fadeOut(1000);
-  })
+  });
 
 });
 

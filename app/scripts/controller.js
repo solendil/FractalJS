@@ -15,6 +15,8 @@ var dragX, dragY;		// start dragging point
 var dragStartDesc;		// start fractal description
 var ldragX, ldragY;		// last dragging point
 
+var initFromUrl = false;
+
 //-------- private methods
 
 /*
@@ -98,6 +100,7 @@ var readUrl = function() {
 			//console.log("Initialization", desc, color);
 			renderer.setFractalDesc(desc);
 			renderer.setColorDesc(color);
+			initFromUrl=true;
 		}
 	} catch(e) {
 		console.error("Could not read URL");
@@ -220,7 +223,8 @@ events.on("iter.change", updateUrl);
 events.on("mouse.control", updateUrl);
 events.on("api.change", updateUrl);
 
-//-------- public methods
-// none :)
+return {
+	initFromUrl:initFromUrl,
+};
 
 };

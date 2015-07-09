@@ -4,8 +4,21 @@
  * - handles the computation backbuffer
  * - performs fractal computations in tiles
  */
-FractalJS.Engine = function(desc) {
+FractalJS.EngineWorker = function() {
 "use strict";
+	return new Worker(FractalJS.EngineWorkerBlob);
+};
+
+// the web worker is defined as a blob, thank to 
+// http://stackoverflow.com/questions/5408406/web-workers-without-a-separate-javascript-file
+FractalJS.EngineWorkerBlob = (function() {
+"use strict";
+var blobURL = URL.createObjectURL( new Blob([ '(',
+function(){
+
+//-------- start of actual worker code
+var engine = (function(desc) {
+
 
 //-------- private members
 
@@ -13,13 +26,12 @@ var x, y;		// coordinates of the center of S on P
 var w;			// minimum extent of P displayed on S (height or width)
 var iter;		// maximum number of iterations
 var escape = 4;	// square of escape distance
-var type;		// type of fractal
+var typeid;		// type of fractal
 
 var swidth, sheight;	// S width & height
 var pixelOnP;			// size of one pixel on P
 var pxmin, pymin;		// upper-left displayed coordinate of P
 
-var frame;				// the computation backbuffer 
 var fractalFunction;	// the fractal function used
 
 //-------- private methds
@@ -40,9 +52,8 @@ var project = function() {
 var logBase = 1.0 / Math.log(2.0);
 var logHalfBase = Math.log(0.5)*logBase;
 
-// what a mess! this part will need some love & refactoring
-var fractalTypeById = {0:'mandel',1:'mandel3',2:'burningship',3:'tippetts'};
-var fractalIdByType = {'mandel':0,'mandel3':1,'burningship':2,'tippetts':3};
+// TODO add string identifiers as a complement to int identifiers for fractal 
+// types.
 var fractalFunctionList = {
 	'mandelsmooth' : function(cx,cy) {
 		var znx=0, zny=0, sqx=0, sqy=0, i=0, j=0;
@@ -63,7 +74,8 @@ var fractalFunctionList = {
 		return res;
 		//return i;	
 	},	
-	'mandel' : function(cx,cy) {
+	// mandelbrot
+	0 : function(cx,cy) {
 		var znx=0, zny=0, sqx=0, sqy=0, i=0, j=0;
 		for(;i<iter && sqx+sqy<=escape; ++i) {
 			zny = (znx+znx)*zny + cy;
@@ -73,7 +85,8 @@ var fractalFunctionList = {
 		}
 		return i;	
 	},
-	'tippetts' : function(cx,cy) {
+	// tippetts
+	3 : function(cx,cy) {
 		var zx=0, zy=0, sqx=0, sqy=0, i=0;
 		for(;i<iter && sqx+sqy<=escape; ++i) {
 			zx = sqx-sqy+cx;
@@ -83,7 +96,8 @@ var fractalFunctionList = {
 		}
 		return i;	
 	},
-	'mandel3' : function(cx,cy) {
+	// multibrot3
+	1 : function(cx,cy) {
 		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
 		while (true) {
 			znx = sqx*zx-3*zx*sqy+cx;
@@ -99,7 +113,8 @@ var fractalFunctionList = {
 		}		
 		return i;
 	},
-	'burningship' : function(cx,cy) {
+	// burningship
+	2 : function(cx,cy) {
 		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
 		while (true) {
 			zny = (zx+zx)*zy+cy;
@@ -116,7 +131,7 @@ var fractalFunctionList = {
 		return i;
 	}
 };
-fractalFunction = fractalFunctionList.mandel; //default
+fractalFunction = fractalFunctionList[0];
 
 //-------- public methods
 
@@ -133,21 +148,13 @@ setFractalDesc: function(desc) {
 		iter = Math.round(desc.i);
 	if (desc.iter)
 		iter = Math.round(desc.iter);
-	if (desc.typeid) {
-		if (!(desc.typeid in fractalTypeById))
-			throw "Invalid fractal type " + desc.typeid;
-		desc.type = fractalTypeById[desc.typeid];
-	}
-	if (desc.type) {
-		if (!(desc.type in fractalFunctionList))
-			throw "Invalid fractal function " + desc.type;
-		type = desc.type;
-		fractalFunction = fractalFunctionList[type];
+	if ('typeid' in desc) {
+		typeid = desc.typeid;
+		fractalFunction = fractalFunctionList[typeid];
 	}
 	if (desc.swidth) {
 		swidth = desc.swidth;
 		sheight = desc.sheight;
-		frame = new Float32Array(swidth*sheight);
 	}
 	project();
 	var res = this.getFractalDesc();
@@ -162,16 +169,17 @@ getFractalDesc: function() {
 		pixelOnP:pixelOnP, 
 		swidth:swidth, sheight:sheight,
 		pxmin:pxmin, pymin:pymin,
-		type:type,typeid:fractalIdByType[type]
+		typeid:typeid
 	};
 	return res;
 },
 
-drawTile: function(tile) {
+drawTileOnBuffer: function(tile) {
+	var frame = tile.frame;
 	var py = pymin+tile.y1*pixelOnP;
+	var dx = 0;
 	for (var sy=tile.y1; sy<tile.y2; sy++) {
 		var px = pxmin+tile.x1*pixelOnP;
-		var dx = sy*swidth+tile.x1;
 		for (var sx=tile.x1; sx<tile.x2; sx++) {
 			var piter = fractalFunction(px, py);
 			//console.log(px, py, piter)
@@ -183,11 +191,6 @@ drawTile: function(tile) {
 		}
 		py += pixelOnP;
 	}	
-	return frame;	
-},
-
-getBuffer: function() {
-	return frame;
 },
 
 };
@@ -195,6 +198,31 @@ getBuffer: function() {
 //-------- constructor
 publicMethods.setFractalDesc(desc);
 return publicMethods;
+})({});
 
+onmessage = function(param) {
+	if (param.data.action === "setDesc") {
+		//console.log(engine.getFractalDesc())
+		engine.setFractalDesc(param.data.desc);
+		//console.log(engine.getFractalDesc())
+	} else if (param.data.action === "draw") {
+		var startTime = new Date().getTime();
+		engine.drawTileOnBuffer(param.data.tile);
+		var endTime = new Date().getTime();
+		postMessage({
+			action:"endFrame", 
+			tile:param.data.tile, 
+			frameId:param.data.frameId,
+			finished:param.data.finished
+		});
+	} else {
+		throw "invalid worker message";
+	}
 };
+//-------- end of actual worker code
+
+}.toString(),
+')()' ], { type: 'application/javascript' } ) );
+return blobURL;
+})();
 

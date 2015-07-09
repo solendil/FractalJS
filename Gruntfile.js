@@ -56,7 +56,7 @@ concat: {
     src: [
       'app/scripts/util.js',
       'app/scripts/events.js',
-      'app/scripts/engine.js',
+      'app/scripts/engine-worker.js',
       'app/scripts/colormap.js',
       'app/scripts/renderer.js',
       'app/scripts/controller.js',
