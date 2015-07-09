@@ -148,9 +148,10 @@ setFractalDesc: function(desc) {
 		iter = Math.round(desc.i);
 	if (desc.iter)
 		iter = Math.round(desc.iter);
-	if ('typeid' in desc) {
+	if ('typeid' in desc && desc.typeid!==undefined) {
 		typeid = desc.typeid;
 		fractalFunction = fractalFunctionList[typeid];
+		//console.log(desc, desc.typeid, typeid, fractalFunction)
 	}
 	if (desc.swidth) {
 		swidth = desc.swidth;
@@ -175,6 +176,7 @@ getFractalDesc: function() {
 },
 
 drawTileOnBuffer: function(tile) {
+	//console.log(fractalFunction)
 	var frame = tile.frame;
 	var py = pymin+tile.y1*pixelOnP;
 	var dx = 0;
