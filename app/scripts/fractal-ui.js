@@ -3,30 +3,44 @@ var fractal;
 var typeList = {
   "tippetts" : {
     typeid:3,
-    x:-0.2, 
-    y:0.0, 
-    w:4, 
+    x:-0.2,
+    y:0.0,
+    w:4,
     i:50
   },
   "mandel" : {
     typeid:0,
-    x:-0.7, 
-    y:0.0, 
-    w:2.5, 
+    x:-0.7,
+    y:0.0,
+    w:2.5,
     i:50
+  },
+  "julia_a" : {
+    typeid:4,
+    x:0.0,
+    y:0.0,
+    w:2.2,
+    i:50
+  },
+  "phoenix" : {
+    typeid:5,
+    x:0.0,
+    y:-0.1,
+    w:2,
+    i:500
   },
   "mandel3" : {
     typeid:1,
-    x:0.0, 
-    y:0.0, 
-    w:3.0, 
+    x:0.0,
+    y:0.0,
+    w:3.0,
     i:50
   },
   "burningship" : {
     typeid:2,
-    x:-0.4, 
-    y:-0.7, 
-    w:3, 
+    x:-0.4,
+    y:-0.7,
+    w:3,
     i:50
   }
 };
@@ -78,14 +92,14 @@ $(function() {
     canvas:document.getElementById("maincanvas"),
     fractalDesc:{
       type:'mandel',
-      x:-0.7, 
-      y:0.0, 
-      w:2.5, 
+      x:-0.7,
+      y:0.0,
+      w:2.5,
       i:50
     },
     renderer:{
       numberOfTiles:100,
-      drawAfterInit:false, 
+      drawAfterInit:false,
     },
     controller:{
       fitToWindow:true
@@ -151,7 +165,7 @@ $(function() {
     fractal.setColorDesc({offset:value});
     fractal.refreshColormap();
   });
-  
+
   var dens = fractal.getColorDesc().density;
   var val = Math.log(20*dens)/Math.log(increment);
   //console.log("densval", fractal.getColorDesc(), dens, val)
@@ -208,5 +222,3 @@ $(function() {
   });
 
 });
-
-

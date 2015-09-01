@@ -19,16 +19,24 @@ FractalJS is a web application written in Javascript, and one of the more friend
 * [Multibrot 3](https://en.wikipedia.org/wiki/Multibrot_set)
 * [Burning Ship](https://en.wikipedia.org/wiki/Burning_Ship_fractal)
 * [John Tippetts Mandelbrot](http://paulbourke.net/fractals/tippetts/)
+* [Julia set](https://en.wikipedia.org/wiki/Julia_set) (just one example)
+* [Phoenix set](http://www.ultrafractal.com/help/index.html?/help/formulas/standard/phoenix.html)
 * ...don't be shy, why not adding your own?
 
 # Technical details
 
 ### How to setup
 
-In order to setup the FractalJS project at home, it is advised to use [Bower](http://bower.io/) :  `bower install`. Alternatively, you can also install all dependencies (listed in `bower.json`) by hand in `app/libs`...
+In order to setup the FractalJS project at home, it is advised to use [Bower](http://bower.io/). Alternatively, you can install all dependencies (listed in `bower.json`) by hand in `app/libs`...
 
-[Grunt](http://gruntjs.com/) is optionally used to compile, minify and distribute the project. Its usage is optional as the project is designed to run uncompiled directly from the `src` directory.
+[Grunt](http://gruntjs.com/) is used to compile, minify and distribute the project, but its usage is optional, and the project is designed to run uncompiled directly from the `src` directory. You will need [node.js](https://nodejs.org/) in order to use Grunt.
 
+The complete setup is:
+```
+$ bower install
+$ npm install
+$ grunt serve
+```
 
 ### Technologies
 
@@ -37,9 +45,3 @@ The project is 100% percent Javascript, using the following technologies:
 * [typed arrays](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) and type conversion for image and color buffers manipulation
 * [web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) to split the computations across cores
 * more to come...
-
-
-
-
-
-

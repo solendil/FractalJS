@@ -9,7 +9,7 @@ FractalJS.EngineWorker = function() {
 	return new Worker(FractalJS.EngineWorkerBlob);
 };
 
-// the web worker is defined as a blob, thank to 
+// the web worker is defined as a blob, thank to
 // http://stackoverflow.com/questions/5408406/web-workers-without-a-separate-javascript-file
 FractalJS.EngineWorkerBlob = (function() {
 "use strict";
@@ -40,9 +40,9 @@ var project = function() {
 	var sminExtent = Math.min(swidth, sheight);
 
 	// precision limit is ten times the nb of pixels times double precision
-	var limit = sminExtent*1.11e-15; 
+	var limit = sminExtent*1.11e-15;
 	if (w<limit)
-		w = limit; 
+		w = limit;
 
 	pixelOnP = w/sminExtent;
 	pxmin = x - swidth/2 * pixelOnP;
@@ -52,7 +52,7 @@ var project = function() {
 var logBase = 1.0 / Math.log(2.0);
 var logHalfBase = Math.log(0.5)*logBase;
 
-// TODO add string identifiers as a complement to int identifiers for fractal 
+// TODO add string identifiers as a complement to int identifiers for fractal
 // types.
 var fractalFunctionList = {
 	'mandelsmooth' : function(cx,cy) {
@@ -72,8 +72,8 @@ var fractalFunctionList = {
 
 		var res = 5 + i - logHalfBase - Math.log(Math.log(sqx+sqy))*logBase;
 		return res;
-		//return i;	
-	},	
+		//return i;
+	},
 	// mandelbrot
 	0 : function(cx,cy) {
 		var znx=0, zny=0, sqx=0, sqy=0, i=0, j=0;
@@ -83,7 +83,33 @@ var fractalFunctionList = {
 			sqx = znx*znx;
 			sqy = zny*zny;
 		}
-		return i;	
+		return i;
+	},
+	// Julia Set A
+	4 : function(cx,cy) {
+		var znx=cx, zny=cy, sqx=cx*cx, sqy=cy*cy, i=0, j=0;
+		for(;i<iter && sqx+sqy<=escape; ++i) {
+			zny = (znx+znx)*zny + 0.15;
+			znx = sqx-sqy -0.79;
+			sqx = znx*znx;
+			sqy = zny*zny;
+		}
+		return i;
+	},
+	// Phoenix Set
+	5 : function(cx,cy) {
+		var x=-cy, y=cx, xm1=0, ym1=0;
+		var sx=0, sy=0, i=0;
+		var c=0.5667, p=-0.5;
+		for(;i<iter && sx+sy<=escape; ++i) {
+			xp1 = x*x-y*y+c+p*xm1;
+			yp1 = 2*x*y+p*ym1;
+			sx = xp1*xp1;
+			sy = yp1*yp1;
+			xm1=x; ym1=y;
+			x=xp1; y=yp1;
+		}
+		return i;
 	},
 	// tippetts
 	3 : function(cx,cy) {
@@ -94,7 +120,7 @@ var fractalFunctionList = {
 			sqx = zx*zx;
 			sqy = zy*zy;
 		}
-		return i;	
+		return i;
 	},
 	// multibrot3
 	1 : function(cx,cy) {
@@ -110,7 +136,7 @@ var fractalFunctionList = {
 			sqy = zy*zy;
 			if (sqx+sqy>escape)
 				break;
-		}		
+		}
 		return i;
 	},
 	// burningship
@@ -127,7 +153,7 @@ var fractalFunctionList = {
 			sqy = zy*zy;
 			if (sqx+sqy>escape)
 				break;
-		}		
+		}
 		return i;
 	}
 };
@@ -167,7 +193,7 @@ getFractalDesc: function() {
 	var res = {
 		x:x, y:y, w:w, iter:iter,
 		testx:x, testy:y,
-		pixelOnP:pixelOnP, 
+		pixelOnP:pixelOnP,
 		swidth:swidth, sheight:sheight,
 		pxmin:pxmin, pymin:pymin,
 		typeid:typeid
@@ -192,7 +218,7 @@ drawTileOnBuffer: function(tile) {
 			px += pixelOnP;
 		}
 		py += pixelOnP;
-	}	
+	}
 },
 
 };
@@ -212,8 +238,8 @@ onmessage = function(param) {
 		engine.drawTileOnBuffer(param.data.tile);
 		var endTime = new Date().getTime();
 		postMessage({
-			action:"endFrame", 
-			tile:param.data.tile, 
+			action:"endFrame",
+			tile:param.data.tile,
 			frameId:param.data.frameId,
 			finished:param.data.finished
 		});
@@ -227,4 +253,3 @@ onmessage = function(param) {
 ')()' ], { type: 'application/javascript' } ) );
 return blobURL;
 })();
-
