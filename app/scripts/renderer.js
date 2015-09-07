@@ -81,10 +81,10 @@ this.resize = function() {
 
 this.setFractalDesc = function (desc) {
   engine.setDesc(desc);
-}
+};
 this.getFractalDesc = function () {
   return engine.getDesc();
-}
+};
 
 
 this.setColorDesc = function(desc) {
@@ -106,8 +106,8 @@ var lastvector = null;
 var lastquality = null;
 
 this.refine = function() {
-  this.draw(null, lastvector, 300)
-}
+  this.draw(null, lastvector, 300);
+};
 
 this.draw = function(vector, priovector, quality) {
   lastvector = vector;
@@ -188,7 +188,7 @@ this.draw = function(vector, priovector, quality) {
   engine.eachWorker(function(w){
     tile = drawList.shift();
 		w.postMessage({action:"draw", quality:quality, frameId:frameId, tile:tile});
-  })
+  });
 };
 
 //-------- private methods
@@ -248,7 +248,7 @@ var endOfFrame = function() {
 		that.draw();
 		events.send("iter.change");
 	} else {
-    setTimeout(function() {that.refine()},1000);
+    setTimeout(function() {that.refine();},1000);
   }
 	if (percInSet > 1 && percFringe10p<0.2) {
 		that.setFractalDesc({iter:engine.getDesc().iter/1.5});
@@ -328,11 +328,11 @@ var workerMessage = function(param) {
 		if (param.data.finished)
 			endOfFrame();
 	} else {
-    throw "Unknown message"
+    throw "Unknown message";
   }
 };
 
-engine.eachWorker(function(w) {w.onmessage=workerMessage})
+engine.eachWorker(function(w) {w.onmessage=workerMessage;});
 this.resize();
 
 };

@@ -208,11 +208,11 @@ this.readUrl = function() {
 				offset:intArray[3]/10000.0,
 				density:byteArray.length>32?floatArray[8]:20,
 				typeid:byteArray[5],
-				resolution:1000,
+				resolution:1000, 
 				buffer:FractalJS.Colormapbuilder().fromId(1000, byteArray[5]),
 			};
 
-			return [desc,color]
+			return [desc,color];
 		}
 	} catch(e) {
 		console.error("Could not read URL");

@@ -50,8 +50,8 @@ params.controller = util.defaultProps(params.controller, {
 controller = new FractalJS.Controller(this);
 var urlParams = controller.readUrl();
 if (urlParams) {
-	params.fractalDesc = urlParams[0]
-	params.colorDesc = urlParams[1]
+	params.fractalDesc = urlParams[0];
+	params.colorDesc = urlParams[1];
 }
 
 // define default palette if not set

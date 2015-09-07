@@ -90,7 +90,7 @@ $(function() {
 
   fractal = new FractalJS.create ({
     canvas:document.getElementById("maincanvas"),
-    fractalDesc:typeList['mandel'],
+    fractalDesc:typeList.mandel,
     renderer:{
       numberOfTiles:100,
       drawAfterInit:false,

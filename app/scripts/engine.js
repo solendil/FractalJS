@@ -8,7 +8,6 @@ FractalJS.Engine = function(nbThreads) {
 
 var desc = {};
 var workers = [];
-var nbThreads = nbThreads;
 for (var i=0; i<nbThreads; i++)
   workers.push(FractalJS.EngineWorker());
 
@@ -26,7 +25,7 @@ var project = function() {
 this.eachWorker = function (callback) {
   for (var w in workers)
     callback(workers[w]);
-}
+};
 
 this.setDesc = function (other) {
   if ('x' in other)
@@ -47,7 +46,7 @@ this.setDesc = function (other) {
   }
   project();
   for (var w in workers)
-    workers[w].postMessage({action:"setDesc",desc:desc,other:other})
+    workers[w].postMessage({action:"setDesc",desc:desc,other:other});
 };
 
 this.getDesc = function () {
@@ -57,7 +56,7 @@ this.getDesc = function () {
     swidth:desc.swidth, sheight:desc.sheight,
     pxmin:desc.pxmin, pymin:desc.pymin,
     typeid:desc.typeid
-  }
+  };
 };
 
 };

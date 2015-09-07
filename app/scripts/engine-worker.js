@@ -17,7 +17,7 @@ var blobURL = URL.createObjectURL( new Blob([ '(',
 function(){
 
 //-------- start of actual worker code
-var engine = (function(desc) {
+var engine = (function() {
 
 //-------- private members
 
@@ -165,39 +165,19 @@ drawTileOnBuffer: function(tile) {
 },
 
 drawSuperTileOnBuffer: function(tile) {
-	//console.log("super",tile)
-	var sup = 16;
-	var quincunx = false;
-	var sss = desc.pixelOnP/6
-	//console.log(fractalFunction)
+	var sss = desc.pixelOnP/4;
 	var frame = tile.frame;
 	var py = desc.pymin+tile.y1*desc.pixelOnP;
 	var dx = 0;
 	for (var sy=tile.y1; sy<=tile.y2; sy++) {
 		var px = desc.pxmin+tile.x1*desc.pixelOnP;
 		for (var sx=tile.x1; sx<=tile.x2; sx++) {
-			var itersum = 0
-			if (quincunx) {
-				// quincunx
-				itersum += fractalFunction(px+0*sss,py+0*sss);
-				itersum += fractalFunction(px+1*sss,py+2*sss);
-				itersum += fractalFunction(px+2*sss,py-1*sss);
-				itersum += fractalFunction(px-1*sss,py-2*sss);
-				itersum += fractalFunction(px-2*sss,py-1*sss);
-				var piter = itersum/5;
-			} else if (sup==1) {
-				var piter = fractalFunction(px, py);
-			} else {
-				for (var ss=0; ss<sup; ss++) {
-					itersum += fractalFunction(px+Math.random()*desc.pixelOnP, py+Math.random()*desc.pixelOnP);
-				}
-				var piter = itersum/sup;
+			var itersum = 0;
+			for (var ss=0; ss<16; ss++) {
+				itersum += fractalFunction(px+(ss/4*sss), py+(ss%4*sss));
 			}
-			//console.log(px, py, piter)
-			if (piter==desc.iter)
-				frame[dx++] = 0;
-			else
-				frame[dx++] = piter;
+			var piter = itersum/16;
+			frame[dx++] = piter==desc.iter?0:piter;
 			px += desc.pixelOnP;
 		}
 		py += desc.pixelOnP;
@@ -207,20 +187,20 @@ drawSuperTileOnBuffer: function(tile) {
 drawSubTileOnBuffer: function(tile) {
 	var res=4;
 	var py = desc.pymin+(tile.y1+res/2)*desc.pixelOnP;
-	var index = 0
+	var index = 0;
 	for (var y=0; y<tile.height; y+=res) {
 		var px = desc.pxmin+(tile.x1+res/2)*desc.pixelOnP;
-		var lineindex = index
+		var lineindex = index;
 		for (var x=0; x<tile.width; x+=res) {
 			var piter = fractalFunction(px, py);
 			var color = piter==desc.iter?0:piter;
 			for (var sx=0; sx<res && x+sx<tile.width; sx++)
-				tile.frame[index++] = color
+				tile.frame[index++] = color;
 			px += desc.pixelOnP*res;
 		}
 		for (var sy=1; sy<res && y+sy<tile.height; sy++)
 			for (var tx=0; tx<tile.width; tx++)
-				tile.frame[index++] = tile.frame[lineindex+tx]
+				tile.frame[index++] = tile.frame[lineindex+tx];
 		py += desc.pixelOnP*res;
 	}
 },
@@ -236,16 +216,16 @@ drawSubTileOnBuffer: function(tile) {
 })({});
 
 onmessage = function(param) {
-	var data = param.data
+	var data = param.data;
 	if (!data)
 		console.error(param);
 	if (data.action === "setDesc") {
 		engine.setDesc(data.desc);
 	} else if (data.action === "draw") {
-		if (data.quality==200) engine.drawTileOnBuffer(data.tile)
-		else if (data.quality==100) engine.drawSubTileOnBuffer(data.tile)
-		else if (data.quality==300) engine.drawSuperTileOnBuffer(data.tile)
-		else throw "invalid drawing quality"
+		if (data.quality==200) engine.drawTileOnBuffer(data.tile);
+		else if (data.quality==100) engine.drawSubTileOnBuffer(data.tile);
+		else if (data.quality==300) engine.drawSuperTileOnBuffer(data.tile);
+		else throw "invalid drawing quality";
 		//setTimeout(function() {
 		postMessage({
 			action:"endTile",
@@ -253,7 +233,7 @@ onmessage = function(param) {
 			tile:param.data.tile,
 			frameId:param.data.frameId,
 			finished:param.data.finished
-		})
+		});
 		//},0);
 	} else {
 		throw "invalid worker message";

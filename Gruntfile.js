@@ -51,12 +51,13 @@ clean: {
 concat: {
   options: {
     separator: ';',
-  }, 
+  },
   dist: {
     src: [
       'app/scripts/util.js',
       'app/scripts/events.js',
       'app/scripts/engine-worker.js',
+      'app/scripts/engine.js',
       'app/scripts/colormap.js',
       'app/scripts/renderer.js',
       'app/scripts/controller.js',
@@ -90,7 +91,7 @@ copy: {
   dist: {
     files: [
     {expand: true,cwd: 'app/css',src: '**',dest: 'dist/css/',},
-    {expand: true,cwd: 'app/libs',src: 
+    {expand: true,cwd: 'app/libs',src:
       ['**/*.{css,js}', '**/font-awesome/fonts/**','!**/{src,docs,tests,grunt}/**'],
       dest: 'dist/libs/',},
     {expand: true,cwd: 'app/scripts',src: 'fractal-ui.js',dest: 'dist/scripts/',},
