@@ -14,22 +14,16 @@ var debug  = false;
 
 // the canvas on which to display, its context, backbuffer and view as int32
 var context  	= canvas.getContext("2d");
-var imageData;
-var idata32;
+var imageData, idata32;
 
 // colormap is defined later
 var colormap 	= null;
 
 // internal state for tiling
 var tiles=[];
-
 var drawList = [];		// list of remaining items to be drawn
-var nextCallback;		// id of the next callback for the draw list
 
-var public_methods;
 var startFrameMs;
-
-
 var frameId = 0;
 var nbOfThreads = 4;
 
@@ -83,32 +77,6 @@ this.resize = function() {
       tiles.push(tile);
     }
   }
-  /*
-	// reset tiles
-	var tilesNb = Math.sqrt(params.numberOfTiles);
-	var tilewidth = canvas.width/tilesNb;
-	var tileheight = canvas.height/tilesNb;
-	var id = 0;
-	tiles.length=0;
-	for (var i=0; i<tilesNb; i++) {
-		for (var j=0; j<tilesNb; j++) {
-			var tile = {
-				i:i,j:j,id:id++,
-				// TODO : Math.round? We must have overlapping pixels
-				x1:Math.round(j*canvas.width/tilesNb),
-				x2:Math.round((j+1)*canvas.width/tilesNb),
-				y1:Math.round(i*canvas.height/tilesNb),
-				y2:Math.round((i+1)*canvas.height/tilesNb),
-			};
-			tile.x = (tile.x1+tile.x2)/2; // center of tile
-			tile.y = (tile.y1+tile.y2)/2;
-			tile.width = tile.x2-tile.x1;
-			tile.height = tile.y2-tile.y1;
-			tile.frame = new Float32Array(tile.width*tile.height);
-			tile.indexScreen = tile.y1*canvas.width+tile.x1;
-			tiles.push(tile);
-		}
-	}*/
 };
 
 this.setFractalDesc = function (desc) {
@@ -134,12 +102,22 @@ this.drawColors = function() {
 	refreshColormap();
 };
 
-this.draw = function(vector) {
+var lastvector = null;
+var lastquality = null;
+
+this.refine = function() {
+  this.draw(null, lastvector, 300)
+}
+
+this.draw = function(vector, priovector, quality) {
+  lastvector = vector;
+  if (!quality) quality=200;
+  if (!priovector) priovector=vector;
+  lastquality = quality;
+
 	// if a frame is being drawn, cancel next callback, empty draw list
-	if (drawList.length!==0) {
-		clearTimeout(nextCallback);
+	if (drawList.length!==0)
 		drawList.length = 0;
-	}
 
 	startFrameMs = performance.now();
 	frameId++;
@@ -209,7 +187,7 @@ this.draw = function(vector) {
 	// dispatch first items of the drawList to all workers
   engine.eachWorker(function(w){
     tile = drawList.shift();
-		w.postMessage({action:"draw", quality:200, frameId:frameId, tile:tile});
+		w.postMessage({action:"draw", quality:quality, frameId:frameId, tile:tile});
   })
 };
 
@@ -223,6 +201,8 @@ var endOfFrame = function() {
 			time: endFrameMs-startFrameMs,
 		};
 	});
+  if (lastquality==300)
+    return;
 	// frame is finished; analyze buffer to auto-adjust iteration count
 	// algorithm:
 	// - we compute the percentage of pixels in the set/pixels on the screen
@@ -267,7 +247,9 @@ var endOfFrame = function() {
 		that.setFractalDesc({iter:engine.getDesc().iter*1.5});
 		that.draw();
 		events.send("iter.change");
-	}
+	} else {
+    setTimeout(function() {that.refine()},1000);
+  }
 	if (percInSet > 1 && percFringe10p<0.2) {
 		that.setFractalDesc({iter:engine.getDesc().iter/1.5});
 		// public_methods.draw();
@@ -331,7 +313,7 @@ var workerMessage = function(param) {
 			tile = drawList.shift();
 			var message = {
 				action:"draw",
-        quality:200,
+        quality:param.data.quality,
 				frameId:frameId,
 				tile:tile
 			};
