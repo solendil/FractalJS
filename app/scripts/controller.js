@@ -3,7 +3,7 @@
  * - capture events related to the canvas and modify the view accordingly
  * - loads the URL parameters and updates the URL in relatime
  */
-FractalJS.Controller = function(renderer, canvas, params, events) {
+FractalJS.Controller = function(fractal) {
 "use strict";
 
 //-------- private members
@@ -15,7 +15,11 @@ var dragX, dragY;		// start dragging point
 var dragStartDesc;		// start fractal description
 var ldragX, ldragY;		// last dragging point
 
-var initFromUrl = false;
+//-------- shortcuts
+
+var canvas = fractal.params.canvas;
+var params = fractal.params.controller;
+var events = fractal.events;
 
 //-------- private methods
 
@@ -36,10 +40,8 @@ var initFromUrl = false;
  *   36-39        reserved
  */
 var updateUrl = function() {
-	var desc = renderer.getFractalDesc();
-	var color = renderer.getColorDesc();
-	//console.log(color)
-
+	var desc = fractal.getFractalDesc();
+	var color = fractal.getColorDesc();
 	// create a buffer and two views on it to store fractal parameters
 	var buffer = new ArrayBuffer(40);
 	var byteArray = new Uint8Array(buffer);
@@ -55,19 +57,132 @@ var updateUrl = function() {
 	doubleArray[2] = desc.y;
 	doubleArray[3] = desc.w;
 	floatArray[8] = color.density;
-
 	// encode as base64 and put in the URL
 	// https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string/11562550#11562550
 	var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
 	base64String = base64String.split("/").join("*");
 	base64String = base64String.split("=").join("_");
-
 	history.replaceState("", "", "#A"+base64String);
 	//document.location.hash="A"+base64String;
 	//console.log("Updating URL", {x:desc.x,y:desc.y,w:desc.w,iter:desc.iter});
 };
 
-var readUrl = function() {
+//-------- event catchers
+
+if (params.mouseControl) {
+
+	canvas.onmousedown = function(e) {
+		if (!e) e = window.event;
+		if (e.button !== 0)
+			return;
+		isDragging = true;
+		dragX = ldragX = e.screenX;
+		dragY = ldragY = e.screenY;
+		if (e.button !== 0)
+			return;
+		dragStartDesc = fractal.getFractalDesc();
+	};
+
+	window.addEventListener("mouseup", function(e) {
+		if (!e) e = window.event;
+		isDragging = false;
+	});
+
+	window.addEventListener("mousemove", function(e) {
+		if (!e) e = window.event;
+		if (isDragging) {
+			var vecx = e.screenX-dragX;
+			var vecy = e.screenY-dragY;
+			var vecpx = vecx*dragStartDesc.pixelOnP;
+			var vecpy = vecy*dragStartDesc.pixelOnP;
+			var c = {x:dragStartDesc.x-vecpx, y:dragStartDesc.y-vecpy};
+			fractal.setFractalDesc(c, true);
+
+	        var vfx = e.screenX - ldragX;
+	        var vfy = e.screenY - ldragY;
+	        var vector = {x:vfx,y:vfy,mvt:"pan"};
+			fractal.draw(vector);
+			events.send("mouse.control");
+	        ldragX = e.screenX;
+	        ldragY = e.screenY;
+		}
+	});
+
+	var wheelFunction = function(e) {
+		if (!e) e = window.event;
+		e.preventDefault();
+	    var delta = e.deltaY || e.wheelDelta; // IE11 special
+		var mousex = e.clientX;
+		var mousey = e.clientY;
+
+	    var startDesc = fractal.getFractalDesc();
+	    var c = fractal.getFractalDesc();
+
+	    // test if we're at the maximum possible resolution (1.11e-15/pixel)
+		var sminExtent = Math.min(c.swidth, c.sheight);
+		var limit = sminExtent*1.11e-15;
+		if (c.w<=limit && delta > 0) {
+			events.send("zoom.limit.reached");
+			return;
+		}
+
+		// zoom in place, two steps :
+		// 1) translate complex point under mouse to center
+		// 2) zoom, and translate back by the zoomed vector
+		// should happen in only one step if I could figure out the math :-)
+		var pax = (mousex - c.swidth/2)*c.pixelOnP;
+		var pay = (mousey - c.sheight/2)*c.pixelOnP;
+		c.x += pax;
+		c.y += pay;
+		fractal.setFractalDesc(c,true);
+		c = fractal.getFractalDesc(c);
+	    var vector = {sx:mousex,sy:mousey};
+
+	    if(delta > 0) {
+	        c.w /= zoomFactor;
+			c.x -= pax / zoomFactor;
+			c.y -= pay / zoomFactor;
+	        vector.z = 1 * zoomFactor;
+	        vector.mvt = "zoomin";
+	    } else {
+	        c.w *= zoomFactor;
+			c.x -= pax * zoomFactor;
+			c.y -= pay * zoomFactor;
+	        vector.z = 1 / zoomFactor;
+	        vector.mvt = "zoomout";
+	    }
+			fractal.setFractalDesc(c, true);
+			var endDesc = fractal.getFractalDesc(c);
+
+	    // computes the movement vector, then redraws
+	    vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
+	    vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
+		fractal.draw(vector);
+		events.send("mouse.control");
+	};
+
+	// IE11 special
+	if ("onwheel" in canvas)
+		canvas.onwheel = wheelFunction;
+	else
+		canvas.onmousewheel = wheelFunction;
+
+}
+
+if (params.fitToWindow) {
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	window.onresize = function() {
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		fractal.resize();
+		fractal.draw();
+	};
+}
+
+//-------- public methods
+
+this.readUrl = function() {
 	try {
 		var url = document.location.hash;
 		if (url.startsWith("#A")) {
@@ -97,10 +212,7 @@ var readUrl = function() {
 				buffer:FractalJS.Colormapbuilder().fromId(1000, byteArray[5]),
 			};
 
-			//console.log("Initialization", desc, color);
-			renderer.setFractalDesc(desc);
-			renderer.setColorDesc(color);
-			initFromUrl=true;
+			return [desc,color]
 		}
 	} catch(e) {
 		console.error("Could not read URL");
@@ -108,129 +220,10 @@ var readUrl = function() {
 	}
 };
 
-//-------- event catchers
-
-if (params.mouseControl) {
-
-	canvas.onmousedown = function(e) {
-		if (!e) e = window.event;
-		if (e.button !== 0)
-			return;
-		isDragging = true;
-		dragX = ldragX = e.screenX;
-		dragY = ldragY = e.screenY;
-		if (e.button !== 0)
-			return;
-		dragStartDesc = renderer.getFractalDesc();
-	};
-
-	window.addEventListener("mouseup", function(e) {
-		if (!e) e = window.event;
-		isDragging = false;
-	});
-
-	window.addEventListener("mousemove", function(e) {
-		if (!e) e = window.event;
-		if (isDragging) {
-			var vecx = e.screenX-dragX;
-			var vecy = e.screenY-dragY;
-			var vecpx = vecx*dragStartDesc.pixelOnP;
-			var vecpy = vecy*dragStartDesc.pixelOnP;
-			var c = {x:dragStartDesc.x-vecpx, y:dragStartDesc.y-vecpy};
-			renderer.setFractalDesc(c);
-
-	        var vfx = e.screenX - ldragX;
-	        var vfy = e.screenY - ldragY;
-	        var vector = {x:vfx,y:vfy,mvt:"pan"};
-			renderer.draw(vector);
-			events.send("mouse.control");
-	        ldragX = e.screenX;
-	        ldragY = e.screenY;
-		}
-	});
-
-	var wheelFunction = function(e) {
-		if (!e) e = window.event;
-		e.preventDefault();
-	    var delta = e.deltaY || e.wheelDelta; // IE11 special
-		var mousex = e.clientX;
-		var mousey = e.clientY;
-
-	    var startDesc = renderer.getFractalDesc();
-	    var c = renderer.getFractalDesc();
-
-	    // test if we're at the maximum possible resolution (1.11e-15/pixel)
-		var sminExtent = Math.min(c.swidth, c.sheight);
-		var limit = sminExtent*1.11e-15;
-		if (c.w<=limit && delta > 0) {
-			events.send("zoom.limit.reached");
-			return;
-		}
-
-		// zoom in place, two steps :
-		// 1) translate complex point under mouse to center
-		// 2) zoom, and translate back by the zoomed vector
-		// should happen in only one step if I could figure out the math :-)
-		var pax = (mousex - c.swidth/2)*c.pixelOnP;
-		var pay = (mousey - c.sheight/2)*c.pixelOnP;
-		c.x += pax;
-		c.y += pay;
-		renderer.setFractalDesc(c);
-		c = renderer.getFractalDesc(c);
-	    var vector = {sx:mousex,sy:mousey};
-
-	    if(delta > 0) {
-	        c.w /= zoomFactor;
-			c.x -= pax / zoomFactor;
-			c.y -= pay / zoomFactor;
-	        vector.z = 1 * zoomFactor;
-	        vector.mvt = "zoomin";
-	    } else {
-	        c.w *= zoomFactor;
-			c.x -= pax * zoomFactor;
-			c.y -= pay * zoomFactor;
-	        vector.z = 1 / zoomFactor;
-	        vector.mvt = "zoomout";
-	    }
-			renderer.setFractalDesc(c);
-			var endDesc = renderer.getFractalDesc(c);
-
-	    // computes the movement vector, then redraws
-	    vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
-	    vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
-		renderer.draw(vector);
-		events.send("mouse.control");
-	};
-
-	// IE11 special
-	if ("onwheel" in canvas)
-		canvas.onwheel = wheelFunction;
-	else
-		canvas.onmousewheel = wheelFunction;
-
-}
-
-if (params.fitToWindow) {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	renderer.resize();
-	window.onresize = function() {
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-		renderer.resize();
-		renderer.draw();
-	};
-}
-
 //-------- constructor & jquery callbacks
 
-readUrl();
 events.on("iter.change", updateUrl);
 events.on("mouse.control", updateUrl);
 events.on("api.change", updateUrl);
-
-return {
-	initFromUrl:initFromUrl,
-};
 
 };

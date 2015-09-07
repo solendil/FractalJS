@@ -88,7 +88,7 @@ var updateShare = function() {
 
 $(function() {
 
-  fractal = FractalJS.create ({
+  fractal = new FractalJS.create ({
     canvas:document.getElementById("maincanvas"),
     fractalDesc:typeList['mandel'],
     renderer:{

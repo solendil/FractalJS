@@ -1,10 +1,16 @@
- FractalJS.Renderer = function(canvas, params, events) {
+ FractalJS.Renderer = function(fractal) {
 "use strict";
 
-//-------- private members
+//-------- shortcuts
 
-var util 		= FractalJS.util;
-var that		= this;
+var events = fractal.events;
+var params = fractal.params.renderer;
+var canvas = fractal.params.canvas;
+var util   = FractalJS.util;
+var that   = this;
+var debug  = false;
+
+//-------- private members
 
 // the canvas on which to display, its context, backbuffer and view as int32
 var context  	= canvas.getContext("2d");
@@ -345,5 +351,6 @@ var workerMessage = function(param) {
 };
 
 engine.eachWorker(function(w) {w.onmessage=workerMessage})
+this.resize();
 
 };
