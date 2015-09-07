@@ -7,9 +7,9 @@ var util 		= FractalJS.util;
 var that		= this;
 
 // the canvas on which to display, its context, backbuffer and view as int32
-var context  	= canvas.getContext("2d");	
+var context  	= canvas.getContext("2d");
 var imageData;
-var idata32; 
+var idata32;
 
 // colormap is defined later
 var colormap 	= null;
@@ -17,7 +17,7 @@ var colormap 	= null;
 // internal state for tiling
 var tiles=[];
 
-var drawList = [];		// list of remaining items to be drawn 
+var drawList = [];		// list of remaining items to be drawn
 var nextCallback;		// id of the next callback for the draw list
 
 var public_methods;
@@ -26,7 +26,6 @@ var startFrameMs;
 
 var frameId = 0;
 var nbOfThreads = 4;
-var workers = [];
 
 //-------- constructor
 
@@ -36,25 +35,49 @@ if ("hardwareConcurrency" in navigator) {
 } else {
 	console.log("FractalJS will use the default " + nbOfThreads + " threads");
 }
-for (var i=0; i<nbOfThreads; i++)
-	workers.push(FractalJS.EngineWorker());
+
+var engine = new FractalJS.Engine(nbOfThreads);
 
 //-------- public methods
 
 this.resize = function() {
 	// send message to workers
 	this.setFractalDesc({
-			swidth: canvas.width, 
+			swidth: canvas.width,
 			sheight: canvas.height
 		});
-	for (var w in workers) 
-		workers[w].postMessage({action:"setDesc",desc:{
-			swidth: canvas.width, 
-			sheight: canvas.height
-		}})	;
 	// resize temp buffers
 	imageData = context.createImageData(canvas.width, canvas.height);
 	idata32 = new Uint32Array(imageData.data.buffer);
+
+  // compute new tiling
+  var ratio = canvas.width / canvas.height;
+  var tileNbHeight = Math.sqrt(params.numberOfTiles/ratio);
+  var tileNbWidth = Math.round(tileNbHeight*ratio);
+  tileNbHeight = Math.round(tileNbHeight);
+  console.log("tiles: "+tileNbWidth+"*"+tileNbHeight+" = "+tileNbHeight*tileNbWidth+" ("+params.numberOfTiles+" asked), ratio "+ratio);
+  // instanciate new tiles
+  var tileid = 0;
+  tiles.length=0;
+  for (var j=0; j<tileNbHeight; j++) {
+    for (var i=0; i<tileNbWidth; i++) {
+      var tile = {
+        i:i,j:j,id:tileid++,
+        x1:Math.round(i*canvas.width/tileNbWidth),
+        x2:Math.round((i+1)*canvas.width/tileNbWidth)-1,
+        y1:Math.round(j*canvas.height/tileNbHeight),
+        y2:Math.round((j+1)*canvas.height/tileNbHeight)-1,
+      };
+      tile.x = (tile.x1+tile.x2)/2; // center of tile
+      tile.y = (tile.y1+tile.y2)/2;
+      tile.width = tile.x2-tile.x1+1;
+      tile.height = tile.y2-tile.y1+1;
+      tile.frame = new Float32Array(tile.width*tile.height);
+      tile.indexScreen = tile.y1*canvas.width+tile.x1;
+      tiles.push(tile);
+    }
+  }
+  /*
 	// reset tiles
 	var tilesNb = Math.sqrt(params.numberOfTiles);
 	var tilewidth = canvas.width/tilesNb;
@@ -79,57 +102,16 @@ this.resize = function() {
 			tile.indexScreen = tile.y1*canvas.width+tile.x1;
 			tiles.push(tile);
 		}
-	}	
-};
-
-// fractal description/projection is temporarily implemented in renderer  
-var fractalDesc = {};
-var project = function() {
-	var sminExtent = Math.min(fractalDesc.swidth, fractalDesc.sheight);
-	// precision limit is ten times the nb of pixels times double precision
-	var limit = sminExtent*1.11e-15; 
-	if (fractalDesc.w<limit)
-		fractalDesc.w = limit; 
-	fractalDesc.pixelOnP = fractalDesc.w/sminExtent;
-	fractalDesc.pxmin = fractalDesc.x - fractalDesc.swidth/2 * fractalDesc.pixelOnP;
-	fractalDesc.pymin = fractalDesc.y - fractalDesc.sheight/2 * fractalDesc.pixelOnP;
+	}*/
 };
 
 this.setFractalDesc = function (desc) {
-	//console.log("setDesc",desc)
-	if ('x' in desc)
-		fractalDesc.x = desc.x;
-	if ('y' in desc)
-		fractalDesc.y = desc.y;
-	if (desc.w)
-		fractalDesc.w = desc.w;
-	if (desc.i)
-		fractalDesc.iter = Math.round(desc.i);
-	if (desc.iter)
-		fractalDesc.iter = Math.round(desc.iter);
-	if ('typeid' in desc) 
-		fractalDesc.typeid = desc.typeid;
-	if (desc.swidth) {
-		fractalDesc.swidth = desc.swidth;
-		fractalDesc.sheight = desc.sheight;
-	}
-	project();
-	for (var w in workers) 
-		workers[w].postMessage({action:"setDesc",desc:desc});
-	//console.log("returning",fractalDesc)
-	return this.getFractalDesc();
-};
-
+  engine.setDesc(desc);
+}
 this.getFractalDesc = function () {
-	var res = {
-		x:fractalDesc.x, y:fractalDesc.y, w:fractalDesc.w, iter:fractalDesc.iter,
-		pixelOnP:fractalDesc.pixelOnP, 
-		swidth:fractalDesc.swidth, sheight:fractalDesc.sheight,
-		pxmin:fractalDesc.pxmin, pymin:fractalDesc.pymin,
-		type:fractalDesc.type,typeid:fractalDesc.typeid
-	};
-	return res;
-};
+  return engine.getDesc();
+}
+
 
 this.setColorDesc = function(desc) {
 	if (!colormap) {
@@ -155,9 +137,7 @@ this.draw = function(vector) {
 
 	startFrameMs = performance.now();
 	frameId++;
-	events.send("frame.start", function() {
-		return {fractalDesc:fractalDesc};
-	});
+	events.send("frame.start");
 
 	// if a movement vector is provided, zoom/pan the current canvas accordingly to provide a quick first picture
 	if (vector) {
@@ -172,7 +152,7 @@ this.draw = function(vector) {
 		newCanvas.getContext("2d").putImageData(imageData, 0, 0);
 		context.scale(vector.z, vector.z);
 		context.translate(vector.x, vector.y);
-		context.drawImage(newCanvas,0,0);	
+		context.drawImage(newCanvas,0,0);
 		context.setTransform(1, 0, 0, 1, 0, 0);
 	}
 
@@ -200,7 +180,7 @@ this.draw = function(vector) {
 				tile.prio = 1;
 			}
 		}
-		drawList.push(tile);	
+		drawList.push(tile);
 	}
 
 	// prioritize tiles according to movement
@@ -221,10 +201,10 @@ this.draw = function(vector) {
 	}
 
 	// dispatch first items of the drawList to all workers
-	for (var w in workers) {
-		tile = drawList.shift();
-		workers[w].postMessage({action:"draw", frameId:frameId, tile:tile});
-	}
+  engine.eachWorker(function(w){
+    tile = drawList.shift();
+		w.postMessage({action:"draw", quality:200, frameId:frameId, tile:tile});
+  })
 };
 
 //-------- private methods
@@ -233,7 +213,7 @@ var endOfFrame = function() {
 	var endFrameMs = performance.now();
 	events.send("frame.end", function() {
 		return {
-			fractalDesc : fractalDesc,
+			fractalDesc : engine.getDesc(),
 			time: endFrameMs-startFrameMs,
 		};
 	});
@@ -263,27 +243,27 @@ var endOfFrame = function() {
 		}
 	}
 	var iterRange = maxIter-minIter;
-	var fringe10p = fractalDesc.iter - Math.ceil(iterRange/10);
+	var fringe10p = engine.getDesc().iter - Math.ceil(iterRange/10);
 	var nbFringe10p = 0;
 	for (ti in tiles) {
 		tile = tiles[ti];
 		for (i=0; i<tile.frame.length; i++) {
 			iter = tile.frame[i];
-			if (iter===0) 
+			if (iter===0)
 				continue;
-			if (iter>=fringe10p) 
+			if (iter>=fringe10p)
 				nbFringe10p++;
-		}	
+		}
 	}
 	var percInSet = 100.0*nbInSet/nb;
  	var percFringe10p = 100.0*nbFringe10p/nbInSet;
 	if (percInSet > 1 && percFringe10p>1) {
-		that.setFractalDesc({iter:fractalDesc.iter*1.5});
+		that.setFractalDesc({iter:engine.getDesc().iter*1.5});
 		that.draw();
 		events.send("iter.change");
 	}
 	if (percInSet > 1 && percFringe10p<0.2) {
-		that.setFractalDesc({iter:fractalDesc.iter/1.5});
+		that.setFractalDesc({iter:engine.getDesc().iter/1.5});
 		// public_methods.draw();
 		events.send("iter.change");
 	}
@@ -294,7 +274,7 @@ var refreshColormap = function() {
 	// Performing the colormap refresh in place instead of calling the colormap
 	// object brings a 5x performance in Chrome (25ms instead of 150).
 	var cmap = colormap.getDesc();
-	var buffer=cmap.buffer, offset=cmap.offset*buffer.length, 
+	var buffer=cmap.buffer, offset=cmap.offset*buffer.length,
 		density=cmap.density, resolution=buffer.length;
 	for (var ti in tiles) {
 		var tile = tiles[ti];
@@ -318,8 +298,8 @@ var refreshColormap = function() {
 };
 
 var workerMessage = function(param) {
-	if (param.data.action === "endFrame") {
-		if (param.data.frameId != frameId) 
+	if (param.data.action === "endTile") {
+		if (param.data.frameId != frameId)
 			return; // frame has changed, drop this result
 
 		// replace original tile by the one coming from worker
@@ -328,26 +308,25 @@ var workerMessage = function(param) {
 		tiles[incid] = tile;
 
 		// paint on canvas
-		var tileIndex = 0;
-		var bufferIndex = 0;
-		for (var ty=0; ty<tile.height; ty++) {
-			bufferIndex = (ty+tile.y1)*canvas.width+tile.x1;
-			for (var tx=0; tx<tile.width; tx++) {
-				var iter = tile.frame[tileIndex++];
-				var color = colormap.getColorForIter(iter);
-				idata32[bufferIndex++] = color;
-			}
-		}
-		
-		context.putImageData(imageData, 0, 0, tile.x1, tile.y1, 
-			tile.x2-tile.x1, tile.y2-tile.y1);
+    var tileIndex = 0;
+    var bufferIndex = 0;
+    for (var ty=0; ty<tile.height; ty++) {
+      bufferIndex = (ty+tile.y1)*canvas.width+tile.x1;
+      for (var tx=0; tx<tile.width; tx++) {
+        var iter = tile.frame[tileIndex++];
+        var color = colormap.getColorForIter(iter);
+        idata32[bufferIndex++] = color;
+      }
+    }
+    context.putImageData(imageData, 0, 0, tile.x1, tile.y1, tile.width, tile.height);
 
 		// set this worker to another task
 		if (drawList.length>0) {
 			tile = drawList.shift();
 			var message = {
-				action:"draw", 
-				frameId:frameId, 
+				action:"draw",
+        quality:200,
+				frameId:frameId,
 				tile:tile
 			};
 			if (drawList.length===0) {
@@ -360,11 +339,11 @@ var workerMessage = function(param) {
 		// this mechanism looks fragile...
 		if (param.data.finished)
 			endOfFrame();
-	}
+	} else {
+    throw "Unknown message"
+  }
 };
 
-for (var w in workers) 
-	workers[w].onmessage = workerMessage;
-
+engine.eachWorker(function(w) {w.onmessage=workerMessage})
 
 };

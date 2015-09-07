@@ -29,9 +29,9 @@ var initFromUrl = false;
  *   4            Uint8Array[4]	        type of fractal
  *   5            Uint8Array[5]	        type of gradient
  *   6,7          Uint16Array[3]		color offset (times 10000)
- *   8-15         Float64Array[1]		x 
+ *   8-15         Float64Array[1]		x
  *   16-23        Float64Array[2]		y
- *   24-31        Float64Array[3]		w (extent) 
+ *   24-31        Float64Array[3]		w (extent)
  *   32-35        Float32Array[8]		color density (if present, 20 if not)
  *   36-39        reserved
  */
@@ -114,12 +114,12 @@ if (params.mouseControl) {
 
 	canvas.onmousedown = function(e) {
 		if (!e) e = window.event;
-		if (e.button !== 0) 
+		if (e.button !== 0)
 			return;
 		isDragging = true;
 		dragX = ldragX = e.screenX;
 		dragY = ldragY = e.screenY;
-		if (e.button !== 0) 
+		if (e.button !== 0)
 			return;
 		dragStartDesc = renderer.getFractalDesc();
 	};
@@ -140,8 +140,8 @@ if (params.mouseControl) {
 			renderer.setFractalDesc(c);
 
 	        var vfx = e.screenX - ldragX;
-	        var vfy = e.screenY - ldragY;  
-	        var vector = {x:vfx,y:vfy,mvt:"pan"};     
+	        var vfy = e.screenY - ldragY;
+	        var vector = {x:vfx,y:vfy,mvt:"pan"};
 			renderer.draw(vector);
 			events.send("mouse.control");
 	        ldragX = e.screenX;
@@ -161,13 +161,13 @@ if (params.mouseControl) {
 
 	    // test if we're at the maximum possible resolution (1.11e-15/pixel)
 		var sminExtent = Math.min(c.swidth, c.sheight);
-		var limit = sminExtent*1.11e-15; 
+		var limit = sminExtent*1.11e-15;
 		if (c.w<=limit && delta > 0) {
 			events.send("zoom.limit.reached");
 			return;
 		}
 
-		// zoom in place, two steps : 
+		// zoom in place, two steps :
 		// 1) translate complex point under mouse to center
 		// 2) zoom, and translate back by the zoomed vector
 		// should happen in only one step if I could figure out the math :-)
@@ -175,7 +175,8 @@ if (params.mouseControl) {
 		var pay = (mousey - c.sheight/2)*c.pixelOnP;
 		c.x += pax;
 		c.y += pay;
-		c = renderer.setFractalDesc(c);
+		renderer.setFractalDesc(c);
+		c = renderer.getFractalDesc(c);
 	    var vector = {sx:mousex,sy:mousey};
 
 	    if(delta > 0) {
@@ -191,7 +192,8 @@ if (params.mouseControl) {
 	        vector.z = 1 / zoomFactor;
 	        vector.mvt = "zoomout";
 	    }
-	    var endDesc = renderer.setFractalDesc(c);
+			renderer.setFractalDesc(c);
+			var endDesc = renderer.getFractalDesc(c);
 
 	    // computes the movement vector, then redraws
 	    vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
@@ -201,9 +203,9 @@ if (params.mouseControl) {
 	};
 
 	// IE11 special
-	if ("onwheel" in canvas) 
+	if ("onwheel" in canvas)
 		canvas.onwheel = wheelFunction;
-	else 
+	else
 		canvas.onmousewheel = wheelFunction;
 
 }
