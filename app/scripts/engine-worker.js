@@ -30,8 +30,139 @@ var desc;
 
 //-------- private methds
 
-var logBase = 1.0 / Math.log(2.0);
-var logHalfBase = Math.log(0.5)*logBase;
+var iLog2 = 1.0 / Math.log(2.0);
+var iLog3 = 1.0 / Math.log(3.0);
+
+// core fractal functions
+var fractalFunctionListSmooth = {
+	0 : function(cx,cy) {
+		var znx=0, zny=0, sqx=0, sqy=0, i=0, j=0;
+		for(;i<desc.iter && sqx+sqy<=escape; ++i) {
+			zny = (znx+znx)*zny + cy;
+			znx = sqx-sqy + cx;
+			sqx = znx*znx;
+			sqy = zny*zny;
+		}
+		if (i==desc.iter) return i;
+		for(j=0;j<4; ++j) {
+			zny = (znx+znx)*zny + cy;
+			znx = sqx-sqy + cx;
+			sqx = znx*znx;
+			sqy = zny*zny;
+		}
+		var res = 5 + i - Math.log(Math.log(sqx+sqy)) * iLog2;
+		return res;
+	},
+	// multibrot3
+	1 : function(cx,cy) {
+		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
+		while (true) {
+			znx = sqx*zx-3*zx*sqy+cx;
+			zny = 3*sqx*zy-sqy*zy+cy;
+			zx = znx;
+			zy = zny;
+			if (++i>=desc.iter)
+				break;
+			sqx = zx*zx;
+			sqy = zy*zy;
+			if (sqx+sqy>escape)
+				break;
+		}
+		if (i==desc.iter) return i;
+		for(j=0;j<4; ++j) {
+			znx = sqx*zx-3*zx*sqy+cx;
+			zny = 3*sqx*zy-sqy*zy+cy;
+			zx = znx;
+			zy = zny;
+			sqx = zx*zx;
+			sqy = zy*zy;
+		}
+		var res = 5 + i - Math.log(Math.log(sqx+sqy)) * iLog3;
+		return res;
+	},
+	// burningship
+	2 : function(cx,cy) {
+		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
+		while (true) {
+			zny = (zx+zx)*zy+cy;
+			znx = sqx-sqy+cx;
+			zx = Math.abs(znx);
+			zy = Math.abs(zny);
+			if (++i>=desc.iter)
+				break;
+			sqx = zx*zx;
+			sqy = zy*zy;
+			if (sqx+sqy>escape)
+				break;
+		}
+		if (i==desc.iter) return i;
+		for(j=0;j<4; ++j) {
+			zny = (zx+zx)*zy+cy;
+			znx = sqx-sqy+cx;
+			zx = Math.abs(znx);
+			zy = Math.abs(zny);
+			sqx = zx*zx;
+			sqy = zy*zy;
+		}
+		var res = 5 + i - Math.log(Math.log(sqx+sqy)) * iLog2;
+		return res;
+	},
+	// tippetts
+	3 : function(cx,cy) {
+		var zx=0, zy=0, sqx=0, sqy=0, i=0;
+		for(;i<desc.iter && sqx+sqy<=escape; ++i) {
+			zx = sqx-sqy+cx;
+			zy = (zx+zx)*zy+cy;
+			sqx = zx*zx;
+			sqy = zy*zy;
+		}
+		return i;
+	},
+	// Julia Set A
+	4 : function(cx,cy) {
+		var znx=cx, zny=cy, sqx=cx*cx, sqy=cy*cy, i=0, j=0;
+		for(;i<desc.iter && sqx+sqy<=escape; ++i) {
+			zny = (znx+znx)*zny + 0.15;
+			znx = sqx-sqy -0.79;
+			sqx = znx*znx;
+			sqy = zny*zny;
+		}
+		if (i==desc.iter) return i;
+		for(j=0;j<4; ++j) {
+			zny = (znx+znx)*zny + 0.15;
+			znx = sqx-sqy -0.79;
+			sqx = znx*znx;
+			sqy = zny*zny;
+		}
+		var res = 5 + i - Math.log(Math.log(sqx+sqy)) * iLog2;
+		return res;
+	},
+	// Phoenix Set
+	5 : function(cx,cy) {
+		var x=-cy, y=cx, xm1=0, ym1=0;
+		var sx=0, sy=0, i=0;
+		var c=0.5667, p=-0.5;
+		for(;i<desc.iter && sx+sy<=escape; ++i) {
+			xp1 = x*x-y*y+c+p*xm1;
+			yp1 = 2*x*y+p*ym1;
+			sx = xp1*xp1;
+			sy = yp1*yp1;
+			xm1=x; ym1=y;
+			x=xp1; y=yp1;
+		}
+		if (i==desc.iter) return i;
+		for(j=0;j<4; ++j) {
+			xp1 = x*x-y*y+c+p*xm1;
+			yp1 = 2*x*y+p*ym1;
+			sx = xp1*xp1;
+			sy = yp1*yp1;
+			xm1=x; ym1=y;
+			x=xp1; y=yp1;
+		}
+		var res = 5 + i - Math.log(Math.log(x*x+y*y)) * iLog2;
+		return res;
+	},
+};
 
 // core fractal functions
 var fractalFunctionList = {
@@ -136,8 +267,6 @@ var fractalFunctionList = {
 		}
 		return i;
 	},
-
-
 };
 
 //-------- public methods
@@ -207,7 +336,11 @@ drawSubTileOnBuffer: function(tile) {
 
 	setDesc: function(other) {
 		desc=other;
-		fractalFunction = fractalFunctionList[desc.typeid];
+		//console.log("setDesc",desc)
+		if (desc.smooth)
+			fractalFunction = fractalFunctionListSmooth[desc.typeid];
+		else
+			fractalFunction = fractalFunctionList[desc.typeid];
 	}
 
 };

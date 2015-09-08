@@ -1,5 +1,5 @@
 * {
-  box-sizing: border-box;  
+  box-sizing: border-box;
   margin: 0;
   word-spacing: 0.2em;
   font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Verdana', sans-serif;
@@ -10,7 +10,7 @@
   border-radius:0;
 }
 .navbar-inverse:hover, .navbar-inverse.active {
-  background: rgba(47,65,84,0.95); 
+  background: rgba(47,65,84,0.95);
   text-shadow: none;
   transition:0.25s;
 }
@@ -34,7 +34,7 @@ canvas {
 
 .tabpane {
   padding:1em 1em;
-  background: rgba(47,65,84,0.95); 
+  background: rgba(47,65,84,0.95);
   display:none;
   border-top:1px solid #1abc9c;
   color:#FFF;
@@ -61,7 +61,7 @@ pre {
   margin-right:2em;
 }
 div.gradient {
-  box-sizing: content-box;  
+  box-sizing: content-box;
   width:150px;
   height:45px;
   display:inline-block;

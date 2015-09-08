@@ -231,6 +231,7 @@ var endOfFrame = function() {
 	var iterRange = maxIter-minIter;
 	var fringe10p = engine.getDesc().iter - Math.ceil(iterRange/10);
 	var nbFringe10p = 0;
+  //console.log(minIter, maxIter, iterRange +"/"+ engine.getDesc().iter, nbInSet, fringe10p)
 	for (ti in tiles) {
 		tile = tiles[ti];
 		for (i=0; i<tile.frame.length; i++) {
@@ -243,6 +244,7 @@ var endOfFrame = function() {
 	}
 	var percInSet = 100.0*nbInSet/nb;
  	var percFringe10p = 100.0*nbFringe10p/nbInSet;
+  //console.log(nbFringe10p, percInSet, percFringe10p)
 	if (percInSet > 1 && percFringe10p>1) {
 		that.setFractalDesc({iter:engine.getDesc().iter*1.5});
 		that.draw();

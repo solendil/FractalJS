@@ -40,6 +40,8 @@ this.setDesc = function (other) {
     desc.iter = Math.round(other.iter);
   if ('typeid' in other)
     desc.typeid = other.typeid;
+  if ('smooth' in other)
+    desc.smooth = other.smooth;
   if (other.swidth) {
     desc.swidth = other.swidth;
     desc.sheight = other.sheight;
@@ -55,7 +57,7 @@ this.getDesc = function () {
     pixelOnP:desc.pixelOnP,
     swidth:desc.swidth, sheight:desc.sheight,
     pxmin:desc.pxmin, pymin:desc.pymin,
-    typeid:desc.typeid
+    typeid:desc.typeid, smooth:desc.smooth
   };
 };
 

@@ -10,6 +10,7 @@ var typeList = {
   },
   "mandel" : {
     typeid:0,
+    smooth:true,
     x:-0.7,
     y:0.0,
     w:2.5,
@@ -17,6 +18,7 @@ var typeList = {
   },
   "julia_a" : {
     typeid:4,
+    smooth:true,
     x:0.0,
     y:0.0,
     w:2.2,
@@ -24,6 +26,7 @@ var typeList = {
   },
   "phoenix" : {
     typeid:5,
+    smooth:true,
     x:0.0,
     y:-0.1,
     w:2,
@@ -31,6 +34,7 @@ var typeList = {
   },
   "mandel3" : {
     typeid:1,
+    smooth:true,
     x:0.0,
     y:0.0,
     w:3.0,
@@ -38,6 +42,7 @@ var typeList = {
   },
   "burningship" : {
     typeid:2,
+    smooth:true,
     x:-0.4,
     y:-0.7,
     w:3,
@@ -106,6 +111,20 @@ $(function() {
   });
   fractal.draw();
 
+  desc=fractal.getFractalDesc();
+  if (desc.smooth) $('#smooth').removeClass('btn-default').addClass('btn-info');
+  else $('#smooth').removeClass('btn-success').addClass('btn-default');
+  $('#smooth').click(function(){
+    if ($('#smooth').hasClass('btn-default')) {
+      fractal.setFractalDesc({smooth:true});
+      $('#smooth').removeClass('btn-default').addClass('btn-info');
+    } else {
+      fractal.setFractalDesc({smooth:false});
+      $('#smooth').removeClass('btn-info').addClass('btn-default');
+    }
+    fractal.draw();
+  });
+
   buildGradientSwatches();
   var slider_offset = document.getElementById("slider.offset");
   var slider_density = document.getElementById("slider.density");
@@ -129,6 +148,7 @@ $(function() {
   $(".fractaltype").click(function(e) {
     var name = $(this).attr("name");
     fractal.setFractalDesc(typeList[name]);
+    $('#smooth').removeClass('btn-default').addClass('btn-info');
     fractal.draw();
   });
 
