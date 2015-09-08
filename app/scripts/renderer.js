@@ -36,7 +36,7 @@ if ("hardwareConcurrency" in navigator) {
 	console.log("FractalJS will use the default " + nbOfThreads + " threads");
 }
 
-var engine = new FractalJS.Engine(nbOfThreads);
+var engine;
 
 //-------- public methods
 
@@ -287,7 +287,7 @@ var refreshColormap = function() {
 	//console.log("colormap refreshed in ", (end-start))
 };
 
-var workerMessage = function(param) {
+this.workerMessage = function(param) {
 	if (param.data.action === "endTile") {
 		if (param.data.frameId != frameId)
 			return; // frame has changed, drop this result
@@ -334,7 +334,7 @@ var workerMessage = function(param) {
   }
 };
 
-engine.eachWorker(function(w) {w.onmessage=workerMessage;});
-this.resize();
+ engine = new FractalJS.Engine(nbOfThreads, this);
+ this.resize();
 
 };

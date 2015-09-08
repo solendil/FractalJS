@@ -353,8 +353,10 @@ onmessage = function(param) {
 	if (!data)
 		console.error(param);
 	if (data.action === "setDesc") {
+		//console.log("receive DESC", param)
 		engine.setDesc(data.desc);
 	} else if (data.action === "draw") {
+		//console.log("receive DRAW", param)
 		if (data.quality==200) engine.drawTileOnBuffer(data.tile);
 		else if (data.quality==100) engine.drawSubTileOnBuffer(data.tile);
 		else if (data.quality==300) engine.drawSuperTileOnBuffer(data.tile);

@@ -149,6 +149,7 @@ $(function() {
     var name = $(this).attr("name");
     fractal.setFractalDesc(typeList[name]);
     $('#smooth').removeClass('btn-default').addClass('btn-info');
+    slider_density.noUiSlider.set(100);
     fractal.draw();
   });
 

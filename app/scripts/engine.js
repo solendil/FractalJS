@@ -3,13 +3,20 @@
  * - knows fractal parameters and perform basic computations on them (pixel ratio, zoom limit, etc...)
  * - instanciates and maintains workers to perform the actual fractal computations
  */
-FractalJS.Engine = function(nbThreads) {
+FractalJS.Engine = function(nbThreads, renderer) {
 "use strict";
 
 var desc = {};
 var workers = [];
-for (var i=0; i<nbThreads; i++)
-  workers.push(FractalJS.EngineWorker());
+
+var createWorkers = function() {
+  workers.length = 0;
+  for (var i=0; i<nbThreads; i++) {
+    var worker = FractalJS.EngineWorker();
+    workers.push(worker);
+    worker.onmessage=renderer.workerMessage;
+  }
+};
 
 var project = function() {
   var sminExtent = Math.min(desc.swidth, desc.sheight);
@@ -48,7 +55,7 @@ this.setDesc = function (other) {
   }
   project();
   for (var w in workers)
-    workers[w].postMessage({action:"setDesc",desc:desc,other:other});
+    workers[w].postMessage({action:"setDesc",desc:desc});
 };
 
 this.getDesc = function () {
@@ -60,5 +67,7 @@ this.getDesc = function () {
     typeid:desc.typeid, smooth:desc.smooth
   };
 };
+
+createWorkers();
 
 };
