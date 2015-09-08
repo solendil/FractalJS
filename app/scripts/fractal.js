@@ -66,7 +66,7 @@ renderer.setFractalDesc(params.fractalDesc);
 
 // draw if required
 if (params.renderer.drawAfterInit)
-	renderer.draw();
+	renderer.draw("init");
 
 //-------- public API
 
@@ -80,8 +80,8 @@ this.getFractalDesc= function () {
 	return renderer.getFractalDesc();
 };
 
-this.draw= function(vector) {
-	renderer.draw(vector);
+this.draw= function(reason,vector) {
+	renderer.draw(reason,vector);
 };
 
 this.resize= function() {

@@ -109,7 +109,7 @@ $(function() {
       density:20,
     }
   });
-  fractal.draw();
+  fractal.draw("init");
 
   desc=fractal.getFractalDesc();
   if (desc.smooth) $('#smooth').removeClass('btn-default').addClass('btn-info');
@@ -122,7 +122,7 @@ $(function() {
       fractal.setFractalDesc({smooth:false});
       $('#smooth').removeClass('btn-info').addClass('btn-default');
     }
-    fractal.draw();
+    fractal.draw("init");
   });
 
   buildGradientSwatches();
@@ -150,7 +150,7 @@ $(function() {
     fractal.setFractalDesc(typeList[name]);
     $('#smooth').removeClass('btn-default').addClass('btn-info');
     slider_density.noUiSlider.set(100);
-    fractal.draw();
+    fractal.draw("init");
   });
 
   // update "share" panel if it is opened

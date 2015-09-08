@@ -15,6 +15,7 @@ var debug  = false;
 // the canvas on which to display, its context, backbuffer and view as int32
 var context  	= canvas.getContext("2d");
 var imageData, idata32;
+var vectorCanvas;
 
 // colormap is defined later
 var colormap 	= null;
@@ -49,6 +50,9 @@ this.resize = function() {
 	// resize temp buffers
 	imageData = context.createImageData(canvas.width, canvas.height);
 	idata32 = new Uint32Array(imageData.data.buffer);
+  vectorCanvas = document.createElement('canvas');
+  vectorCanvas.width = canvas.width;
+  vectorCanvas.height = canvas.height;
 
   // compute new tiling
   var ratio = canvas.width / canvas.height;
@@ -106,10 +110,12 @@ var lastvector = null;
 var lastquality = null;
 
 this.refine = function() {
-  this.draw(null, lastvector, 300);
+  this.draw("supersampling", null, lastvector, 300);
 };
 
-this.draw = function(vector, priovector, quality) {
+this.draw = function(reason, vector, priovector, quality) {
+  //console.log("start frae", reason)
+  //throw "stack"
   lastvector = vector;
   if (!quality) quality=200;
   if (!priovector) priovector=vector;
@@ -126,17 +132,10 @@ this.draw = function(vector, priovector, quality) {
 	// if a movement vector is provided, zoom/pan the current canvas accordingly to provide a quick first picture
 	if (vector) {
 		var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-		// TODO : cache to improve speed
-		// http://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
-		var div = document.createElement('div');
-		div.innerHTML = "<canvas width='"+imageData.width+"' "+
-			"height='"+imageData.height+"'> </canvas>";
-		var newCanvas = div.firstChild;
-
-		newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+		vectorCanvas.getContext("2d").putImageData(imageData, 0, 0);
 		context.scale(vector.z, vector.z);
 		context.translate(vector.x, vector.y);
-		context.drawImage(newCanvas,0,0);
+		context.drawImage(vectorCanvas,0,0);
 		context.setTransform(1, 0, 0, 1, 0, 0);
 	}
 
@@ -164,30 +163,31 @@ this.draw = function(vector, priovector, quality) {
 				tile.prio = 1;
 			}
 		}
-		drawList.push(tile);
+    // if this is an initialisation drawing, stars with a low quality 16x subsampling
+    if (reason=="init")
+      drawList.push({action:'draw', quality:100, frameId:frameId, tile:tile});
+    drawList.push({action:'draw', quality:quality, frameId:frameId, tile:tile});
 	}
 
-	// prioritize tiles according to movement
-	if (vector && vector.mvt=="pan") {
-		drawList.sort(function(t1,t2){
-			return t2.prio - t1.prio;
-		});
-	}
-	if (vector && vector.mvt=="zoomin") {
-		drawList.sort(function(t1,t2){
-			return t1.dist - t2.dist;
-		});
-	}
-	if (vector && vector.mvt=="zoomout") {
-		drawList.sort(function(t1,t2){
-			return t2.dist - t1.dist;
-		});
-	}
+  // prioritize tiles according to movement
+  drawList.sort(function(t1,t2){
+    if (t1.quality!=t2.quality)
+      return t1.quality-t2.quality;
+    if (vector) {
+      if (vector.mvt=="pan")
+        return t2.tile.prio - t1.tile.prio;
+      if (vector.mvt=="zoomin")
+        return t1.tile.dist - t2.tile.dist;
+      if (vector.mvt=="zoomout")
+        return t2.tile.dist - t1.tile.dist;
+    }
+    return t1.tile.id-t2.tile.id;
+  });
 
 	// dispatch first items of the drawList to all workers
   engine.eachWorker(function(w){
-    tile = drawList.shift();
-		w.postMessage({action:"draw", quality:quality, frameId:frameId, tile:tile});
+    var drawOrder = drawList.shift();
+		w.postMessage(drawOrder);
   });
 };
 
@@ -312,18 +312,11 @@ this.workerMessage = function(param) {
 
 		// set this worker to another task
 		if (drawList.length>0) {
-			tile = drawList.shift();
-			var message = {
-				action:"draw",
-        quality:param.data.quality,
-				frameId:frameId,
-				tile:tile
-			};
+			var drawOrder = drawList.shift();
 			if (drawList.length===0) {
-				message.finished=true;
+				drawOrder.finished=true;
 			}
-			// why is it called "target" when it's the source ?
-			param.target.postMessage(message);
+			param.target.postMessage(drawOrder);
 		}
 
 		// this mechanism looks fragile...

@@ -105,7 +105,7 @@ if (params.mouseControl) {
 	        var vfx = e.screenX - ldragX;
 	        var vfy = e.screenY - ldragY;
 	        var vector = {x:vfx,y:vfy,mvt:"pan"};
-			fractal.draw(vector);
+			fractal.draw("mouse.control",vector);
 			events.send("mouse.control");
 	        ldragX = e.screenX;
 	        ldragY = e.screenY;
@@ -161,7 +161,7 @@ if (params.mouseControl) {
 	    // computes the movement vector, then redraws
 	    vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
 	    vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
-		fractal.draw(vector);
+		fractal.draw("mouse.control",vector);
 		events.send("mouse.control");
 	};
 
@@ -180,7 +180,7 @@ if (params.fitToWindow) {
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
 		fractal.resize();
-		fractal.draw();
+		fractal.draw("init");
 	};
 }
 
