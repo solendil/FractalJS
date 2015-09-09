@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- 
+    <!--
     USAGE : <iframe onmousewheel="" src="fractaljs.iframe.html#AAQA*AgAAAABAP+Wpp3O7vyrLehP8xO6*9V3GYVaAQj8_"></iframe>
     The onmousewheel="" is required by Safari so the mouse wheel events work in the iFrame
     -->
@@ -12,6 +12,7 @@
     <script src="scripts/util.js"></script>
     <script src="scripts/events.js"></script>
     <script src="scripts/engine-worker.js"></script>
+    <script src="scripts/engine.js"></script>
     <script src="scripts/colormap.js"></script>
     <script src="scripts/renderer.js"></script>
     <script src="scripts/controller.js"></script>
@@ -42,7 +43,7 @@
       a {
         color:#AAA;
         text-decoration:none;
-      }     
+      }
       a:hover {
         color:#FFF;
         text-decoration:none;
@@ -76,9 +77,9 @@ var f = FractalJS.create ({
     canvas:document.getElementById("maincanvas"),
     fractalDesc:{
       type:'mandel',
-      x:-0.7, 
-      y:0.0, 
-      w:2.5, 
+      x:-0.7,
+      y:0.0,
+      w:2.5,
       i:50
     },
     palette:{
@@ -86,14 +87,13 @@ var f = FractalJS.create ({
       stops:"0#080560;0.2#2969CB;0.40#F1FEFE;0.60#FCA425;0.85#000000"
     },
     renderer:{
-      numberOfTiles:100,
-      drawAfterInit:false,  // postpone first drawing after UI is initialized
+      numberOfTiles:10,
+      drawAfterInit:true,  // postpone first drawing after UI is initialized
     },
     controller:{
       fitToWindow:true
     }
 });
-f.draw();
 var openFull = function() {
   window.open("index.html"+window.location.hash, "_parent");
 }
