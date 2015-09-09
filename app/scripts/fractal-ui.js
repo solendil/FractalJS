@@ -84,6 +84,14 @@ var buildGradientSwatches = function() {
   });
 };
 
+var updateInfo = function() {
+  var desc = fractal.getFractalDesc();
+  $("#info_x").text(desc.x);
+  $("#info_y").text(desc.y);
+  $("#info_w").text(desc.w.toExponential(4));
+  $("#info_iter").text(desc.iter);
+};
+
 var updateShare = function() {
   var url = document.location.href;
   $("#share_link").html("<a href='"+url+"'>this link</a>");
@@ -155,8 +163,11 @@ $(function() {
 
   // update "share" panel if it is opened
   fractal.events.on(["iter.change","mouse.control","api.change"], function(){
-    if ($(".pane[name='share']").hasClass("selected")) {
+    if ($(".tabpane[name='share']").hasClass("active")) {
       updateShare();
+    }
+    if ($(".tabpane[name='info']").hasClass("active")) {
+      updateInfo();
     }
   });
 
@@ -226,6 +237,7 @@ $(function() {
       $(".tabpane[name='"+name+"']").addClass("active");
       $(".navbar-inverse").addClass("active");
       updateShare();
+      updateInfo();
     }
     return false;
   });

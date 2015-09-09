@@ -85,3 +85,7 @@ canvas.gradient {
   left:1em;
   display:none;
 }
+.infobox {
+  -webkit-user-select: auto;
+  font-size:90%;
+}
