@@ -13,6 +13,7 @@
     },
 	controller : {
 		mouseControl : true,		// allow mouse navigation in canvas
+		keyboardControl : true,		// allow keyboard navigation in canvas
 		fitToWindow : false,		// fit the canvas to the window
 	}
 }
@@ -43,6 +44,7 @@ params.renderer = util.defaultProps(params.renderer, {
 });
 params.controller = util.defaultProps(params.controller, {
 	mouseControl: true,
+	keyboardControl: true,
 	fitToWindow: false
 });
 

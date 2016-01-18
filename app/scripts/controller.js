@@ -73,6 +73,19 @@ var updateUrl = function() {
 
 //-------- event catchers
 
+if (params.keyboardControl) {
+
+	document.onkeydown = function(e) {
+	    e = e || window.event;
+			console.log(e);
+/*	    var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
+	    if (charCode > 0) {
+	        console.log("Typed character: " + String.fromCharCode(charCode));
+	    }*/
+	};
+
+}
+
 if (params.mouseControl) {
 
 	canvas.onmousedown = function(e) {
@@ -125,7 +138,7 @@ if (params.mouseControl) {
 	    // test if we're at the maximum possible resolution (1.11e-15/pixel)
 		var sminExtent = Math.min(c.swidth, c.sheight);
 		var limit = sminExtent*1.11e-15;
-		if (c.w<=limit && delta > 0) {
+		if (c.w<=limit && delta < 0) {
 			events.send("zoom.limit.reached");
 			return;
 		}
