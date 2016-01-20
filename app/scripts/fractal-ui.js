@@ -162,7 +162,7 @@ $(function() {
   });
 
   // update "share" panel if it is opened
-  fractal.events.on(["iter.change","mouse.control","api.change"], function(){
+  fractal.events.on(["iter.change","user.control","api.change"], function(){
     if ($(".tabpane[name='share']").hasClass("active")) {
       updateShare();
     }

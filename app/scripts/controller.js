@@ -73,15 +73,80 @@ var updateUrl = function() {
 
 //-------- event catchers
 
+var pan = function(x, y) {
+	var desc = fractal.getFractalDesc();
+	var deltax = x*desc.swidth*desc.pixelOnP;
+	var deltay = y*desc.sheight*desc.pixelOnP;
+	fractal.setFractalDesc({x:desc.x-deltax, y:desc.y-deltay}, true);
+	var screenx = x*desc.swidth;
+	var screeny = y*desc.sheight;
+	fractal.draw("user.control",{x:screenx,y:screeny,mvt:"pan"});
+	events.send("user.control");
+};
+
+var zoom = function(x, y, delta) {
+	var startDesc = fractal.getFractalDesc();
+	var c = fractal.getFractalDesc();
+
+	// test if we're at the maximum possible resolution (1.11e-15/pixel)
+	var sminExtent = Math.min(c.swidth, c.sheight);
+	var limit = sminExtent*1.11e-15;
+	if (c.w<=limit && delta < 0) {
+		events.send("zoom.limit.reached");
+		return;
+	}
+
+	// zoom in place, two steps :
+	// 1) translate complex point under mouse to center
+	// 2) zoom, and translate back by the zoomed vector
+	// should happen in only one step if I could figure out the math :-)
+	var pax = (x - c.swidth/2)*c.pixelOnP;
+	var pay = (y - c.sheight/2)*c.pixelOnP;
+	c.x += pax;
+	c.y += pay;
+	fractal.setFractalDesc(c,true);
+	c = fractal.getFractalDesc(c);
+	var vector = {sx:x,sy:y};
+
+	if(delta < 0) {
+		c.w /= zoomFactor;
+		c.x -= pax / zoomFactor;
+		c.y -= pay / zoomFactor;
+		vector.z = 1 * zoomFactor;
+		vector.mvt = "zoomin";
+	} else {
+		c.w *= zoomFactor;
+		c.x -= pax * zoomFactor;
+		c.y -= pay * zoomFactor;
+		vector.z = 1 / zoomFactor;
+		vector.mvt = "zoomout";
+	}
+	fractal.setFractalDesc(c, true);
+	var endDesc = fractal.getFractalDesc(c);
+
+	// computes the movement vector, then redraws
+	vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
+	vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
+	fractal.draw("user.control",vector);
+	events.send("user.control");
+};
+
+
 if (params.keyboardControl) {
 
+	var panRatio = 0.095;
 	document.onkeydown = function(e) {
 	    e = e || window.event;
 			console.log(e);
-/*	    var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
-	    if (charCode > 0) {
-	        console.log("Typed character: " + String.fromCharCode(charCode));
-	    }*/
+	    var keyCode = (typeof e.which == "number") ? e.which : e.keyCode;
+			switch (keyCode) {
+				case 107: zoom(canvas.width/2, canvas.height/2, -1); break; // key +, zoom in
+				case 109: zoom(canvas.width/2, canvas.height/2, 1); break;  // key -, zoom out
+				case 37: pan(panRatio, 0); break; // left arrow
+				case 38: pan(0, panRatio); break; // up arrow
+				case 39: pan(-panRatio, 0); break; // right arrow
+				case 40: pan(0, -panRatio); break; // down arrow
+			}
 	};
 
 }
@@ -115,67 +180,21 @@ if (params.mouseControl) {
 			var c = {x:dragStartDesc.x-vecpx, y:dragStartDesc.y-vecpy};
 			fractal.setFractalDesc(c, true);
 
-	        var vfx = e.screenX - ldragX;
-	        var vfy = e.screenY - ldragY;
-	        var vector = {x:vfx,y:vfy,mvt:"pan"};
-			fractal.draw("mouse.control",vector);
-			events.send("mouse.control");
-	        ldragX = e.screenX;
-	        ldragY = e.screenY;
+			var vfx = e.screenX - ldragX;
+			var vfy = e.screenY - ldragY;
+			var vector = {x:vfx,y:vfy,mvt:"pan"};
+			fractal.draw("user.control",vector);
+			events.send("user.control");
+			ldragX = e.screenX;
+			ldragY = e.screenY;
 		}
 	});
 
 	var wheelFunction = function(e) {
 		if (!e) e = window.event;
 		e.preventDefault();
-	    var delta = e.deltaY || e.wheelDelta; // IE11 special
-		var mousex = e.clientX;
-		var mousey = e.clientY;
-
-	    var startDesc = fractal.getFractalDesc();
-	    var c = fractal.getFractalDesc();
-
-	    // test if we're at the maximum possible resolution (1.11e-15/pixel)
-		var sminExtent = Math.min(c.swidth, c.sheight);
-		var limit = sminExtent*1.11e-15;
-		if (c.w<=limit && delta < 0) {
-			events.send("zoom.limit.reached");
-			return;
-		}
-
-		// zoom in place, two steps :
-		// 1) translate complex point under mouse to center
-		// 2) zoom, and translate back by the zoomed vector
-		// should happen in only one step if I could figure out the math :-)
-		var pax = (mousex - c.swidth/2)*c.pixelOnP;
-		var pay = (mousey - c.sheight/2)*c.pixelOnP;
-		c.x += pax;
-		c.y += pay;
-		fractal.setFractalDesc(c,true);
-		c = fractal.getFractalDesc(c);
-	    var vector = {sx:mousex,sy:mousey};
-
-	    if(delta < 0) {
-	        c.w /= zoomFactor;
-			c.x -= pax / zoomFactor;
-			c.y -= pay / zoomFactor;
-	        vector.z = 1 * zoomFactor;
-	        vector.mvt = "zoomin";
-	    } else {
-	        c.w *= zoomFactor;
-			c.x -= pax * zoomFactor;
-			c.y -= pay * zoomFactor;
-	        vector.z = 1 / zoomFactor;
-	        vector.mvt = "zoomout";
-	    }
-			fractal.setFractalDesc(c, true);
-			var endDesc = fractal.getFractalDesc(c);
-
-	    // computes the movement vector, then redraws
-	    vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
-	    vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
-		fractal.draw("mouse.control",vector);
-		events.send("mouse.control");
+	  var delta = e.deltaY || e.wheelDelta; // IE11 special
+		zoom(e.clientX, e.clientY, delta);
 	};
 
 	// IE11 special
@@ -242,7 +261,7 @@ this.readUrl = function() {
 //-------- constructor & jquery callbacks
 
 events.on("iter.change", updateUrl);
-events.on("mouse.control", updateUrl);
+events.on("user.control", updateUrl);
 events.on("api.change", updateUrl);
 
 };
