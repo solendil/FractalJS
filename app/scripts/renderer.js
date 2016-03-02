@@ -1,4 +1,4 @@
- FractalJS.Renderer = function(fractal) {
+ FractalJS.Renderer = function(fractal, model) {
 "use strict";
 
 //-------- shortcuts
@@ -37,16 +37,11 @@ if ("hardwareConcurrency" in navigator) {
 	console.log("FractalJS will use the default " + nbOfThreads + " threads");
 }
 
-var engine;
+var workers = [];
 
 //-------- public methods
 
 this.resize = function() {
-	// send message to workers
-	this.setFractalDesc({
-			swidth: canvas.width,
-			sheight: canvas.height
-		});
 	// resize temp buffers
 	imageData = context.createImageData(canvas.width, canvas.height);
 	idata32 = new Uint32Array(imageData.data.buffer);
@@ -82,14 +77,6 @@ this.resize = function() {
     }
   }
 };
-
-this.setFractalDesc = function (desc) {
-  engine.setDesc(desc);
-};
-this.getFractalDesc = function () {
-  return engine.getDesc();
-};
-
 
 this.setColorDesc = function(desc) {
 	if (!colormap) {
@@ -185,10 +172,14 @@ this.draw = function(reason, vector, priovector, quality) {
   });
 
 	// dispatch first items of the drawList to all workers
-  engine.eachWorker(function(w){
-    var drawOrder = drawList.shift();
-		w.postMessage(drawOrder);
-  });
+	for (var w in workers) {
+		var drawOrder = drawList.shift();
+		if (drawOrder) {
+			drawOrder.model = model.getWorkerModel();
+			workers[w].postMessage(drawOrder);
+		}
+	}
+
 };
 
 //-------- private methods
@@ -197,12 +188,14 @@ var endOfFrame = function() {
 	var endFrameMs = performance.now();
 	events.send("frame.end", function() {
 		return {
-			fractalDesc : engine.getDesc(),
 			time: endFrameMs-startFrameMs,
+			data:{
+				lastquality:lastquality,
+			}
 		};
 	});
-  if (lastquality==300)
-    return;
+	if (lastquality==300)
+		return;
 	// frame is finished; analyze buffer to auto-adjust iteration count
 	// algorithm:
 	// - we compute the percentage of pixels in the set/pixels on the screen
@@ -229,7 +222,7 @@ var endOfFrame = function() {
 		}
 	}
 	var iterRange = maxIter-minIter;
-	var fringe10p = engine.getDesc().iter - Math.ceil(iterRange/10);
+	var fringe10p = model.iter - Math.ceil(iterRange/10);
 	var nbFringe10p = 0;
   //console.log(minIter, maxIter, iterRange +"/"+ engine.getDesc().iter, nbInSet, fringe10p)
 	for (ti in tiles) {
@@ -244,16 +237,16 @@ var endOfFrame = function() {
 	}
 	var percInSet = 100.0*nbInSet/nb;
  	var percFringe10p = 100.0*nbFringe10p/nbInSet;
-  //console.log(nbFringe10p, percInSet, percFringe10p)
+	//console.log(nbFringe10p, percInSet, percFringe10p)
 	if (percInSet > 1 && percFringe10p>1) {
-		that.setFractalDesc({iter:engine.getDesc().iter*1.5});
+		model.iter = Math.round(model.iter*1.5);
 		that.draw();
 		events.send("iter.change");
 	} else {
     setTimeout(function() {that.refine();},1000);
   }
 	if (percInSet > 1 && percFringe10p<0.2) {
-		that.setFractalDesc({iter:engine.getDesc().iter/1.5});
+		model.iter = Math.round(model.iter/1.5);
 		// public_methods.draw();
 		events.send("iter.change");
 	}
@@ -316,6 +309,7 @@ this.workerMessage = function(param) {
 			if (drawList.length===0) {
 				drawOrder.finished=true;
 			}
+      drawOrder.model = model.getWorkerModel();
 			param.target.postMessage(drawOrder);
 		}
 
@@ -327,7 +321,12 @@ this.workerMessage = function(param) {
   }
 };
 
- engine = new FractalJS.Engine(nbOfThreads, this);
+for (var i=0; i<nbOfThreads; i++) {
+	var worker = FractalJS.EngineWorker();
+	workers.push(worker);
+	worker.onmessage=this.workerMessage;
+}
+
  this.resize();
 
 };

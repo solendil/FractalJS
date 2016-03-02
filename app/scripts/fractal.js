@@ -22,8 +22,6 @@
 FractalJS.create = function(params) {
 "use strict";
 
-//-------- private members
-
 var renderer, controller;
 var util = FractalJS.util;
 this.params = params;
@@ -37,6 +35,8 @@ if (!params.canvas || !params.canvas.width)
 if (!params.fractalDesc)
 	throw "Fractal Description is not set";
 
+var model = new FractalJS.Model(params.canvas);
+
 // define default values
 params.renderer = util.defaultProps(params.renderer, {
 	numberOfTiles: 1,
@@ -49,12 +49,14 @@ params.controller = util.defaultProps(params.controller, {
 });
 
 // instanciate controller, read and set URL
-controller = new FractalJS.Controller(this);
+controller = new FractalJS.Controller(this, model);
 var urlParams = controller.readUrl();
 if (urlParams) {
 	params.fractalDesc = urlParams[0];
 	params.colorDesc = urlParams[1];
 }
+
+model.setFractalDesc(params.fractalDesc);
 
 // define default palette if not set
 if (!params.colorDesc) {
@@ -62,9 +64,8 @@ if (!params.colorDesc) {
 }
 
 // instanciate renderer and set startup params
-renderer = new FractalJS.Renderer(this);
+renderer = new FractalJS.Renderer(this, model);
 renderer.setColorDesc(params.colorDesc);
-renderer.setFractalDesc(params.fractalDesc);
 
 // draw if required
 if (params.renderer.drawAfterInit)
@@ -72,14 +73,19 @@ if (params.renderer.drawAfterInit)
 
 //-------- public API
 
-this.setFractalDesc = function (desc, nofire) {
-	renderer.setFractalDesc(desc);
-	if (!nofire)
-		this.events.send("api.change");
+this.setFractalDesc = function (desc) {
+	if ("x" in desc)
+		model.camera.setXYW(desc.x, desc.y, desc.w);
+	if ("iter" in desc)
+		model.iter = desc.iter;
+	if ("typeId" in desc)
+		model.typeId = desc.typeId;
+	if ("smooth" in desc)
+		model.smooth = desc.smooth;
 };
 
-this.getFractalDesc= function () {
-	return renderer.getFractalDesc();
+this.getModel = function () {
+	return model;
 };
 
 this.draw= function(reason,vector) {
@@ -87,6 +93,7 @@ this.draw= function(reason,vector) {
 };
 
 this.resize= function() {
+	model.resize();
 	renderer.resize();
 };
 

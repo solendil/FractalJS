@@ -3,7 +3,7 @@
  * - capture events related to the canvas and modify the view accordingly
  * - loads the URL parameters and updates the URL in relatime
  */
-FractalJS.Controller = function(fractal) {
+FractalJS.Controller = function(fractal, model) {
 "use strict";
 
 //-------- private members
@@ -42,7 +42,6 @@ var events = fractal.events;
  *   37-39        reserved
  */
 var updateUrl = function() {
-	var desc = fractal.getFractalDesc();
 	var color = fractal.getColorDesc();
 	// create a buffer and two views on it to store fractal parameters
 	var buffer = new ArrayBuffer(40);
@@ -51,15 +50,15 @@ var updateUrl = function() {
 	var doubleArray = new Float64Array(buffer);
 	var floatArray = new Float32Array(buffer);
 	intArray[0] = 1; // version number
-	intArray[1] = desc.iter;
-	byteArray[4] = desc.typeid;
+	intArray[1] = model.iter;
+	byteArray[4] = model.typeid;
 	byteArray[5] = color.typeid;
 	intArray[3] = color.offset*10000;
-	doubleArray[1] = desc.x;
-	doubleArray[2] = desc.y;
-	doubleArray[3] = desc.w;
+	doubleArray[1] = model.camera.x;
+	doubleArray[2] = model.camera.y;
+	doubleArray[3] = model.camera.w;
 	floatArray[8] = color.density;
-	var flags = desc.smooth?1:0;
+	var flags = model.smooth?1:0;
 	byteArray[36] = flags;
 	// encode as base64 and put in the URL
 	// https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string/11562550#11562550
@@ -74,24 +73,24 @@ var updateUrl = function() {
 //-------- event catchers
 
 var pan = function(x, y) {
-	var desc = fractal.getFractalDesc();
-	var deltax = x*desc.swidth*desc.pixelOnP;
-	var deltay = y*desc.sheight*desc.pixelOnP;
-	fractal.setFractalDesc({x:desc.x-deltax, y:desc.y-deltay}, true);
-	var screenx = x*desc.swidth;
-	var screeny = y*desc.sheight;
+	var cam = model.camera;
+	var deltax = x * cam.width * cam.pixelOnP;
+	var deltay = y * cam.height * cam.pixelOnP;
+	var screenx = x * cam.width;
+	var screeny = y * cam.height;
+	cam.setXYW(cam.x - deltax, cam.y - deltay);
 	fractal.draw("user.control",{x:screenx,y:screeny,mvt:"pan"});
 	events.send("user.control");
 };
 
 var zoom = function(x, y, delta) {
-	var startDesc = fractal.getFractalDesc();
-	var c = fractal.getFractalDesc();
+	var startDesc = model.camera.clone();
+	var cam = model.camera;
 
 	// test if we're at the maximum possible resolution (1.11e-15/pixel)
-	var sminExtent = Math.min(c.swidth, c.sheight);
+	var sminExtent = Math.min(cam.width, cam.height);
 	var limit = sminExtent*1.11e-15;
-	if (c.w<=limit && delta < 0) {
+	if (cam.w<=limit && delta < 0) {
 		events.send("zoom.limit.reached");
 		return;
 	}
@@ -100,29 +99,29 @@ var zoom = function(x, y, delta) {
 	// 1) translate complex point under mouse to center
 	// 2) zoom, and translate back by the zoomed vector
 	// should happen in only one step if I could figure out the math :-)
-	var pax = (x - c.swidth/2)*c.pixelOnP;
-	var pay = (y - c.sheight/2)*c.pixelOnP;
-	c.x += pax;
-	c.y += pay;
-	fractal.setFractalDesc(c,true);
-	c = fractal.getFractalDesc(c);
+	var pax = (x - cam.width/2)*cam.pixelOnP;
+	var pay = (y - cam.height/2)*cam.pixelOnP;
+	cam.x += pax;
+	cam.y += pay;
+	cam.project();
+
 	var vector = {sx:x,sy:y};
 
 	if(delta < 0) {
-		c.w /= zoomFactor;
-		c.x -= pax / zoomFactor;
-		c.y -= pay / zoomFactor;
+		cam.w /= zoomFactor;
+		cam.x -= pax / zoomFactor;
+		cam.y -= pay / zoomFactor;
 		vector.z = 1 * zoomFactor;
 		vector.mvt = "zoomin";
 	} else {
-		c.w *= zoomFactor;
-		c.x -= pax * zoomFactor;
-		c.y -= pay * zoomFactor;
+		cam.w *= zoomFactor;
+		cam.x -= pax * zoomFactor;
+		cam.y -= pay * zoomFactor;
 		vector.z = 1 / zoomFactor;
 		vector.mvt = "zoomout";
 	}
-	fractal.setFractalDesc(c, true);
-	var endDesc = fractal.getFractalDesc(c);
+	cam.project();
+	var endDesc = model.camera.clone();
 
 	// computes the movement vector, then redraws
 	vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
@@ -131,9 +130,7 @@ var zoom = function(x, y, delta) {
 	events.send("user.control");
 };
 
-
 if (params.keyboardControl) {
-
 	var panRatio = 0.095;
 	document.onkeydown = function(e) {
 	    e = e || window.event;
@@ -148,7 +145,6 @@ if (params.keyboardControl) {
 				case 40: pan(0, -panRatio); break; // down arrow
 			}
 	};
-
 }
 
 if (params.mouseControl) {
@@ -162,7 +158,7 @@ if (params.mouseControl) {
 		dragY = ldragY = e.screenY;
 		if (e.button !== 0)
 			return;
-		dragStartDesc = fractal.getFractalDesc();
+		dragStartDesc = model.camera.clone();
 	};
 
 	window.addEventListener("mouseup", function(e) {
@@ -178,7 +174,7 @@ if (params.mouseControl) {
 			var vecpx = vecx*dragStartDesc.pixelOnP;
 			var vecpy = vecy*dragStartDesc.pixelOnP;
 			var c = {x:dragStartDesc.x-vecpx, y:dragStartDesc.y-vecpy};
-			fractal.setFractalDesc(c, true);
+			model.camera.setXYW(dragStartDesc.x-vecpx, dragStartDesc.y-vecpy);
 
 			var vfx = e.screenX - ldragX;
 			var vfy = e.screenY - ldragY;
@@ -208,6 +204,7 @@ if (params.mouseControl) {
 if (params.fitToWindow) {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
+	model.resize();
 	window.onresize = function() {
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
@@ -238,14 +235,14 @@ this.readUrl = function() {
 				y:doubleArray[2],
 				w:doubleArray[3],
 				iter:intArray[1],
-				typeid:byteArray[4],
+				typeId:byteArray[4],
 				smooth:flags&0x1==1
 			};
 
 			var color = {
 				offset:intArray[3]/10000.0,
 				density:byteArray.length>32?floatArray[8]:20,
-				typeid:byteArray[5],
+				typeId:byteArray[5],
 				resolution:1000,
 				buffer:FractalJS.Colormapbuilder().fromId(1000, byteArray[5]),
 			};

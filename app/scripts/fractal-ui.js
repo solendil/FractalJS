@@ -2,51 +2,51 @@
 var fractal;
 var typeList = {
   "tippetts" : {
-    typeid:3,
+    typeId:3,
     x:-0.2,
     y:0.0,
     w:4,
-    i:50
+    iter:50
   },
   "mandel" : {
-    typeid:0,
+    typeId:0,
     smooth:true,
     x:-0.7,
     y:0.0,
     w:2.5,
-    i:50
+    iter:50
   },
   "julia_a" : {
-    typeid:4,
+    typeId:4,
     smooth:true,
     x:0.0,
     y:0.0,
     w:2.2,
-    i:50
+    iter:50
   },
   "phoenix" : {
-    typeid:5,
+    typeId:5,
     smooth:true,
     x:0.0,
     y:-0.1,
     w:2,
-    i:500
+    iter:500
   },
   "mandel3" : {
-    typeid:1,
+    typeId:1,
     smooth:true,
     x:0.0,
     y:0.0,
     w:3.0,
-    i:50
+    iter:50
   },
   "burningship" : {
-    typeid:2,
+    typeId:2,
     smooth:true,
     x:-0.4,
     y:-0.7,
     w:3,
-    i:50
+    iter:50
   }
 };
 
@@ -76,7 +76,7 @@ var buildGradientSwatches = function() {
   $("canvas.gradient").click(function(e) {
     //console.log("event", e, $(this).attr("ival"))
     fractal.setColorDesc({
-      typeid:$(this).attr("ival"),
+      typeId:$(this).attr("ival"),
       buffer:builder.fromId(1000,$(this).attr("ival"))
     });
     fractal.refreshColormap();
@@ -85,11 +85,11 @@ var buildGradientSwatches = function() {
 };
 
 var updateInfo = function() {
-  var desc = fractal.getFractalDesc();
-  $("#info_x").text(desc.x);
-  $("#info_y").text(desc.y);
-  $("#info_w").text(desc.w.toExponential(4));
-  $("#info_iter").text(desc.iter);
+  var model = fractal.getModel();
+  $("#info_x").text(model.camera.x);
+  $("#info_y").text(model.camera.y);
+  $("#info_w").text(model.camera.w.toExponential(4));
+  $("#info_iter").text(model.iter);
 };
 
 var updateShare = function() {
@@ -112,15 +112,14 @@ $(function() {
       fitToWindow:true
     },
     colormap:{
-      typeid:0,
+      typeId:0,
       buffer:FractalJS.Colormapbuilder().fromId(1000,0),
       density:20,
     }
   });
   fractal.draw("init");
 
-  desc=fractal.getFractalDesc();
-  if (desc.smooth) $('#smooth').removeClass('btn-default').addClass('btn-info');
+  if (fractal.getModel().smooth) $('#smooth').removeClass('btn-default').addClass('btn-info');
   else $('#smooth').removeClass('btn-success').addClass('btn-default');
   $('#smooth').click(function(){
     if ($('#smooth').hasClass('btn-default')) {
@@ -180,7 +179,7 @@ $(function() {
 
   // log end of frame recap and time
   fractal.events.on("frame.end", function(res) {
-    console.log("finished drawing", res.fractalDesc, "time in ms", res.time);
+    console.log("finished drawing", res.data, "time in ms", res.time);
   });
 
   //

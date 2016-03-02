@@ -1,7 +1,18 @@
 /*
- * Event center of the Fractal engine, allows components to send or 
+ * Event center of the Fractal engine, allows components to send or
  * subscribe to events.
  */
+
+/*
+List of events :
+
+frame.end
+	Sent by the renderer when a frame is finished drawing. This event is generated for every quality.
+
+
+
+*/
+
 FractalJS.Events = function(){
 "use strict";
 
@@ -12,7 +23,7 @@ var listeners = {};
 var callbackHelp = function(cblist, _param) {
 	if(cblist.length>0) {
 		var param = _param;
-		if (typeof(_param) === "function") 
+		if (typeof(_param) === "function")
 			param = _param();
 		for(var cb in cblist) {
 			cblist[cb](param);
@@ -25,7 +36,7 @@ return {
 on: function(_event, callback) {
 	// events can be a single event or a list
 	var events = _event;
-	if (_event.constructor !== Array) 
+	if (_event.constructor !== Array)
 		events = [_event];
 
 	for (var i in events) {
@@ -44,7 +55,7 @@ send: function(_event, _param) {
 		events = [_event];
 	// param can be a single object or a function to be called
 	var param = _param;
-	if (typeof(_param) === "function") 
+	if (typeof(_param) === "function")
 		param = _param();
 
 	var cblist = [];
