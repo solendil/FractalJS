@@ -309,9 +309,10 @@ drawSuperTileOnBuffer: function(tile, model) {
 drawSubTileOnBuffer: function(tile, model) {
 	var res = 4;
 	var frame = tile.frame;
-	for (var sy=tile.y1; sy<=tile.y2; sy+=res) {
-		var dx = (sy-tile.y1)*tile.width;
-		for (var sx=tile.x1; sx<=tile.x2; sx+=res) {
+	var dx, sx, sy;
+	for (sy=tile.y1; sy<=tile.y2; sy+=res) {
+		dx = (sy-tile.y1)*tile.width;
+		for (sx=tile.x1; sx<=tile.x2; sx+=res) {
 			var px = sx * model.a + sy * model.c + model.e + (res/2)*pixelOnP;
 			var py = sx * model.b + sy * model.d + model.f - (res/2)*pixelOnP;
 			var piter = fractalFunction(px, py);
@@ -322,10 +323,10 @@ drawSubTileOnBuffer: function(tile, model) {
 			dx+=res;
 		}
 	}
-	var dx = 0;
-	for (var sy=0; sy<tile.height; sy++) {
-		for (var sx=0; sx<tile.width; sx++) {
-			if (sy%res==0 && sx%res==0) {
+	dx = 0;
+	for (sy=0; sy<tile.height; sy++) {
+		for (sx=0; sx<tile.width; sx++) {
+			if (sy%res===0 && sx%res===0) {
 			} else {
 				frame[dx]= frame[(sy-sy%res)*tile.width+sx-sx%res];
 			}

@@ -22,54 +22,9 @@ var canvas = fractal.params.canvas;
 var params = fractal.params.controller;
 var events = fractal.events;
 
-//-------- private methods
+//-------- public members
 
-/*
- * If first letter of URL hash is an 'A'
- * Decode rest of hash using base64, build three arrays on the buffer:
- *   Uint8Array, Uint16Array, Float64Array
- * --bytes ------ array -------------	usage --------------------
- *   0,1          Uint16Array[0]		version of hash
- *   2,3          Uint16Array[1]		number of iterations
- *   4            Uint8Array[4]	    type of fractal
- *   5            Uint8Array[5]	    type of gradient
- *   6,7          Uint16Array[3]		color offset (times 10000)
- *   8-15         Float64Array[1]		x
- *   16-23        Float64Array[2]		y
- *   24-31        Float64Array[3]		w (extent)
- *   32-35        Float32Array[8]		color density (if present, 20 if not)
- *   36           Uint8Array[36]    flags (if present, 0 if not)
- *                                  0x00000001 : smooth shading
- *   37-39        reserved
- */
-var updateUrl = function() {
-	var color = fractal.getColorDesc();
-	// create a buffer and two views on it to store fractal parameters
-	var buffer = new ArrayBuffer(40);
-	var byteArray = new Uint8Array(buffer);
-	var intArray = new Uint16Array(buffer);
-	var doubleArray = new Float64Array(buffer);
-	var floatArray = new Float32Array(buffer);
-	intArray[0] = 1; // version number
-	intArray[1] = model.iter;
-	byteArray[4] = model.typeId;
-	byteArray[5] = color.typeId;
-	intArray[3] = color.offset*10000;
-	doubleArray[1] = model.camera.x;
-	doubleArray[2] = -model.camera.y;
-	doubleArray[3] = model.camera.w;
-	floatArray[8] = color.density;
-	var flags = model.smooth?1:0;
-	byteArray[36] = flags;
-	// encode as base64 and put in the URL
-	// https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string/11562550#11562550
-	var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
-	base64String = base64String.split("/").join("*");
-	base64String = base64String.split("=").join("_");
-	history.replaceState("", "", "#A"+base64String);
-	//document.location.hash="A"+base64String;
-	//console.log("Updating URL", {x:desc.x,y:desc.y,w:desc.w,iter:desc.iter});
-};
+this.url = new FractalJS.Url(model, fractal);
 
 //-------- event catchers
 
@@ -77,7 +32,7 @@ var rotate = function(angle) {
 	model.camera.angle += angle;
 	model.camera.project();
 	fractal.draw("user.control");
-}
+};
 
 var pan = function(x, y) {
 	var cam = model.camera;
@@ -108,7 +63,7 @@ var zoom = function(x, y, delta) {
 	cam.setXYW(z.x+vec.x*zoom, z.y+vec.y*zoom, cam.w*zoom); // adjust camera using scaled vector
 	var dest = cam.S2C(0,0);
 	var vector = {x:(origin.x-dest.x)/startRatio, y:-(origin.y-dest.y)/startRatio,
-		z:1/zoom, mvt:delta<0?"zoomin":"zoomout", sx:x,sy:y}
+		z:1/zoom, mvt:delta<0?"zoomin":"zoomout", sx:x,sy:y};
 	fractal.draw("user.control",vector);
 	events.send("user.control");
 };
@@ -197,52 +152,10 @@ if (params.fitToWindow) {
 	};
 }
 
-//-------- public methods
-
-this.readUrl = function() {
-	try {
-		var url = document.location.hash;
-		if (url.startsWith("#A")) {
-			var base64String = url.substr(2);
-			base64String = base64String.split("*").join("/");
-			base64String = base64String.split("_").join("=");
-
-			var buffer = FractalJS.util.base64ToArrayBuffer(base64String);
-			var byteArray = new Uint8Array(buffer);
-			var intArray = new Uint16Array(buffer);
-			var doubleArray = new Float64Array(buffer);
-			var floatArray = new Float32Array(buffer);
-
-			var flags = byteArray[36];
-			var desc = {
-				x:doubleArray[1],
-				y:-doubleArray[2],
-				w:doubleArray[3],
-				iter:intArray[1],
-				typeId:byteArray[4],
-				smooth:flags&0x1==1
-			};
-
-			var color = {
-				offset:intArray[3]/10000.0,
-				density:byteArray.length>32?floatArray[8]:20,
-				typeId:byteArray[5],
-				resolution:1000,
-				buffer:FractalJS.Colormapbuilder().fromId(1000, byteArray[5]),
-			};
-
-			return [desc,color];
-		}
-	} catch(e) {
-		console.error("Could not read URL");
-		console.error(e);
-	}
-};
-
 //-------- constructor & jquery callbacks
 
-events.on("iter.change", updateUrl);
-events.on("user.control", updateUrl);
-events.on("api.change", updateUrl);
+events.on("iter.change", this.url.update);
+events.on("user.control", this.url.update);
+events.on("api.change", this.url.update);
 
 };

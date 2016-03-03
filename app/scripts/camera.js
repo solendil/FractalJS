@@ -21,9 +21,9 @@ FractalJS.Camera = function(){
     // apply rotation to Q
     var rotation = util.Matrix.GetRotationMatrix(-angle);
     var m = rotation;
-    var p = m.applyTo(1,-1)
-    var q = m.applyTo(-1,1)
-    var r = m.applyTo(-1,-1)
+    var p = m.applyTo(1,-1);
+    var q = m.applyTo(-1,1);
+    var r = m.applyTo(-1,-1);
 
     if (width >= height) {
       var x1=(width-height)/2, x2=x1+height;
@@ -32,11 +32,11 @@ FractalJS.Camera = function(){
       var y1=(height-width)/2, y2=y1+width;
       return util.Matrix.GetTriangleToTriangle(width,y2,0,y1,0,y2,p.x,p.y,q.x,q.y,r.x,r.y);
     }
-  }
+  };
 
   var getSquareToComplexMatrix = function(x, y, w) {
     return util.Matrix.GetTriangleToTriangle(1,0,0,1,0,0,x+w/2,y,x,y+w/2,x,y);
-  }
+  };
 
   // project is called whenever the camera changes; it computes new projection parameters
   this.project = function() {
@@ -69,7 +69,7 @@ FractalJS.Camera = function(){
 
   this.S2C = function(x,y) {
     return matrix.applyTo(x,y);
-  }
+  };
 
   // returns a serialisable object
   this.getWorkerModel = function() {

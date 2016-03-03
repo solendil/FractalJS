@@ -50,7 +50,7 @@ params.controller = util.defaultProps(params.controller, {
 
 // instanciate controller, read and set URL
 controller = new FractalJS.Controller(this, model);
-var urlParams = controller.readUrl();
+var urlParams = controller.url.read();
 if (urlParams) {
 	params.fractalDesc = urlParams[0];
 	params.colorDesc = urlParams[1];
@@ -60,7 +60,7 @@ model.setFractalDesc(params.fractalDesc);
 
 // define default palette if not set
 if (!params.colorDesc) {
-	params.colorDesc = {typeid:0, resolution:1000, buffer:FractalJS.Colormapbuilder().fromId(1000, 0)};
+	params.colorDesc = {typeId:0, resolution:1000, buffer:FractalJS.Colormapbuilder().fromId(1000, 0)};
 }
 
 // instanciate renderer and set startup params

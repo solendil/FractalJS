@@ -205,7 +205,7 @@ base64ToArrayBuffer: function (base64) {
 
 
 Matrix: function(a,b,c,d,e,f) {
-	var Matrix = FractalJS.util.Matrix
+	var Matrix = FractalJS.util.Matrix;
     if (f===undefined) {
       this.a = 1; this.c = 0; this.e = 0;
       this.b = 0; this.d = 1; this.f = 0;
@@ -216,7 +216,7 @@ Matrix: function(a,b,c,d,e,f) {
     this.isInvertible = function() {
       var deter = this.a * this.d - this.b * this.c;
       return Math.abs(deter)>1e-14;
-    }
+    };
     this.inverse = function() {
       if (!this.isInvertible()) {
         throw "Matrix is not invertible.";
@@ -225,7 +225,7 @@ Matrix: function(a,b,c,d,e,f) {
         var dt = a * d - b * c;
         return new Matrix(d/dt, -b/dt, -c/dt, a/dt, (c * f - d * e) / dt, -(a * f - b * e) / dt);
       }
-    }
+    };
     this.multiply = function(o) {
       return new Matrix(
         this.a * o.a + this.c * o.b,
@@ -234,22 +234,22 @@ Matrix: function(a,b,c,d,e,f) {
     		this.b * o.c + this.d * o.d,
     		this.a * o.e + this.c * o.f + this.e,
     		this.b * o.e + this.d * o.f + this.f
-      )
-    }
+      );
+    };
     this.rotate = function(angle) {
       var cos = Math.cos(angle), sin = Math.sin(angle);
       return this.multiply(new Matrix(cos, sin, -sin, cos, 0, 0));
-    }
+    };
     this.applyTo = function(x, y) {
       return {
         x: x * this.a + y * this.c + this.e,
         y: x * this.b + y * this.d + this.f
-      }
-    }
+      };
+    };
     // this method is used to pass a matrix to a worker
     this.params = function() {
-      return {a:a,b:b,c:c,d:d,e:e,f:f}
-    }
+      return {a:a,b:b,c:c,d:d,e:e,f:f};
+    };
 }
 
 };
@@ -262,10 +262,10 @@ FractalJS.util.Matrix.GetTriangleToTriangle = function(t1px, t1py, t1qx, t1qy, t
   var STD2T2 = new FractalJS.util.Matrix(t2px-t2rx, t2py-t2ry, t2qx-t2rx, t2qy-t2ry, t2rx, t2ry);
   var T12STD = STD2T1.inverse();
   return STD2T2.multiply(T12STD);
-}
+};
 
 // add static method to matrix
 FractalJS.util.Matrix.GetRotationMatrix = function(angle) {
   var cos = Math.cos(angle), sin = Math.sin(angle);
   return new FractalJS.util.Matrix(cos, sin, -sin, cos, 0, 0);
-}
+};

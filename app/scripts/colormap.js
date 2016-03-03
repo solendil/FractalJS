@@ -1,7 +1,7 @@
 /*
  * The color map:
  * - is an array of colors whose size is the "resolution"
- * - a fractal iteration number is mapped onto this array according to 
+ * - a fractal iteration number is mapped onto this array according to
  *   the "offset" (range [0..1[) and the "density" (range [0.1..10[)
  * - is created from the different palette builders
  */
@@ -14,7 +14,7 @@ var buffer = new Int32Array(params.buffer);
 var offset = params.offset || 0.0;
 var density = params.density || 20;
 var resolution = buffer.length;
-var typeid = params.typeid;
+var typeId = params.typeId;
 
 //-------- private methds
 
@@ -40,7 +40,7 @@ getDesc: function() {
 		offset:offset,
 		density:density,
 		buffer:buffer,
-		typeid:typeid,
+		typeId:typeId,
 	};
 },
 
@@ -50,8 +50,8 @@ setDesc: function(cmap) {
 		offset = cmap.offset;
 	if (cmap.density)
 		density = cmap.density;
-	if (cmap.typeid)
-		typeid = cmap.typeid;
+	if (cmap.typeId)
+		typeId = cmap.typeId;
 	if (cmap.buffer) {
 		buffer = cmap.buffer;
 		resolution = cmap.buffer.length;
