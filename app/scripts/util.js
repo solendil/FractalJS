@@ -10,7 +10,7 @@ window.FractalJS = window.FractalJS || {};
 FractalJS.util = (function(){
 "use strict";
 
-//-------- polyfills 
+//-------- polyfills
 
 Math.trunc = Math.trunc || function(x) {
   return x < 0 ? Math.ceil(x) : Math.floor(x);
@@ -25,7 +25,7 @@ if (typeof String.prototype.startsWith != 'function') {
 if ("performance" in window === false) {
 	window.performance = {};
 }
-  
+
 // https://gist.github.com/paulirish/5438650
 if ("now" in window.performance === false){
 	var nowOffset = Date.now();
@@ -40,7 +40,7 @@ if ("now" in window.performance === false){
 //-------- private functions
 
 var toHex2 = function(number) {
-	if (number<0 || number>255) 
+	if (number<0 || number>255)
 		throw "Number is out of range";
 	if (number<16)
 		return "0" + number.toString(16);
@@ -65,7 +65,7 @@ return {
 /* jshint ignore:start */
 createInterpolant: function(xs, ys) {
 	var i, length = xs.length;
-	
+
 	// Deal with length issues
 	if (length != ys.length) { throw 'Need an equal count of xs and ys.'; }
 	if (length === 0) { return function(x) { return 0; }; }
@@ -75,7 +75,7 @@ createInterpolant: function(xs, ys) {
 		var result = +ys[0];
 		return function(x) { return result; };
 	}
-	
+
 	// Rearrange xs and ys so that xs is sorted
 	var indexes = [];
 	for (i = 0; i < length; i++) { indexes.push(i); }
@@ -85,14 +85,14 @@ createInterpolant: function(xs, ys) {
 	xs = []; ys = [];
 	// Impl: Unary plus properly converts values to numbers
 	for (i = 0; i < length; i++) { xs.push(+oldXs[indexes[i]]); ys.push(+oldYs[indexes[i]]); }
-	
+
 	// Get consecutive differences and slopes
 	var dys = [], dxs = [], ms = [];
 	for (i = 0; i < length - 1; i++) {
 		var dx = xs[i + 1] - xs[i], dy = ys[i + 1] - ys[i];
 		dxs.push(dx); dys.push(dy); ms.push(dy/dx);
 	}
-	
+
 	// Get degree-1 coefficients
 	var c1s = [ms[0]];
 	for (i = 0; i < dxs.length - 1; i++) {
@@ -105,20 +105,20 @@ createInterpolant: function(xs, ys) {
 		}
 	}
 	c1s.push(ms[ms.length - 1]);
-	
+
 	// Get degree-2 and degree-3 coefficients
 	var c2s = [], c3s = [];
 	for (i = 0; i < c1s.length - 1; i++) {
 		var c1 = c1s[i], m = ms[i], invDx = 1/dxs[i], common = c1 + c1s[i + 1] - m - m;
 		c2s.push((m - c1 - common)*invDx); c3s.push(common*invDx*invDx);
 	}
-	
+
 	// Return interpolant function
 	return function(x) {
 		// The rightmost point in the dataset should give an exact result
 		var i = xs.length - 1;
 		if (x == xs[i]) { return ys[i]; }
-		
+
 		// Search for the interval x is in, returning the corresponding y if x is one of the original xs
 		var low = 0, mid, high = c3s.length - 1;
 		while (low <= high) {
@@ -129,7 +129,7 @@ createInterpolant: function(xs, ys) {
 			else { return ys[mid]; }
 		}
 		i = Math.max(0, high);
-		
+
 		// Interpolate
 		var diff = x - xs[i], diffSq = diff*diff;
 		return ys[i] + c1s[i]*diff + c2s[i]*diffSq + c3s[i]*diff*diffSq;
@@ -201,8 +201,71 @@ base64ToArrayBuffer: function (base64) {
         bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes.buffer;
+},
+
+
+Matrix: function(a,b,c,d,e,f) {
+	var Matrix = FractalJS.util.Matrix
+    if (f===undefined) {
+      this.a = 1; this.c = 0; this.e = 0;
+      this.b = 0; this.d = 1; this.f = 0;
+    } else {
+      this.a = a; this.c = c; this.e = e;
+      this.b = b; this.d = d; this.f = f;
+    }
+    this.isInvertible = function() {
+      var deter = this.a * this.d - this.b * this.c;
+      return Math.abs(deter)>1e-14;
+    }
+    this.inverse = function() {
+      if (!this.isInvertible()) {
+        throw "Matrix is not invertible.";
+      } else {
+        var a = this.a, b = this.b, c = this.c, d = this.d, e = this.e, f = this.f;
+        var dt = a * d - b * c;
+        return new Matrix(d/dt, -b/dt, -c/dt, a/dt, (c * f - d * e) / dt, -(a * f - b * e) / dt);
+      }
+    }
+    this.multiply = function(o) {
+      return new Matrix(
+        this.a * o.a + this.c * o.b,
+    		this.b * o.a + this.d * o.b,
+    		this.a * o.c + this.c * o.d,
+    		this.b * o.c + this.d * o.d,
+    		this.a * o.e + this.c * o.f + this.e,
+    		this.b * o.e + this.d * o.f + this.f
+      )
+    }
+    this.rotate = function(angle) {
+      var cos = Math.cos(angle), sin = Math.sin(angle);
+      return this.multiply(new Matrix(cos, sin, -sin, cos, 0, 0));
+    }
+    this.applyTo = function(x, y) {
+      return {
+        x: x * this.a + y * this.c + this.e,
+        y: x * this.b + y * this.d + this.f
+      }
+    }
+    // this method is used to pass a matrix to a worker
+    this.params = function() {
+      return {a:a,b:b,c:c,d:d,e:e,f:f}
+    }
 }
 
 };
 
 })();
+
+// add static method to matrix
+FractalJS.util.Matrix.GetTriangleToTriangle = function(t1px, t1py, t1qx, t1qy, t1rx, t1ry, t2px, t2py, t2qx, t2qy, t2rx, t2ry) {
+  var STD2T1 = new FractalJS.util.Matrix(t1px-t1rx, t1py-t1ry, t1qx-t1rx, t1qy-t1ry, t1rx, t1ry);
+  var STD2T2 = new FractalJS.util.Matrix(t2px-t2rx, t2py-t2ry, t2qx-t2rx, t2qy-t2ry, t2rx, t2ry);
+  var T12STD = STD2T1.inverse();
+  return STD2T2.multiply(T12STD);
+}
+
+// add static method to matrix
+FractalJS.util.Matrix.GetRotationMatrix = function(angle) {
+  var cos = Math.cos(angle), sin = Math.sin(angle);
+  return new FractalJS.util.Matrix(cos, sin, -sin, cos, 0, 0);
+}

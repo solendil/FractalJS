@@ -78,6 +78,7 @@ var fractalFunctionListSmooth = {
 	},
 	// burningship
 	2 : function(cx,cy) {
+		cy = -cy; // this fractal is usually represented upside down
 		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
 		while (true) {
 			zny = (zx+zx)*zy+cy;
@@ -211,6 +212,7 @@ var fractalFunctionList = {
 	},
 	// burningship
 	2 : function(cx,cy) {
+		cy = -cy; // this fractal is usually represented upside down
 		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
 		while (true) {
 			zny = (zx+zx)*zy+cy;
@@ -271,60 +273,64 @@ return {
 
 drawTileOnBuffer: function(tile, model) {
 	var frame = tile.frame;
-	var py = model.pymin+tile.y1*model.pixelOnP;
 	var dx = 0;
 	for (var sy=tile.y1; sy<=tile.y2; sy++) {
-		var px = model.pxmin+tile.x1*model.pixelOnP;
 		for (var sx=tile.x1; sx<=tile.x2; sx++) {
+			var px = sx * model.a + sy * model.c + model.e;
+			var py = sx * model.b + sy * model.d + model.f;
 			var piter = fractalFunction(px, py);
 			if (piter==iter)
 				frame[dx++] = 0;
 			else
 				frame[dx++] = piter;
-			px += model.pixelOnP;
 		}
-		py += model.pixelOnP;
 	}
 },
 
+// subsampling with a regular 4*4 grid
 drawSuperTileOnBuffer: function(tile, model) {
 	var sss = model.pixelOnP/4;
 	var frame = tile.frame;
-	var py = model.pymin+tile.y1*model.pixelOnP;
 	var dx = 0;
 	for (var sy=tile.y1; sy<=tile.y2; sy++) {
-		var px = model.pxmin+tile.x1*model.pixelOnP;
 		for (var sx=tile.x1; sx<=tile.x2; sx++) {
+			var px = sx * model.a + sy * model.c + model.e - model.pixelOnP/2;
+			var py = sx * model.b + sy * model.d + model.f - model.pixelOnP/2;
 			var itersum = 0;
 			for (var ss=0; ss<16; ss++) {
 				itersum += fractalFunction(px+(ss/4*sss), py+(ss%4*sss));
 			}
 			var piter = itersum/16;
 			frame[dx++] = piter==iter?0:piter;
-			px += model.pixelOnP;
 		}
-		py += model.pixelOnP;
 	}
 },
 
 drawSubTileOnBuffer: function(tile, model) {
-	var res=4;
-	var py = model.pymin+(tile.y1+res/2)*model.pixelOnP;
-	var index = 0;
-	for (var y=0; y<tile.height; y+=res) {
-		var px = model.pxmin+(tile.x1+res/2)*model.pixelOnP;
-		var lineindex = index;
-		for (var x=0; x<tile.width; x+=res) {
+	var res = 4;
+	var frame = tile.frame;
+	for (var sy=tile.y1; sy<=tile.y2; sy+=res) {
+		var dx = (sy-tile.y1)*tile.width;
+		for (var sx=tile.x1; sx<=tile.x2; sx+=res) {
+			var px = sx * model.a + sy * model.c + model.e + (res/2)*pixelOnP;
+			var py = sx * model.b + sy * model.d + model.f - (res/2)*pixelOnP;
 			var piter = fractalFunction(px, py);
-			var color = piter==iter?0:piter;
-			for (var sx=0; sx<res && x+sx<tile.width; sx++)
-				tile.frame[index++] = color;
-			px += model.pixelOnP*res;
+			if (piter==iter)
+				frame[dx] = 0;
+			else
+				frame[dx] = piter;
+			dx+=res;
 		}
-		for (var sy=1; sy<res && y+sy<tile.height; sy++)
-			for (var tx=0; tx<tile.width; tx++)
-				tile.frame[index++] = tile.frame[lineindex+tx];
-		py += model.pixelOnP*res;
+	}
+	var dx = 0;
+	for (var sy=0; sy<tile.height; sy++) {
+		for (var sx=0; sx<tile.width; sx++) {
+			if (sy%res==0 && sx%res==0) {
+			} else {
+				frame[dx]= frame[(sy-sy%res)*tile.width+sx-sx%res];
+			}
+			dx++;
+		}
 	}
 },
 

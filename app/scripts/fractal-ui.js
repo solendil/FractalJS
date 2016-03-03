@@ -43,8 +43,8 @@ var typeList = {
   "burningship" : {
     typeId:2,
     smooth:true,
-    x:-0.4,
-    y:-0.7,
+    x:-0.25,
+    y:0.55,
     w:3,
     iter:50
   }

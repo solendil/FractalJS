@@ -9,6 +9,7 @@ FractalJS.Controller = function(fractal, model) {
 //-------- private members
 
 var zoomFactor = 1.3;
+var angle = Math.PI/180;
 
 var isDragging;			// is the user dragging ?
 var dragX, dragY;		// start dragging point
@@ -51,11 +52,11 @@ var updateUrl = function() {
 	var floatArray = new Float32Array(buffer);
 	intArray[0] = 1; // version number
 	intArray[1] = model.iter;
-	byteArray[4] = model.typeid;
-	byteArray[5] = color.typeid;
+	byteArray[4] = model.typeId;
+	byteArray[5] = color.typeId;
 	intArray[3] = color.offset*10000;
 	doubleArray[1] = model.camera.x;
-	doubleArray[2] = model.camera.y;
+	doubleArray[2] = -model.camera.y;
 	doubleArray[3] = model.camera.w;
 	floatArray[8] = color.density;
 	var flags = model.smooth?1:0;
@@ -72,6 +73,12 @@ var updateUrl = function() {
 
 //-------- event catchers
 
+var rotate = function(angle) {
+	model.camera.angle += angle;
+	model.camera.project();
+	fractal.draw("user.control");
+}
+
 var pan = function(x, y) {
 	var cam = model.camera;
 	var deltax = x * cam.width * cam.pixelOnP;
@@ -79,12 +86,11 @@ var pan = function(x, y) {
 	var screenx = x * cam.width;
 	var screeny = y * cam.height;
 	cam.setXYW(cam.x - deltax, cam.y - deltay);
-	fractal.draw("user.control",{x:screenx,y:screeny,mvt:"pan"});
+	fractal.draw("user.control",{x:screenx,y:-screeny,mvt:"pan"});
 	events.send("user.control");
 };
 
 var zoom = function(x, y, delta) {
-	var startDesc = model.camera.clone();
 	var cam = model.camera;
 
 	// test if we're at the maximum possible resolution (1.11e-15/pixel)
@@ -95,37 +101,14 @@ var zoom = function(x, y, delta) {
 		return;
 	}
 
-	// zoom in place, two steps :
-	// 1) translate complex point under mouse to center
-	// 2) zoom, and translate back by the zoomed vector
-	// should happen in only one step if I could figure out the math :-)
-	var pax = (x - cam.width/2)*cam.pixelOnP;
-	var pay = (y - cam.height/2)*cam.pixelOnP;
-	cam.x += pax;
-	cam.y += pay;
-	cam.project();
-
-	var vector = {sx:x,sy:y};
-
-	if(delta < 0) {
-		cam.w /= zoomFactor;
-		cam.x -= pax / zoomFactor;
-		cam.y -= pay / zoomFactor;
-		vector.z = 1 * zoomFactor;
-		vector.mvt = "zoomin";
-	} else {
-		cam.w *= zoomFactor;
-		cam.x -= pax * zoomFactor;
-		cam.y -= pay * zoomFactor;
-		vector.z = 1 / zoomFactor;
-		vector.mvt = "zoomout";
-	}
-	cam.project();
-	var endDesc = model.camera.clone();
-
-	// computes the movement vector, then redraws
-	vector.x = (startDesc.pxmin - endDesc.pxmin) / startDesc.pixelOnP;
-	vector.y = (startDesc.pymin - endDesc.pymin) / startDesc.pixelOnP;
+	var origin = cam.S2C(0,0), startRatio = cam.pixelOnP;
+	var z = cam.S2C(x,y);					// complex point under mouse
+	var vec = {x:cam.x-z.x, y:cam.y-z.y};   // vector to complex point at center
+	var zoom =delta<0?1/zoomFactor:zoomFactor; // zoom multiplicator according to movement
+	cam.setXYW(z.x+vec.x*zoom, z.y+vec.y*zoom, cam.w*zoom); // adjust camera using scaled vector
+	var dest = cam.S2C(0,0);
+	var vector = {x:(origin.x-dest.x)/startRatio, y:-(origin.y-dest.y)/startRatio,
+		z:1/zoom, mvt:delta<0?"zoomin":"zoomout", sx:x,sy:y}
 	fractal.draw("user.control",vector);
 	events.send("user.control");
 };
@@ -134,16 +117,18 @@ if (params.keyboardControl) {
 	var panRatio = 0.095;
 	document.onkeydown = function(e) {
 	    e = e || window.event;
-			console.log(e);
+		console.log(e);
 	    var keyCode = (typeof e.which == "number") ? e.which : e.keyCode;
-			switch (keyCode) {
-				case 107: zoom(canvas.width/2, canvas.height/2, -1); break; // key +, zoom in
-				case 109: zoom(canvas.width/2, canvas.height/2, 1); break;  // key -, zoom out
-				case 37: pan(panRatio, 0); break; // left arrow
-				case 38: pan(0, panRatio); break; // up arrow
-				case 39: pan(-panRatio, 0); break; // right arrow
-				case 40: pan(0, -panRatio); break; // down arrow
-			}
+		switch (keyCode) {
+			case 107: zoom(canvas.width/2, canvas.height/2, -1); break; // key +, zoom in
+			case 109: zoom(canvas.width/2, canvas.height/2, 1); break;  // key -, zoom out
+			case 37: pan(panRatio, 0); break; // left arrow
+			case 38: pan(0, -panRatio); break; // up arrow
+			case 39: pan(-panRatio, 0); break; // right arrow
+			case 40: pan(0, panRatio); break; // down arrow
+			case 82: rotate(angle); break; // R
+			case 84: rotate(-angle); break; // T
+		}
 	};
 }
 
@@ -173,8 +158,7 @@ if (params.mouseControl) {
 			var vecy = e.screenY-dragY;
 			var vecpx = vecx*dragStartDesc.pixelOnP;
 			var vecpy = vecy*dragStartDesc.pixelOnP;
-			var c = {x:dragStartDesc.x-vecpx, y:dragStartDesc.y-vecpy};
-			model.camera.setXYW(dragStartDesc.x-vecpx, dragStartDesc.y-vecpy);
+			model.camera.setXYW(dragStartDesc.x-vecpx, dragStartDesc.y+vecpy);
 
 			var vfx = e.screenX - ldragX;
 			var vfy = e.screenY - ldragY;
@@ -232,7 +216,7 @@ this.readUrl = function() {
 			var flags = byteArray[36];
 			var desc = {
 				x:doubleArray[1],
-				y:doubleArray[2],
+				y:-doubleArray[2],
 				w:doubleArray[3],
 				iter:intArray[1],
 				typeId:byteArray[4],
