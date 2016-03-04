@@ -84,6 +84,10 @@ this.setFractalDesc = function (desc) {
 		model.smooth = desc.smooth;
 };
 
+this.resetViewport = function (desc) {
+	model.camera.resetViewport();
+};
+
 this.getModel = function () {
 	return model;
 };

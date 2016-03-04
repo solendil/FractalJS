@@ -155,6 +155,7 @@ $(function() {
   $(".fractaltype").click(function(e) {
     var name = $(this).attr("name");
     fractal.setFractalDesc(typeList[name]);
+    fractal.resetViewport();
     $('#smooth').removeClass('btn-default').addClass('btn-info');
     slider_density.noUiSlider.set(100);
     fractal.draw("init");

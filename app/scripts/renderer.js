@@ -120,6 +120,11 @@ this.draw = function(reason, vector, priovector, quality) {
 	if (vector) {
 		var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 		vectorCanvas.getContext("2d").putImageData(imageData, 0, 0);
+		if (vector.matrix) {
+			context.translate(model.camera.width/2,model.camera.height/2);
+			context.transform(vector.matrix.a, vector.matrix.b, vector.matrix.c, vector.matrix.d, vector.matrix.e, vector.matrix.f);
+			context.translate(-model.camera.width/2,-model.camera.height/2);
+		}
 		context.scale(vector.z, vector.z);
 		context.translate(vector.x, vector.y);
 		context.drawImage(vectorCanvas,0,0);

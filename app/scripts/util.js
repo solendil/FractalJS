@@ -192,6 +192,12 @@ getHashColor: function(r, g, b) {
 		return "#" + toHex2(r) + toHex2(g) + toHex2(b);
 },
 
+epsilonEquals: function(v1, v2, epsilon) {
+	if (!epsilon)
+		epsilon=1e-15;
+	return Math.abs(v1-v2)<epsilon;
+},
+
 // http://stackoverflow.com/questions/21797299/convert-base64-string-to-arraybuffer
 base64ToArrayBuffer: function (base64) {
     var binary_string =  window.atob(base64);
@@ -215,11 +221,43 @@ Matrix: function(a,b,c,d,e,f) {
     }
     this.isInvertible = function() {
       var deter = this.a * this.d - this.b * this.c;
-      return Math.abs(deter)>1e-14;
+      return Math.abs(deter)>1e-15;
+    };
+    this.inverseGaussJordan = function() {
+		function gje(M,c1i,c2i,f) {
+			var c1 = M[c1i];
+			var c2 = M[c2i];
+			for (var i=0; i<6; i++) {
+				// console.log("multiply factor", f, "by member", c2[i])
+				c1[i] += c2[i] * f;
+			}
+		}
+		function gjet(M,c1i,f) {
+			var c1 = M[c1i];
+			for (var i=0; i<6; i++) {
+				// console.log("multiply factor", f, "by member", c1[i], "res", c1[i] * f)
+				c1[i] = c1[i] * f;
+			}
+		}
+		var M = [[a,c,e,1,0,0],[b,d,f,0,1,0],[0,0,1,0,0,1]];
+		// console.log("START\n"+str(M));
+		gje(M,1,2,-M[1][2]); // c2 = c2 + c3 * -f
+		// console.log("c2=c2-fc3\n"+str(M));
+		gje(M,0,2,-M[0][2]); // c1 = c1 + c3 * -e
+		// console.log("c2=c2-ec3\n"+str(M));
+		gje(M,1,0,-M[1][0]/M[0][0]);
+		// console.log("c2=c2-?c3\n"+str(M));
+		gje(M,0,1,-M[0][1]/M[1][1]);
+		// console.log("c2=c2-?c3\n"+str(M));
+		gjet(M,0,1/M[0][0]);
+		// console.log("c1 norm\n"+str(M));
+		gjet(M,1,1/M[1][1]);
+		// console.log("c1 norm\n"+str(M));
+		return new Matrix(M[0][3],M[1][3],M[0][4],M[1][4],M[0][5],M[1][5]);
     };
     this.inverse = function() {
       if (!this.isInvertible()) {
-        throw "Matrix is not invertible.";
+      	return this.inverseGaussJordan();
       } else {
         var a = this.a, b = this.b, c = this.c, d = this.d, e = this.e, f = this.f;
         var dt = a * d - b * c;
@@ -239,6 +277,12 @@ Matrix: function(a,b,c,d,e,f) {
     this.rotate = function(angle) {
       var cos = Math.cos(angle), sin = Math.sin(angle);
       return this.multiply(new Matrix(cos, sin, -sin, cos, 0, 0));
+    };
+    this.isIdentity = function() {
+      return this.a==1 && this.b===0 && this.c===0 && this.d==1 && this.e===0 && this.f===0;
+    };
+    this.clone = function(angle) {
+      return new Matrix(this.a, this.b, this.c, this.d, this.e, this.f);
     };
     this.applyTo = function(x, y) {
       return {
@@ -269,3 +313,19 @@ FractalJS.util.Matrix.GetRotationMatrix = function(angle) {
   var cos = Math.cos(angle), sin = Math.sin(angle);
   return new FractalJS.util.Matrix(cos, sin, -sin, cos, 0, 0);
 };
+
+// add static method to matrix
+FractalJS.util.Matrix.GetScaleMatrix = function(x, y) {
+ 	return new FractalJS.util.Matrix(x, 0, 0, y, 0, 0);
+};
+
+// add static method to matrix
+FractalJS.util.Matrix.GetShearMatrix = function(x, y) {
+ 	return new FractalJS.util.Matrix(1, y, x, 1, 0, 0);
+};
+
+// add static method to matrix
+FractalJS.util.Matrix.Identity = function(scale) {
+  return new FractalJS.util.Matrix(1, 0, 0, 1, 0, 0);
+};
+

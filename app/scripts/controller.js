@@ -8,19 +8,18 @@ FractalJS.Controller = function(fractal, model) {
 
 //-------- private members
 
-var zoomFactor = 1.3;
-var angle = Math.PI/180;
-
-var isDragging;			// is the user dragging ?
-var dragX, dragY;		// start dragging point
-var dragStartDesc;		// start fractal description
-var ldragX, ldragY;		// last dragging point
+var ZOOM = 1.3;
+var SCALE = 1.1;
+var SHEAR = 0.1;
+var ANGLE = Math.PI/18;
+var PAN = 0.095;
 
 //-------- shortcuts
 
 var canvas = fractal.params.canvas;
 var params = fractal.params.controller;
 var events = fractal.events;
+var camera = model.camera;
 
 //-------- public members
 
@@ -28,66 +27,114 @@ this.url = new FractalJS.Url(model, fractal);
 
 //-------- event catchers
 
-var rotate = function(angle) {
-	model.camera.angle += angle;
-	model.camera.project();
-	fractal.draw("user.control");
-};
+/*
+ * This section of code manipulates a lot of geometry on both the screen space and
+ * complex. Some conventions help to make te code readable:
+ *   v : vector
+ *   p : point
+ *   s : screen space
+ *   c : complex space
+ */
 
-var pan = function(x, y) {
-	var cam = model.camera;
-	var deltax = x * cam.width * cam.pixelOnP;
-	var deltay = y * cam.height * cam.pixelOnP;
-	var screenx = x * cam.width;
-	var screeny = y * cam.height;
-	cam.setXYW(cam.x - deltax, cam.y - deltay);
-	fractal.draw("user.control",{x:screenx,y:-screeny,mvt:"pan"});
+// transforms the viewport
+var transformViewport = function(type, value) {
+	var matrix = model.camera.transformViewport(type, value);
+	fractal.draw("user.control", {matrix:matrix});
 	events.send("user.control");
 };
 
-var zoom = function(x, y, delta) {
-	var cam = model.camera;
+// pan the screen by the given ration of its resolution
+var pan = function(ratiox, ratioy) {
+	var vsx = ratiox * camera.width, vsy = -ratioy * camera.height;
+	var pc1 = camera.S2C(0,0), pc2 = camera.S2C(vsx,vsy); // [pc1,pc2] is the movement vector on C
+	camera.setXYW(camera.x - (pc2.x - pc1.x), camera.y - (pc2.y - pc1.y));
+	fractal.draw("user.control",{x:vsx,y:vsy,mvt:"pan"});
+	events.send("user.control");
+};
 
+// zoom the screen at the given screen point, using the given delta ratio
+var zoom = function(psx, psy, delta) {
 	// test if we're at the maximum possible resolution (1.11e-15/pixel)
-	var sminExtent = Math.min(cam.width, cam.height);
-	var limit = sminExtent*1.11e-15;
-	if (cam.w<=limit && delta < 0) {
+	var extent = Math.min(camera.width, camera.height);
+	var limit = extent*1.11e-15;
+	if (camera.w<=limit && delta < 0) {
 		events.send("zoom.limit.reached");
 		return;
 	}
 
-	var origin = cam.S2C(0,0), startRatio = cam.pixelOnP;
-	var z = cam.S2C(x,y);					// complex point under mouse
-	var vec = {x:cam.x-z.x, y:cam.y-z.y};   // vector to complex point at center
-	var zoom =delta<0?1/zoomFactor:zoomFactor; // zoom multiplicator according to movement
-	cam.setXYW(z.x+vec.x*zoom, z.y+vec.y*zoom, cam.w*zoom); // adjust camera using scaled vector
-	var dest = cam.S2C(0,0);
-	var vector = {x:(origin.x-dest.x)/startRatio, y:-(origin.y-dest.y)/startRatio,
-		z:1/zoom, mvt:delta<0?"zoomin":"zoomout", sx:x,sy:y};
+	var pc00 = camera.S2C(0,0);
+	var pc = camera.S2C(psx,psy);				// complex point under mouse
+	var vc = {x:camera.x-pc.x, y:camera.y-pc.y};   // vector to complex point at center
+	var zoom = delta<0?1/ZOOM:ZOOM;    // zoom multiplicator according to movement
+	camera.setXYW(pc.x+vc.x*zoom, pc.y+vc.y*zoom, camera.w*zoom); // adjust camera using scaled vector
+	var ps00A = camera.C2S(pc00.x,pc00.y);
+
+	var vector = {x:ps00A.x*zoom, y:ps00A.y*zoom, z:1/zoom, mvt:delta<0?"zoomin":"zoomout", sx:psx,sy:psy};
 	fractal.draw("user.control",vector);
 	events.send("user.control");
 };
 
+var keymap = []; // Or you could call it "key"
+
 if (params.keyboardControl) {
-	var panRatio = 0.095;
+	document.onkeyup = function(e) {
+	    e = e || window.event;
+	    keymap[e.keyCode] = false;
+	};
 	document.onkeydown = function(e) {
 	    e = e || window.event;
-		console.log(e);
+	    keymap[e.keyCode] = true;
 	    var keyCode = (typeof e.which == "number") ? e.which : e.keyCode;
 		switch (keyCode) {
 			case 107: zoom(canvas.width/2, canvas.height/2, -1); break; // key +, zoom in
 			case 109: zoom(canvas.width/2, canvas.height/2, 1); break;  // key -, zoom out
-			case 37: pan(panRatio, 0); break; // left arrow
-			case 38: pan(0, -panRatio); break; // up arrow
-			case 39: pan(-panRatio, 0); break; // right arrow
-			case 40: pan(0, panRatio); break; // down arrow
-			case 82: rotate(angle); break; // R
-			case 84: rotate(-angle); break; // T
+			case 86 : camera.resetViewport(); break;  // key V, reset viewport
+			case 37: // left arrow
+				if (keymap[82]===true) // R
+					transformViewport("rotate", -ANGLE);
+				else if (keymap[83]===true) // S
+					transformViewport("scaleX", SCALE);
+				else if (keymap[72]===true) // H
+					transformViewport("shearX", SHEAR);
+				else
+					pan(PAN, 0);
+				break;
+			case 39: // right arrow
+				if (keymap[82]===true) // R
+					transformViewport("rotate", ANGLE);
+				else if (keymap[83]===true) // S
+					transformViewport("scaleX", 1/SCALE);
+				else if (keymap[72]===true) // H
+					transformViewport("shearX", -SHEAR);
+				else
+					pan(-PAN, 0);
+				break;
+			case 38: // up arrow
+				if (keymap[83]===true) // S
+					transformViewport("scaleY", 1/SCALE);
+				else if (keymap[72]===true) // H
+					transformViewport("shearY", -SHEAR);
+				else
+					pan(0, -PAN);
+				break;
+			case 40: // down arrow
+				if (keymap[83]===true) // S
+					transformViewport("scaleY", SCALE);
+				else if (keymap[72]===true) // H
+					transformViewport("shearY", SHEAR);
+				else
+					pan(0, PAN);
+				break;
 		}
 	};
 }
 
 if (params.mouseControl) {
+
+	var isDragging;			// is the user dragging ?
+	var dragX, dragY;		// start dragging point
+	var ldragX, ldragY;		// last dragging point
+	var camStart;			// start camera
 
 	canvas.onmousedown = function(e) {
 		if (!e) e = window.event;
@@ -98,7 +145,7 @@ if (params.mouseControl) {
 		dragY = ldragY = e.screenY;
 		if (e.button !== 0)
 			return;
-		dragStartDesc = model.camera.clone();
+		camStart = model.camera.clone();
 	};
 
 	window.addEventListener("mouseup", function(e) {
@@ -109,16 +156,13 @@ if (params.mouseControl) {
 	window.addEventListener("mousemove", function(e) {
 		if (!e) e = window.event;
 		if (isDragging) {
-			var vecx = e.screenX-dragX;
-			var vecy = e.screenY-dragY;
-			var vecpx = vecx*dragStartDesc.pixelOnP;
-			var vecpy = vecy*dragStartDesc.pixelOnP;
-			model.camera.setXYW(dragStartDesc.x-vecpx, dragStartDesc.y+vecpy);
-
-			var vfx = e.screenX - ldragX;
-			var vfy = e.screenY - ldragY;
-			var vector = {x:vfx,y:vfy,mvt:"pan"};
-			fractal.draw("user.control",vector);
+			var vsx = e.screenX - dragX; // since beginning
+			var vsy = e.screenY - dragY;
+			var pc1 = camStart.S2C(0,0), pc2 = camStart.S2C(vsx,vsy); // [pc1,pc2] is the movement vector on C
+			camera.setXYW(camStart.x - (pc2.x - pc1.x), camStart.y - (pc2.y - pc1.y));
+			var vsxr = e.screenX - ldragX; // relative to last frame
+			var vsyr = e.screenY - ldragY;
+			fractal.draw("user.control",{x:vsxr,y:vsyr,mvt:"pan"});
 			events.send("user.control");
 			ldragX = e.screenX;
 			ldragY = e.screenY;

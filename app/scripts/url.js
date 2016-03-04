@@ -4,24 +4,37 @@
 FractalJS.Url = function(model, fractal){
 "use strict";
 
+	var util = FractalJS.util;
+
 	this.update = function() {
-		var args = [];
-		var color = fractal.getColorDesc();
-		args.push(["t",model.typeId]);
-		args.push(["x",model.camera.x]);
-		args.push(["y",model.camera.y]);
-		args.push(["w",model.camera.w]);
-		args.push(["i",model.iter]);
-		args.push(["fs",model.smooth?1:0]);
-		args.push(["ct",color.typeId]);
-		args.push(["co",color.offset*100]);
-		args.push(["cd",+color.density.toFixed(2)]);
-		var str = "";
-		for (var i in args) {
-			var arg = args[i];
-			str += "&" + arg[0] + "_" + arg[1];
+		try {
+			var args = [];
+			var color = fractal.getColorDesc();
+			args.push(["t",model.typeId]);
+			args.push(["x",model.camera.x]);
+			args.push(["y",model.camera.y]);
+			args.push(["w",model.camera.w]);
+			args.push(["i",model.iter]);
+			args.push(["fs",model.smooth?1:0]);
+			args.push(["ct",color.typeId]);
+			args.push(["co",color.offset*100]);
+			args.push(["cd",+color.density.toFixed(2)]);
+			if (!model.camera.viewportMatrix.isIdentity()) {
+				args.push(["va",model.camera.viewportMatrix.a.toFixed(4)]);
+				args.push(["vb",model.camera.viewportMatrix.b.toFixed(4)]);
+				args.push(["vc",model.camera.viewportMatrix.c.toFixed(4)]);
+				args.push(["vd",model.camera.viewportMatrix.d.toFixed(4)]);
+			}
+			var str = "";
+			for (var i in args) {
+				var arg = args[i];
+				str += "&" + arg[0] + "_" + arg[1];
+			}
+			history.replaceState("", "", "#B"+str.substr(1));
+		} catch(e) {
+			console.error("Could not set URL");
+			console.error(e);
 		}
-		history.replaceState("", "", "#B"+str.substr(1));
 	};
 
 	this.read = function() {
@@ -70,6 +83,10 @@ FractalJS.Url = function(model, fractal){
 				typeId:parseInt(map.t),
 				smooth:map.fs==1,
 			};
+			if ("va" in map) {
+				desc.viewport = new util.Matrix(parseFloat(map.va),parseFloat(map.vb),
+					parseFloat(map.vc),parseFloat(map.vd),0,0);
+			}
 			color = {
 				offset:parseInt(map.co)/100.0,
 				density:parseFloat(map.cd),

@@ -7,6 +7,7 @@ FractalJS.Camera = function(){
   var util = FractalJS.util;
 
   var matrix = null;
+  var cam = this; //javascript and "this"... sigh...
 
   this.width = 100;
   this.height = 100;
@@ -14,16 +15,12 @@ FractalJS.Camera = function(){
   this.y = 0;
   this.w = 0;
   this.pixelOnP = 0;
-  this.angle = 0;
+  this.viewportMatrix = util.Matrix.Identity();
 
-  var getScreenToSquareMatrix = function(width, height, angle) {
-
-    // apply rotation to Q
-    var rotation = util.Matrix.GetRotationMatrix(-angle);
-    var m = rotation;
-    var p = m.applyTo(1,-1);
-    var q = m.applyTo(-1,1);
-    var r = m.applyTo(-1,-1);
+  var getScreenToSquareMatrix = function(width, height) {
+    var p = cam.viewportMatrix.applyTo(1,-1);
+    var q = cam.viewportMatrix.applyTo(-1,1);
+    var r = cam.viewportMatrix.applyTo(-1,-1);
 
     if (width >= height) {
       var x1=(width-height)/2, x2=x1+height;
@@ -48,15 +45,38 @@ FractalJS.Camera = function(){
     this.pixelOnP = this.w/extent;
 
     // matrix stuff
-    var S2Q = getScreenToSquareMatrix(this.width,this.height,this.angle);
+    var S2Q = getScreenToSquareMatrix(this.width,this.height);
     var Q2C = getSquareToComplexMatrix(this.x,this.y,this.w);
     matrix = Q2C.multiply(S2Q);
-    //console.log("project", matrix)
   };
 
   this.setSize = function(width, height) {
     this.width = width;
     this.height = height;
+    this.project();
+  };
+
+  this.transformViewport = function(type, value) {
+    var m;
+    if (type=="rotate")
+      m = util.Matrix.GetRotationMatrix(value);
+    else if (type=="scaleX")
+      m = util.Matrix.GetScaleMatrix(value,1);
+    else if (type=="scaleY")
+      m = util.Matrix.GetScaleMatrix(1, value);
+    else if (type=="shearX")
+      m = util.Matrix.GetShearMatrix(value,0);
+    else if (type=="shearY")
+      m = util.Matrix.GetShearMatrix(0, value);
+    else
+      throw "what? " + type;
+    this.viewportMatrix = this.viewportMatrix.multiply(m);
+    this.project();
+    return util.Matrix.GetScaleMatrix(0,-1).multiply(m.inverse());
+  };
+
+  this.resetViewport = function(type, value) {
+    this.viewportMatrix = util.Matrix.Identity();
     this.project();
   };
 
@@ -69,6 +89,10 @@ FractalJS.Camera = function(){
 
   this.S2C = function(x,y) {
     return matrix.applyTo(x,y);
+  };
+
+  this.C2S = function(x,y) {
+    return matrix.inverse().applyTo(x,y);
   };
 
   // returns a serialisable object
@@ -84,6 +108,9 @@ FractalJS.Camera = function(){
     res.x        = this.x;
     res.y        = this.y;
     res.w        = this.w;
+    res.angle    = this.angle;
+    res.scaleX   = this.scaleX;
+    res.viewportMatrix   = this.viewportMatrix.clone();
     res.project();
     return res;
   };

@@ -30,6 +30,12 @@ FractalJS.Model = function(canvas){
 			this.typeId = desc.typeId;
 		if ("smooth" in desc)
 			this.smooth = desc.smooth;
+		if ("angle" in desc || "scaleX" in desc )
+			this.camera.setViewport(desc.angle, desc.scaleX);
+		if ("viewport" in desc && desc.viewport !== undefined) {
+			this.camera.viewportMatrix = desc.viewport;
+			this.camera.project();
+		}
 	};
 
 };
