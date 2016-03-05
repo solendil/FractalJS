@@ -58,8 +58,8 @@ var buildGradientSwatches = function() {
     var gradient = stdGradients[i];
     div.append("<div class='gradient'><canvas class='gradient' id='grad"+i+"' ival='"+i+"'> </canvas></div>");
     var canvas = document.getElementById("grad"+i);
-    canvas.width = 150;
-    canvas.height = 45;
+    canvas.width = 120;
+    canvas.height = 40;
     //console.log(canvas);
     var ctx = canvas.getContext("2d");
     var imageData = ctx.createImageData(canvas.width, 1);
@@ -185,6 +185,12 @@ $(function() {
 
   //
   slider_offset.noUiSlider.set(fractal.getColorDesc().offset);
+  slider_offset.noUiSlider.on('start', function(){
+    $(".tabpane").addClass("dissolve")
+  });
+  slider_offset.noUiSlider.on('end', function(){
+    $(".tabpane").removeClass("dissolve")
+  });
   slider_offset.noUiSlider.on('update', function(){
     var value = slider_offset.noUiSlider.get();
     if (!fractal) return;
@@ -194,11 +200,14 @@ $(function() {
 
   var dens = fractal.getColorDesc().density;
   var val = Math.log(20*dens)/Math.log(increment);
-  //console.log("densval", fractal.getColorDesc(), dens, val)
   slider_density.noUiSlider.set(val);
-
+  slider_density.noUiSlider.on('start', function(){
+    $(".tabpane").addClass("dissolve")
+  });
+  slider_density.noUiSlider.on('end', function(){
+    $(".tabpane").removeClass("dissolve")
+  });
   slider_density.noUiSlider.on('update', function(){
-    //console.log("value",value)
     var value = slider_density.noUiSlider.get();
     if (!fractal) return;
     fractal.setColorDesc({density:(1/20)*Math.pow(increment,value)});

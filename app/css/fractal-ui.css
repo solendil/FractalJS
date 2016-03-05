@@ -38,10 +38,17 @@ canvas {
   display:none;
   border-top:1px solid #1abc9c;
   color:#FFF;
+  opacity: 1;
+  transition: opacity 0s linear;
 }
 .tabpane.active {
   display:block;
 }
+.tabpane.dissolve {
+  opacity: 0;
+  transition: opacity 0.5s linear;
+}
+
 
 .sharepane {
   display:none;
@@ -56,17 +63,17 @@ pre {
 }
 .slider {
   display:inline-block;
-  width:300px;
+  width:400px;
   margin-left:1em;
   margin-right:2em;
 }
 div.gradient {
   box-sizing: content-box;
-  width:150px;
-  height:45px;
+  width:120px;
+  height:40px;
   display:inline-block;
   border:4px solid black;
-  border-radius:6px;
+  border-radius:8px;
   margin:0 0.3em;
 }
 div.gradient:hover {
@@ -89,7 +96,12 @@ canvas.gradient {
   -webkit-user-select: auto;
   font-size:90%;
 }
-
+span.slider-label {
+  display:inline-block;
+  min-width:8em;
+  text-align:right;
+  padding: 0 0em;
+}
 .key {
   display:inline-block;
   letter-spacing:0.1em;

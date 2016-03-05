@@ -55,7 +55,6 @@ var pan = function(ratiox, ratioy) {
 // zoom the screen at the given screen point, using the given delta ratio
 var zoom = function(psx, psy, delta) {
 	// test if we're at the maximum possible resolution (1.11e-15/pixel)
-	console.log(delta)
 	var extent = Math.min(camera.width, camera.height);
 	var limit = extent*1.11e-15;
 	if (camera.w<=limit && delta < 1) {
