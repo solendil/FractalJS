@@ -20,8 +20,9 @@
   "dependencies": {
     "bootstrap": "~3.3.5",
     "flat-ui": "~2.2.2",
-    "nouislider": "leongersen/noUiSlider#~8.0.2",
+    "nouislider": "leongersen/noUiSlider",
     "jQuery": "~2.1.4",
-    "font-awesome": "FortAwesome/Font-Awesome#~4.3.0"
+    "font-awesome": "FortAwesome/Font-Awesome#~4.3.0",
+    "hammerjs": "hammer.js#~2.0.6"
   }
 }

@@ -19,6 +19,13 @@
 <script src="libs/jquery/dist/jquery.min.js"></script>
 <script src="libs/nouislider/distribute/nouislider.min.js"></script>
 
+<!-- debug code -->
+<!--
+<script src="libs/touchemulator/touch-emulator.js"></script>
+<script> TouchEmulator(); </script>
+<script src="libs/hammerjs/hammer.min.js"></script>
+-->
+
 <!-- @if NODE_ENV == 'DEVELOPMENT' -->
 <script src="scripts/util.js"></script>
 <script src="scripts/events.js"></script>
@@ -57,7 +64,7 @@
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li><a href="#" name='share'>Share</a></li>
-      <li><a href="#" name='about'>About</a></li>
+      <li><a href="#" name='about'>Help</a></li>
     </ul>
   </div>
 </nav>
@@ -91,15 +98,13 @@
 <div class='tabpane container-fluid' name='colors'>
   <div class='row'>
     <div class='col-md-12'>
-      <div id='gradients'>
-      </div>
+      <div id='gradients'></div>
     </div>
   </div>
   <div class='row'>
     <div class='col-md-12'>
-      <div style="margin-top:0.4em">Try to slide the gradient accross the picture :</div>
-      <div style="margin-top:0.6em"><span class='slider-label'>Offset</span><div id="slider.offset" class="slider"></div></div>
-      <div style="margin-top:0.6em"><span class='slider-label'>Density</span><div id="slider.density" class="slider"></div></div>
+      <div style="margin-top:0.6em"><span class='slider-label'>Offset</span><div id="slider.offset" class="slider"> </div></div>
+      <div style="margin-top:0.6em"><span class='slider-label'>Density</span><div id="slider.density" class="slider"> </div></div>
     </div>
   </div>
 </div>
@@ -157,7 +162,8 @@
 <h3 style='margin-top:0px'>FractalJS <small> - browse fractals!</small></h3>
 <p>
   Navigate the fractal sets with the mouse and scrollwheel<br/>
-  Or with the keyboard
+  &nbsp;&nbsp;Or with swipe and pinch on a touchscreen<br/>
+  &nbsp;&nbsp;Or with the keyboard :
   <span class="key">&#x2190;</span> <span class="key">&#x2191;</span> <span class="key">&#x2192;</span> <span class="key">&#x2193;</span> pan
   <span class="key">+</span> <span class="key">-</span> zoom
   <span class="key">Shift</span> increase precision<br/>
@@ -169,12 +175,19 @@
   <a href="http://www.ultrafractal.com/help/index.html?/help/formulas/standard/phoenix.html" target="_">Phoenix</a>.
   <br/>
   Change the color theme, and adjust it with two simple sliders.<br/>
-  Share your favorite result as a link, a picture or tweet it!<br/>
-  Happy browsing !
+  Share your favorite result as a link, a picture or tweet it&nbsp;!<br/>
+  Happy browsing&nbsp;!
 </p>
+<!--
 <a class='btn btn-primary' href="https://github.com/solendil/FractalJS">
 <i class="fa fa-github fa-lg"></i>
-View on Github</a>
+View on Github</a>-->
+<hr>
+<p>Report a bug, ask for a feature or contact the author on the
+<a href="https://github.com/solendil/FractalJS"><i class="fa fa-github"></i> Github project page</a>.</p>
+
+<iframe src="https://ghbtns.com/github-btn.html?user=solendil&repo=fractaljs&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
+
 </div></div>
 </div>
 

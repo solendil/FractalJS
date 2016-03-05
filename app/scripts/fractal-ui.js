@@ -186,10 +186,10 @@ $(function() {
   //
   slider_offset.noUiSlider.set(fractal.getColorDesc().offset);
   slider_offset.noUiSlider.on('start', function(){
-    $(".tabpane").addClass("dissolve")
+    $(".tabpane").addClass("dissolve");
   });
   slider_offset.noUiSlider.on('end', function(){
-    $(".tabpane").removeClass("dissolve")
+    $(".tabpane").removeClass("dissolve");
   });
   slider_offset.noUiSlider.on('update', function(){
     var value = slider_offset.noUiSlider.get();
@@ -202,10 +202,10 @@ $(function() {
   var val = Math.log(20*dens)/Math.log(increment);
   slider_density.noUiSlider.set(val);
   slider_density.noUiSlider.on('start', function(){
-    $(".tabpane").addClass("dissolve")
+    $(".tabpane").addClass("dissolve");
   });
   slider_density.noUiSlider.on('end', function(){
-    $(".tabpane").removeClass("dissolve")
+    $(".tabpane").removeClass("dissolve");
   });
   slider_density.noUiSlider.on('update', function(){
     var value = slider_density.noUiSlider.get();

@@ -17,7 +17,7 @@ FractalJS.Url = function(model, fractal){
 			args.push(["i",model.iter]);
 			args.push(["fs",model.smooth?1:0]);
 			args.push(["ct",color.typeId]);
-			args.push(["co",color.offset*100]);
+			args.push(["co",Math.round(color.offset*100)]);
 			args.push(["cd",+color.density.toFixed(2)]);
 			if (!model.camera.viewportMatrix.isIdentity()) {
 				args.push(["va",model.camera.viewportMatrix.a.toFixed(4)]);

@@ -22,6 +22,7 @@ var engine = (function() {
 //-------- private members
 
 var escape = 4;	// square of escape distance
+var iter, pixelOnP;
 var fractalFunction;	// the fractal function used
 
 //-------- private methds
@@ -336,8 +337,6 @@ drawSubTileOnBuffer: function(tile, model) {
 },
 
 setModel: function(model) {
-	pxmin = model.pxmin;
-	pymin = model.pymin;
 	pixelOnP = model.pixelOnP;
 	iter = model.iter;
 	if (model.smooth)

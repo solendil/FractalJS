@@ -209,6 +209,28 @@ base64ToArrayBuffer: function (base64) {
     return bytes.buffer;
 },
 
+// https://jmperezperez.com/ondemand-javascript-lazy-loading-stubs/
+loadJs: function(url, cb) {
+  var script = document.createElement('script');
+  script.setAttribute('src', url);
+  script.setAttribute('type', 'text/javascript');
+
+  var loaded = false;
+  var loadFunction = function () {
+    if (loaded) return;
+    loaded = true;
+    if (cb) cb();
+  };
+  script.onload = loadFunction;
+  script.onreadystatechange = loadFunction;
+  document.getElementsByTagName("head")[0].appendChild(script);
+},
+
+// http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
+is_touch_device: function() {
+  return 'ontouchstart' in window ||        // works on most browsers
+       navigator.maxTouchPoints;       // works on IE10/11 and Surface
+},
 
 Matrix: function(a,b,c,d,e,f) {
 	var Matrix = FractalJS.util.Matrix;

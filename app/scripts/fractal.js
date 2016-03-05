@@ -45,6 +45,7 @@ params.renderer = util.defaultProps(params.renderer, {
 params.controller = util.defaultProps(params.controller, {
 	mouseControl: true,
 	keyboardControl: true,
+	touchControl: true,
 	fitToWindow: false
 });
 

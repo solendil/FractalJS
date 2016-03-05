@@ -98,9 +98,9 @@ canvas.gradient {
 }
 span.slider-label {
   display:inline-block;
-  min-width:8em;
-  text-align:right;
-  padding: 0 0em;
+  min-width:6em;
+  text-align:left;
+  padding: 0 0.3em;
 }
 .key {
   display:inline-block;

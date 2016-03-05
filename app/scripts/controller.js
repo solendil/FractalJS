@@ -14,12 +14,18 @@ var SHEAR = 0.1;
 var ANGLE = Math.PI/18;
 var PAN   = 0.095;
 
+var isDragging;			// is the user dragging ?
+var dragX, dragY;		// start dragging point
+var ldragX, ldragY;		// last dragging point
+var camStart;			// start camera
+
 //-------- shortcuts
 
 var canvas = fractal.params.canvas;
 var params = fractal.params.controller;
 var events = fractal.events;
 var camera = model.camera;
+var util = FractalJS.util;
 
 //-------- public members
 
@@ -73,8 +79,87 @@ var zoom = function(psx, psy, delta) {
 	events.send("user.control");
 };
 
-var keymap = []; // Or you could call it "key"
+if (params.touchControl && util.is_touch_device()) {
+	// lazy loading of hammer.js library only if required
+	console.log("loading touch events library and code");
+	util.loadJs("libs/hammerjs/hammer.min.js", function() {
+		var hammertime = new Hammer(canvas, {});
+		hammertime.get('pan').set({ direction: Hammer.DIRECTION_ALL, threshold:1 });
+		hammertime.get('pinch').set({ enable: true });
 
+		hammertime.on('panstart', function(ev) {
+			isDragging = true;
+			dragX = ldragX = ev.center.x;
+			dragY = ldragY = ev.center.y;
+			camStart = model.camera.clone();
+		});
+
+		hammertime.on('panend', function(ev) {
+			isDragging = false;
+		});
+
+		hammertime.on('panmove', function(ev) {
+			console.log('panmove');
+			if (isDragging) {
+				var vsx = ev.center.x - dragX; // since beginning
+				var vsy = ev.center.y - dragY;
+				var pc1 = camStart.S2C(0,0), pc2 = camStart.S2C(vsx,vsy); // [pc1,pc2] is the movement vector on C
+				camera.setXYW(camStart.x - (pc2.x - pc1.x), camStart.y - (pc2.y - pc1.y));
+				var vsxr = ev.center.x - ldragX; // relative to last frame
+				var vsyr = ev.center.y - ldragY;
+				fractal.draw("user.control",{x:vsxr,y:vsyr,mvt:"pan"});
+				events.send("user.control");
+				ldragX = ev.center.x;
+				ldragY = ev.center.y;
+			}
+		});
+
+		var isPinching = false;
+		var pinchX, pinchY;		// start dragging point
+		var lastScale;
+
+		hammertime.on('pinchstart', function(ev) {
+			console.log("pinchstart");
+			isPinching = true;
+			pinchX =  ev.center.x;
+			pinchY =  ev.center.y;
+			lastScale = 1;
+			camStart = model.camera.clone();
+		});
+
+		hammertime.on('pinchend', function(ev) {
+			console.log("pinchend");
+			isPinching = false;
+		});
+
+		hammertime.on('pinch', function(ev) {
+			if (isPinching) {
+				var delta = lastScale/ev.scale;
+				var pc00 = camera.S2C(0,0);
+
+				// compute matrix that transforms an original triangle to the transformed triangle
+				var pc1 = camStart.S2C(pinchX, pinchY);
+				var pc2 = camStart.S2C(ev.center.x, ev.center.y);
+				var m = util.Matrix.GetTriangleToTriangle(
+					pc1.x, pc1.y, pc1.x+1,        pc1.y, pc1.x, pc1.y+1,
+					pc2.x, pc2.y, pc2.x+ev.scale, pc2.y, pc2.x, pc2.y+ev.scale);
+
+				// apply inverse of this matrix to starting point
+				var pc0A = m.inverse().applyTo(camStart.x, camStart.y);
+				camera.setXYW(pc0A.x, pc0A.y, camStart.w/m.a);
+
+				var ps00A = camera.C2S(pc00.x,pc00.y);
+				var vector = {x:ps00A.x*delta, y:ps00A.y*delta, z:1/delta, mvt:delta<1?"zoomin":"zoomout", sx:ev.center.x,sy:ev.center.y};
+				fractal.draw("user.control", vector);
+				events.send("user.control");
+
+				lastScale = ev.scale;
+			}
+		});
+	});
+}
+
+var keymap = [];
 if (params.keyboardControl) {
 	document.onkeyup = function(e) {
 	    e = e || window.event;
@@ -85,7 +170,7 @@ if (params.keyboardControl) {
 	    keymap[e.keyCode] = true;
 	    var keyCode = (typeof e.which == "number") ? e.which : e.keyCode;
 	    var modifier = 1;
-	    if (event.getModifierState("Shift")) modifier = 1/10;
+	    if (e.getModifierState("Shift")) modifier = 1/10;
 		switch (keyCode) {
 			case 107: zoom(canvas.width/2, canvas.height/2, 1/(1+ZOOM*modifier)); break; // key +, zoom in
 			case 109: zoom(canvas.width/2, canvas.height/2, 1+ZOOM*modifier); break;  // key -, zoom out
@@ -135,11 +220,6 @@ if (params.keyboardControl) {
 }
 
 if (params.mouseControl) {
-
-	var isDragging;			// is the user dragging ?
-	var dragX, dragY;		// start dragging point
-	var ldragX, ldragY;		// last dragging point
-	var camStart;			// start camera
 
 	canvas.onmousedown = function(e) {
 		if (!e) e = window.event;
