@@ -8,11 +8,11 @@ FractalJS.Controller = function(fractal, model) {
 
 //-------- private members
 
-var ZOOM = 1.3;
-var SCALE = 1.1;
+var ZOOM  = 0.3; // 1+
+var SCALE = 0.1; // 1+
 var SHEAR = 0.1;
 var ANGLE = Math.PI/18;
-var PAN = 0.095;
+var PAN   = 0.095;
 
 //-------- shortcuts
 
@@ -55,9 +55,10 @@ var pan = function(ratiox, ratioy) {
 // zoom the screen at the given screen point, using the given delta ratio
 var zoom = function(psx, psy, delta) {
 	// test if we're at the maximum possible resolution (1.11e-15/pixel)
+	console.log(delta)
 	var extent = Math.min(camera.width, camera.height);
 	var limit = extent*1.11e-15;
-	if (camera.w<=limit && delta < 0) {
+	if (camera.w<=limit && delta < 1) {
 		events.send("zoom.limit.reached");
 		return;
 	}
@@ -65,11 +66,10 @@ var zoom = function(psx, psy, delta) {
 	var pc00 = camera.S2C(0,0);
 	var pc = camera.S2C(psx,psy);				// complex point under mouse
 	var vc = {x:camera.x-pc.x, y:camera.y-pc.y};   // vector to complex point at center
-	var zoom = delta<0?1/ZOOM:ZOOM;    // zoom multiplicator according to movement
-	camera.setXYW(pc.x+vc.x*zoom, pc.y+vc.y*zoom, camera.w*zoom); // adjust camera using scaled vector
+	camera.setXYW(pc.x+vc.x*delta, pc.y+vc.y*delta, camera.w*delta); // adjust camera using scaled vector
 	var ps00A = camera.C2S(pc00.x,pc00.y);
 
-	var vector = {x:ps00A.x*zoom, y:ps00A.y*zoom, z:1/zoom, mvt:delta<0?"zoomin":"zoomout", sx:psx,sy:psy};
+	var vector = {x:ps00A.x*delta, y:ps00A.y*delta, z:1/delta, mvt:delta<1?"zoomin":"zoomout", sx:psx,sy:psy};
 	fractal.draw("user.control",vector);
 	events.send("user.control");
 };
@@ -85,9 +85,11 @@ if (params.keyboardControl) {
 	    e = e || window.event;
 	    keymap[e.keyCode] = true;
 	    var keyCode = (typeof e.which == "number") ? e.which : e.keyCode;
+	    var modifier = 1;
+	    if (event.getModifierState("Shift")) modifier = 1/10;
 		switch (keyCode) {
-			case 107: zoom(canvas.width/2, canvas.height/2, -1); break; // key +, zoom in
-			case 109: zoom(canvas.width/2, canvas.height/2, 1); break;  // key -, zoom out
+			case 107: zoom(canvas.width/2, canvas.height/2, 1/(1+ZOOM*modifier)); break; // key +, zoom in
+			case 109: zoom(canvas.width/2, canvas.height/2, 1+ZOOM*modifier); break;  // key -, zoom out
 			case 86 : // key V, reset viewport
 				camera.resetViewport();
 				fractal.draw("init");
@@ -95,39 +97,39 @@ if (params.keyboardControl) {
 				break;
 			case 37: // left arrow
 				if (keymap[82]===true) // R
-					transformViewport("rotate", -ANGLE);
+					transformViewport("rotate", -ANGLE*modifier);
 				else if (keymap[83]===true) // S
-					transformViewport("scaleX", SCALE);
+					transformViewport("scaleX", 1+SCALE*modifier);
 				else if (keymap[72]===true) // H
-					transformViewport("shearX", SHEAR);
+					transformViewport("shearX", SHEAR*modifier);
 				else
-					pan(PAN, 0);
+					pan(PAN*modifier, 0);
 				break;
 			case 39: // right arrow
 				if (keymap[82]===true) // R
-					transformViewport("rotate", ANGLE);
+					transformViewport("rotate", ANGLE*modifier);
 				else if (keymap[83]===true) // S
-					transformViewport("scaleX", 1/SCALE);
+					transformViewport("scaleX", 1/(1+SCALE*modifier));
 				else if (keymap[72]===true) // H
-					transformViewport("shearX", -SHEAR);
+					transformViewport("shearX", -SHEAR*modifier);
 				else
-					pan(-PAN, 0);
+					pan(-PAN*modifier, 0);
 				break;
 			case 38: // up arrow
 				if (keymap[83]===true) // S
-					transformViewport("scaleY", 1/SCALE);
+					transformViewport("scaleY", 1/(1+SCALE*modifier));
 				else if (keymap[72]===true) // H
-					transformViewport("shearY", -SHEAR);
+					transformViewport("shearY", -SHEAR*modifier);
 				else
-					pan(0, -PAN);
+					pan(0, -PAN*modifier);
 				break;
 			case 40: // down arrow
 				if (keymap[83]===true) // S
-					transformViewport("scaleY", SCALE);
+					transformViewport("scaleY", 1+SCALE*modifier);
 				else if (keymap[72]===true) // H
-					transformViewport("shearY", SHEAR);
+					transformViewport("shearY", SHEAR*modifier);
 				else
-					pan(0, PAN);
+					pan(0, PAN*modifier);
 				break;
 		}
 	};
@@ -173,11 +175,13 @@ if (params.mouseControl) {
 		}
 	});
 
+
 	var wheelFunction = function(e) {
 		if (!e) e = window.event;
 		e.preventDefault();
-	  var delta = e.deltaY || e.wheelDelta; // IE11 special
-		zoom(e.clientX, e.clientY, delta);
+		var modifier = e.shiftKey?1/10:1;
+		var delta = e.deltaY || e.wheelDelta; // IE11 special
+		zoom(e.clientX, e.clientY, delta>0?1+ZOOM*modifier:1/(1+ZOOM*modifier));
 	};
 
 	// IE11 special

@@ -245,7 +245,7 @@ $(function() {
   fractal.events.on("zoom.limit.reached", function() {
     $(".alertbox").stop(true, true);
     $(".alertbox").fadeIn(0);
-    $(".alertbox").delay(3000).fadeOut(1000);
+    $(".alertbox").delay(5000).fadeOut(1000);
   });
 
 });

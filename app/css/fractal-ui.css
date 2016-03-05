@@ -89,3 +89,15 @@ canvas.gradient {
   -webkit-user-select: auto;
   font-size:90%;
 }
+
+.key {
+  display:inline-block;
+  letter-spacing:0.1em;
+  border:1px solid #888;
+  border-radius:4px;
+  padding:0px 4px;
+  margin:0px 0px;
+  font-size:75%;
+  min-width:1.8em;
+  text-align:center;
+}
