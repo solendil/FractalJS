@@ -88,7 +88,11 @@ if (params.keyboardControl) {
 		switch (keyCode) {
 			case 107: zoom(canvas.width/2, canvas.height/2, -1); break; // key +, zoom in
 			case 109: zoom(canvas.width/2, canvas.height/2, 1); break;  // key -, zoom out
-			case 86 : camera.resetViewport(); break;  // key V, reset viewport
+			case 86 : // key V, reset viewport
+				camera.resetViewport();
+				fractal.draw("init");
+				events.send("user.control");
+				break;
 			case 37: // left arrow
 				if (keymap[82]===true) // R
 					transformViewport("rotate", -ANGLE);

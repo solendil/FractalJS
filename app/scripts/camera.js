@@ -72,7 +72,10 @@ FractalJS.Camera = function(){
       throw "what? " + type;
     this.viewportMatrix = this.viewportMatrix.multiply(m);
     this.project();
-    return util.Matrix.GetScaleMatrix(0,-1).multiply(m.inverse());
+    if (type=="scaleX" || type=="scaleY")
+      return m.inverse();
+    else
+      return m;
   };
 
   this.resetViewport = function(type, value) {

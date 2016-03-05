@@ -124,9 +124,10 @@ this.draw = function(reason, vector, priovector, quality) {
 			context.translate(model.camera.width/2,model.camera.height/2);
 			context.transform(vector.matrix.a, vector.matrix.b, vector.matrix.c, vector.matrix.d, vector.matrix.e, vector.matrix.f);
 			context.translate(-model.camera.width/2,-model.camera.height/2);
+		} else {
+			context.scale(vector.z, vector.z);
+			context.translate(vector.x, vector.y);
 		}
-		context.scale(vector.z, vector.z);
-		context.translate(vector.x, vector.y);
 		context.drawImage(vectorCanvas,0,0);
 		context.setTransform(1, 0, 0, 1, 0, 0);
 	}
