@@ -272,13 +272,9 @@ if (params.mouseControl) {
 }
 
 if (params.fitToWindow) {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	model.resize();
+	model.resizeCanvas(window.innerWidth, window.innerHeight);
 	window.onresize = function() {
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-		fractal.resize();
+		fractal.resize(window.innerWidth, window.innerHeight);
 		fractal.draw("init");
 	};
 }

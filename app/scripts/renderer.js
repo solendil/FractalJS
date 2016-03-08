@@ -299,11 +299,17 @@ this.workerMessage = function(param) {
 		// paint on canvas
     var tileIndex = 0;
     var bufferIndex = 0;
+   	var cmap = colormap.getDesc();
+	var buffer=cmap.buffer, offset=cmap.offset*buffer.length,
+		density=cmap.density, resolution=buffer.length, color;
     for (var ty=0; ty<tile.height; ty++) {
       bufferIndex = (ty+tile.y1)*canvas.width+tile.x1;
       for (var tx=0; tx<tile.width; tx++) {
         var iter = tile.frame[tileIndex++];
-        var color = colormap.getColorForIter(iter);
+        if (iter===0)
+			color = 0xFF000000;
+		else
+			color = buffer[~~((iter*density+offset)%resolution)];
         idata32[bufferIndex++] = color;
       }
     }

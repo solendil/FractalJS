@@ -29,6 +29,7 @@ var fractalFunction;	// the fractal function used
 
 var iLog2 = 1.0 / Math.log(2.0);
 var iLog3 = 1.0 / Math.log(3.0);
+var iLog4 = 1.0 / Math.log(4.0);
 
 // core fractal functions
 var fractalFunctionListSmooth = {
@@ -74,7 +75,26 @@ var fractalFunctionListSmooth = {
 			sqx = zx*zx;
 			sqy = zy*zy;
 		}
-		var res = 5 + i - Math.log(Math.log(sqx+sqy)) * iLog3;
+		var res = 5 + i - Math.log(Math.log(sqx+sqy)) * iLog4;
+		return res;
+	},
+	// multibrot4
+	6 : function(cx,cy) {
+		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
+		while (true) {
+			znx = sqx*sqx-6*sqx*sqy+sqy*sqy+cx;
+			zny =4*sqx*zx*zy-4*zx*sqy*zy+cy;
+			zx = znx;
+			zy = zny;
+			if (++i>=iter)
+				break;
+			sqx = zx*zx;
+			sqy = zy*zy;
+			if (sqx+sqy>escape)
+				break;
+		}
+		if (i==iter) return i;
+		var res = 5 + i - Math.log(Math.log(sqx+sqy)) * iLog4;
 		return res;
 	},
 	// burningship
@@ -200,6 +220,23 @@ var fractalFunctionList = {
 		while (true) {
 			znx = sqx*zx-3*zx*sqy+cx;
 			zny = 3*sqx*zy-sqy*zy+cy;
+			zx = znx;
+			zy = zny;
+			if (++i>=iter)
+				break;
+			sqx = zx*zx;
+			sqy = zy*zy;
+			if (sqx+sqy>escape)
+				break;
+		}
+		return i;
+	},
+	// multibrot4
+	6 : function(cx,cy) {
+		var zx=0, zy=0, sqx=0, sqy=0, i=0, znx, zny;
+		while (true) {
+			znx = sqx*sqx-6*sqx*sqy+sqy*sqy+cx;
+			zny =4*sqx*zx*zy-4*zx*sqy*zy+cy;
 			zx = znx;
 			zy = zny;
 			if (++i>=iter)

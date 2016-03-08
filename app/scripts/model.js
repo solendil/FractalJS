@@ -2,14 +2,21 @@
  * The Model of the fractal engine, ie the central place where data is
  * stored and shared between components.
  */
-FractalJS.Model = function(canvas){
+FractalJS.Model = function(params){
 "use strict";
 
-	this.canvas = canvas;
+	this.canvas = params.canvas;
+	this.canvas2 = params.canvas2;
 	this.camera = new FractalJS.Camera();
-	this.camera.setSize(canvas.width, canvas.height);
+	this.camera.setSize(this.canvas.width, this.canvas.height);
 
-	this.resize = function() {
+	this.resizeCanvas = function(width, height) {
+		this.canvas.width = width;
+		this.canvas.height = height;
+		if (this.canvas2) {
+			this.canvas2.width = width;
+			this.canvas2.height = height;
+		}
 		this.camera.setSize(this.canvas.width, this.canvas.height);
 	};
 

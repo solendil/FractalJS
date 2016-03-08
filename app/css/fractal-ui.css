@@ -31,6 +31,13 @@ canvas {
   position:absolute;
   z-index: -1;
 }
+canvas#maincanvas {
+  z-index : -2;
+}
+canvas#canvas2 {
+  z-index : -1;
+  pointer-events:none;
+}
 
 .tabpane {
   padding:1em 1em;

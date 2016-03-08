@@ -40,6 +40,14 @@ var typeList = {
     w:3.0,
     iter:50
   },
+  "mandel4" : {
+    typeId:6,
+    smooth:true,
+    x:0.0,
+    y:0.0,
+    w:3.0,
+    iter:50
+  },
   "burningship" : {
     typeId:2,
     smooth:true,
@@ -103,6 +111,7 @@ $(function() {
 
   fractal = new FractalJS.create ({
     canvas:document.getElementById("maincanvas"),
+    canvas2:document.getElementById("canvas2"),
     fractalDesc:typeList.mandel,
     renderer:{
       numberOfTiles:100,

@@ -35,7 +35,7 @@ if (!params.canvas || !params.canvas.width)
 if (!params.fractalDesc)
 	throw "Fractal Description is not set";
 
-var model = new FractalJS.Model(params.canvas);
+var model = new FractalJS.Model(params);
 
 // define default values
 params.renderer = util.defaultProps(params.renderer, {
@@ -97,8 +97,8 @@ this.draw= function(reason,vector) {
 	renderer.draw(reason,vector);
 };
 
-this.resize= function() {
-	model.resize();
+this.resize= function(width, height) {
+	model.resizeCanvas(width, height);
 	renderer.resize();
 };
 
