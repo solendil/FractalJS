@@ -160,10 +160,11 @@ this.draw = function(reason, vector, priovector, quality) {
 				tile.prio = 1;
 			}
 		}
-    // if this is an initialisation drawing, stars with a low quality 16x subsampling
-    if (reason=="init")
-      drawList.push({action:'draw', quality:100, frameId:frameId, tile:tile});
-    drawList.push({action:'draw', quality:quality, frameId:frameId, tile:tile});
+		// if this is an init, starts with a low quality 16x subsampling
+		if (reason=="init")
+			drawList.push({action:'draw', quality:100, frameId:frameId, tile:tile});
+
+		drawList.push({action:'draw', quality:quality, frameId:frameId, tile:tile});
 	}
 
   // prioritize tiles according to movement
@@ -250,7 +251,7 @@ var endOfFrame = function() {
 	//console.log(nbFringe10p, percInSet, percFringe10p)
 	if (percInSet > 1 && percFringe10p>1) {
 		model.iter = Math.round(model.iter*1.5);
-		that.draw();
+		that.draw(null, null, null, 200);
 		events.send("iter.change");
 	} else {
     setTimeout(function() {that.refine();},1000);

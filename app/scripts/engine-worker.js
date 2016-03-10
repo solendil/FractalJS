@@ -325,6 +325,26 @@ drawTileOnBuffer: function(tile, model) {
 	}
 },
 
+drawTileOnBufferSetOnly: function(tile, model) {
+	var frame = tile.frame;
+	var dx = 0;
+	for (var sy=tile.y1; sy<=tile.y2; sy++) {
+		for (var sx=tile.x1; sx<=tile.x2; sx++) {
+			if (frame[dx]!=0) {
+				dx++
+			 	continue;
+			}
+			var px = sx * model.a + sy * model.c + model.e;
+			var py = sx * model.b + sy * model.d + model.f;
+			var piter = fractalFunction(px, py);
+			if (piter==iter)
+				frame[dx++] = 0;
+			else
+				frame[dx++] = piter;
+		}
+	}
+},
+
 // subsampling with a regular 4*4 grid
 drawSuperTileOnBuffer: function(tile, model) {
 	var sss = model.pixelOnP/4;
@@ -403,6 +423,7 @@ onmessage = function(param) {
 		engine.setModel(data.model);
 		//console.log("receive DRAW", param)
 		if (data.quality==200) engine.drawTileOnBuffer(data.tile, data.model);
+		else if (data.quality==201) engine.drawTileOnBufferSetOnly(data.tile, data.model);
 		else if (data.quality==100) engine.drawSubTileOnBuffer(data.tile, data.model);
 		else if (data.quality==300) engine.drawSuperTileOnBuffer(data.tile, data.model);
 		else throw "invalid drawing quality";
