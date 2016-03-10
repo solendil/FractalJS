@@ -332,6 +332,14 @@ drawSuperTileOnBuffer: function(tile, model) {
 	var dx = 0;
 	for (var sy=tile.y1; sy<=tile.y2; sy++) {
 		for (var sx=tile.x1; sx<=tile.x2; sx++) {
+			if (frame[dx]==0) // if we're not on borders of tile, check if this point is inside set and skip SS
+				if (!(sy==tile.y1 || sy==tile.y2-1 || sx==tile.x1 || sx==tile.y1-1)) {
+
+					if (frame[dx]==0 && frame[dx+1]==0 && frame[dx-1]==0 && frame[dx+tile.width]==0 && frame[dx-tile.width]==0) {
+						dx++;
+						continue;
+					}
+				}
 			var px = sx * model.a + sy * model.c + model.e - model.pixelOnP/2;
 			var py = sx * model.b + sy * model.d + model.f - model.pixelOnP/2;
 			var itersum = 0;

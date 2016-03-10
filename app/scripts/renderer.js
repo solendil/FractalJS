@@ -54,7 +54,11 @@ this.resize = function() {
   var tileNbHeight = Math.sqrt(params.numberOfTiles/ratio);
   var tileNbWidth = Math.round(tileNbHeight*ratio);
   tileNbHeight = Math.round(tileNbHeight);
-  console.log("tiles: "+tileNbWidth+"*"+tileNbHeight+" = "+tileNbHeight*tileNbWidth+" ("+params.numberOfTiles+" asked), ratio "+ratio);
+  console.log("Canvas: "+canvas.width+"*"+canvas.height+
+  	" (ratio "+ratio.toFixed(3)+")"+
+  	", Tiles: "+tileNbWidth+"*"+tileNbHeight+" ("+tileNbHeight*tileNbWidth+" for "+params.numberOfTiles+" asked)"+
+  	" (~size "+Math.round(canvas.width/tileNbWidth)+"*"+Math.round(canvas.height/tileNbHeight)+")"
+  	);
   // instanciate new tiles
   var tileid = 0;
   tiles.length=0;
