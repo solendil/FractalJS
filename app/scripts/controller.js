@@ -237,11 +237,11 @@ if (params.mouseControl) {
 		var psx = e.clientX, psy = e.clientY;
 		var pc = camera.S2C(psx, psy);
 		events.send("mouse.move", {sx:psx, sy:psy, cx:pc.x, cy:pc.y, iter:fractal.getIterAt(psx, psy)});
-	})
+	});
 
 	canvas.addEventListener("mouseout", function(e) {
 		events.send("mouse.move", {});
-	})
+	});
 
 	window.addEventListener("mouseup", function(e) {
 		if (!e) e = window.event;
