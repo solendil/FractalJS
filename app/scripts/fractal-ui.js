@@ -92,12 +92,30 @@ var buildGradientSwatches = function() {
   });
 };
 
+var numberParts = function (x, b) {
+  var exp = 0
+  var sgn = 0
+  if (x<0) sgn=1, x=-x
+  while (x>b) x/=b, exp++
+  while (x<1) x*=b, exp--
+  return { sign: sgn, mantissa: x, exponent: exp }
+}
+
 var updateInfo = function() {
   var model = fractal.getModel();
-  $("#info_x").text(model.camera.x);
-  $("#info_y").text(model.camera.y);
-  $("#info_w").text(model.camera.w.toExponential(4));
-  $("#info_iter").text(model.iter);
+  var coords = ""
+  coords += (model.camera.x>=0)?" ":""
+  coords += model.camera.x.toFixed(16)
+  coords += ", "
+  coords += (model.camera.y>=0)?" ":""
+  coords += model.camera.y.toFixed(16)
+  $("#info_xy").text(coords);
+
+  var parts = numberParts(model.camera.w, 10)
+  var rep = "(zoom ~10^"+(-parts.exponent)+")";
+
+  $("#info_w").text(" "+model.camera.w.toFixed(16)+" "+rep);
+  $("#info_iter").text(" "+model.iter);
 };
 
 var updateShare = function() {
@@ -108,7 +126,6 @@ var updateShare = function() {
 };
 
 $(function() {
-
   fractal = new FractalJS.create ({
     canvas:document.getElementById("maincanvas"),
     canvas2:document.getElementById("canvas2"),
@@ -169,6 +186,29 @@ $(function() {
     slider_density.noUiSlider.set(100);
     fractal.draw("init");
   });
+
+  // update "share" panel if it is opened
+  fractal.events.on(["mouse.move"], function(data){
+    if (!("sx" in data)) {
+      $("#info_mouse_complex_xy").text("")
+      $("#info_mouse_iter").text("")
+    } else {
+      if ($(".tabpane[name='info']").hasClass("active")) {
+        var coords = ""
+        coords += (data.cx>=0)?" ":""
+        coords += data.cx.toFixed(16)
+        coords += ", "
+        coords += (data.cy>=0)?" ":""
+        coords += data.cy.toFixed(16)
+        $("#info_mouse_complex_xy").text(coords)
+        if (data.iter==0)
+          $("#info_mouse_iter").text(" (in set)")
+        else
+          $("#info_mouse_iter").text(" " + data.iter.toFixed(2))
+      }
+    }
+  })
+
 
   // update "share" panel if it is opened
   fractal.events.on(["iter.change","user.control","api.change"], function(){

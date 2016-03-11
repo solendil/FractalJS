@@ -64,10 +64,6 @@ canvas#canvas2 {
 .sharepane.selected {
   display:block;
 }
-pre {
-  -webkit-user-select: text;
-  color:#34495e;
-}
 .slider {
   display:inline-block;
   width:400px;
@@ -100,9 +96,17 @@ canvas.gradient {
   display:none;
 }
 .infobox {
-  -webkit-user-select: auto;
   font-size:90%;
 }
+.infobox .info {
+  -webkit-user-select: auto;
+  font-family: monospace;
+  white-space: pre;
+}
+.infobox table td {
+  padding-right:1em;
+}
+
 span.slider-label {
   display:inline-block;
   min-width:6em;

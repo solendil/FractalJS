@@ -116,4 +116,8 @@ this.getColorDesc= function() {
 	return renderer.getColorDesc();
 };
 
+this.getIterAt= function(sx, sy) {
+	return renderer.getIterAt(sx, sy);
+};
+
 };

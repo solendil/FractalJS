@@ -59,6 +59,7 @@ this.resize = function() {
   	", Tiles: "+tileNbWidth+"*"+tileNbHeight+" ("+tileNbHeight*tileNbWidth+" for "+params.numberOfTiles+" asked)"+
   	" (~size "+Math.round(canvas.width/tileNbWidth)+"*"+Math.round(canvas.height/tileNbHeight)+")"
   	);
+
   // instanciate new tiles
   var tileid = 0;
   tiles.length=0;
@@ -80,6 +81,16 @@ this.resize = function() {
       tiles.push(tile);
     }
   }
+};
+
+this.getIterAt= function(sx, sy) {
+	// TODO : find a more efficient way than enumerating all tiles...
+	for (var t in tiles) {
+		var tile = tiles[t];
+		if (sx>=tile.x1 && sx<=tile.x2 && sy>=tile.y1 && sy<=tile.y2) {
+			return tile.frame[(sy-tile.y1)*tile.width+(sx-tile.x1)];
+		}
+	}
 };
 
 this.setColorDesc = function(desc) {

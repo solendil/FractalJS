@@ -7,6 +7,7 @@ FractalJS.Camera = function(){
   var util = FractalJS.util;
 
   var matrix = null;
+  var matrix_inv = null;
   var cam = this; //javascript and "this"... sigh...
 
   this.width = 100;
@@ -48,6 +49,7 @@ FractalJS.Camera = function(){
     var S2Q = getScreenToSquareMatrix(this.width,this.height);
     var Q2C = getSquareToComplexMatrix(this.x,this.y,this.w);
     matrix = Q2C.multiply(S2Q);
+    matrix_inv = matrix.inverse();
   };
 
   this.setSize = function(width, height) {
@@ -90,12 +92,14 @@ FractalJS.Camera = function(){
     this.project();
   };
 
+  // screen to complex
   this.S2C = function(x,y) {
     return matrix.applyTo(x,y);
   };
 
+  // complex to screen
   this.C2S = function(x,y) {
-    return matrix.inverse().applyTo(x,y);
+    return matrix_inv.applyTo(x,y);
   };
 
   // returns a serialisable object

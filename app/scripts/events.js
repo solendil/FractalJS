@@ -6,10 +6,16 @@
 /*
 List of events :
 
-frame.end
-	Sent by the renderer when a frame is finished drawing. This event is generated for every quality.
+**** frame.end
 
+Sent by the renderer when a frame is finished drawing. This event is generated for every quality.
 
+**** mouse.move:
+
+Sent by the controller when the mouse is moved over/in/out the canvas.
+Object is: {sx, sy, cx, cy, iter}
+{sx, sy} being mouse coordinate on screen (canvas), and {cx, cy} being mouse coordinate
+on complex plane, or empty object if mouse is out of canvas.
 
 */
 

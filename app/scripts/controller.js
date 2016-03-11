@@ -220,7 +220,6 @@ if (params.keyboardControl) {
 }
 
 if (params.mouseControl) {
-
 	canvas.onmousedown = function(e) {
 		if (!e) e = window.event;
 		if (e.button !== 0)
@@ -232,6 +231,17 @@ if (params.mouseControl) {
 			return;
 		camStart = model.camera.clone();
 	};
+
+	canvas.addEventListener("mousemove", function(e) {
+		if (!e) e = window.event;
+		var psx = e.clientX, psy = e.clientY;
+		var pc = camera.S2C(psx, psy);
+		events.send("mouse.move", {sx:psx, sy:psy, cx:pc.x, cy:pc.y, iter:fractal.getIterAt(psx, psy)});
+	})
+
+	canvas.addEventListener("mouseout", function(e) {
+		events.send("mouse.move", {});
+	})
 
 	window.addEventListener("mouseup", function(e) {
 		if (!e) e = window.event;
