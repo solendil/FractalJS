@@ -170,7 +170,7 @@ if (params.keyboardControl) {
 	    keymap[e.keyCode] = true;
 	    var keyCode = (typeof e.which == "number") ? e.which : e.keyCode;
 	    var modifier = 1;
-	    if (e.getModifierState("Shift")) modifier = 1/10;
+	    if (e.shiftKey) modifier = 1/10;
 		switch (keyCode) {
 			case 107: zoom(canvas.width/2, canvas.height/2, 1/(1+ZOOM*modifier)); break; // key +, zoom in
 			case 109: zoom(canvas.width/2, canvas.height/2, 1+ZOOM*modifier); break;  // key -, zoom out
@@ -219,6 +219,13 @@ if (params.keyboardControl) {
 	};
 }
 
+var lastMouseOnCanvasX, lastMouseOnCanvasY;
+function sendMouseMoveEvent() {
+	var psx = lastMouseOnCanvasX, psy = lastMouseOnCanvasY;
+	var pc = camera.S2C(psx, psy);
+	events.send("mouse.move", {sx:psx, sy:psy, cx:pc.x, cy:pc.y, iter:fractal.getIterAt(psx, psy)});
+}
+
 if (params.mouseControl) {
 	canvas.onmousedown = function(e) {
 		if (!e) e = window.event;
@@ -234,9 +241,9 @@ if (params.mouseControl) {
 
 	canvas.addEventListener("mousemove", function(e) {
 		if (!e) e = window.event;
-		var psx = e.clientX, psy = e.clientY;
-		var pc = camera.S2C(psx, psy);
-		events.send("mouse.move", {sx:psx, sy:psy, cx:pc.x, cy:pc.y, iter:fractal.getIterAt(psx, psy)});
+		lastMouseOnCanvasX = e.clientX;
+		lastMouseOnCanvasY = e.clientY;
+		sendMouseMoveEvent();
 	});
 
 	canvas.addEventListener("mouseout", function(e) {
@@ -294,5 +301,8 @@ if (params.fitToWindow) {
 events.on("iter.change", this.url.update);
 events.on("user.control", this.url.update);
 events.on("api.change", this.url.update);
+
+events.on("user.control", sendMouseMoveEvent); // refresh mouse position after every move (notably keyboard)
+events.on("frame.end", sendMouseMoveEvent);    // refresh mouse position after every redraw (to get new iter at pixel)
 
 };
