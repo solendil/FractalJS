@@ -114,21 +114,17 @@ FractalJS.Renderer = function (fractal, model) {
   var lastvector = null;
   var lastquality = null;
 
-  this.refine = function () {
-    this.draw("supersampling", null, lastvector, 300);
-  };
-
-  this.draw = function (reason, vector, priovector, quality) {
-    //console.log("start frae", reason)
-    //throw "stack"
-    lastvector = vector;
+  this.draw = function (reason, vector, fid, quality) {
     if (!quality) {
       quality = 200;
     }
-    if (!priovector) {
-      priovector = vector;
-    }
+    lastvector = vector;
     lastquality = quality;
+
+    if (quality === 300 && fid !== frameId) {
+      // drop supersampling if frame has changed since it was asked
+      return;
+    }
 
     // if a frame is being drawn, cancel next callback, empty draw list
     if (drawList.length !== 0) {
@@ -229,7 +225,7 @@ FractalJS.Renderer = function (fractal, model) {
 
   //-------- private methods
 
-  var endOfFrame = function () {
+  var endOfFrame = function (fid) {
     var endFrameMs = performance.now();
     events.send("frame.end", function () {
       return {
@@ -298,7 +294,7 @@ FractalJS.Renderer = function (fractal, model) {
       events.send("iter.change");
     } else {
       setTimeout(function () {
-        that.refine();
+        that.draw("supersampling", null, fid, 300);
       }, 1000);
     }
     if (percInSet > 1 && percFringe10p < 0.2) {
@@ -372,6 +368,11 @@ FractalJS.Renderer = function (fractal, model) {
         }
       }
       context.putImageData(imageData, 0, 0, tile.x1, tile.y1, tile.width, tile.height);
+      if (debug) {
+        console.log(param.data);
+        context.strokeStyle = param.data.quality === 300 ? "red" : "green";
+        context.strokeRect(tile.x1, tile.y1, tile.width, tile.height);
+      }
 
       // set this worker to another task
       if (drawList.length > 0) {
@@ -385,7 +386,7 @@ FractalJS.Renderer = function (fractal, model) {
 
       // this mechanism looks fragile...
       if (param.data.finished) {
-        endOfFrame();
+        endOfFrame(param.data.frameId);
       }
     } else {
       throw "Unknown message";
