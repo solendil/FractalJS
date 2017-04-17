@@ -1,5 +1,5 @@
-rm -fr ../solendil.github.io/fractaljs3
-cp -R dist/ ../solendil.github.io/fractaljs3
+rm -fr ../solendil.github.io/fractaljs
+cp -R dist/ ../solendil.github.io/fractaljs
 cd ../solendil.github.io
 git add -A
 git commit -m "new version"

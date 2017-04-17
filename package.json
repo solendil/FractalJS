@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "webpack-dev-server --inline",
     "build": "NODE_ENV='production' webpack -p --config webpack.config.prod.js",
+    "deploy": "npm run build && ./misc/deploy.sh",
     "json": "webpack --config webpack.config.prod.js --json > stats.json",
     "node": "babel-node --presets env --plugins transform-object-rest-spread app/js/node/test.js",
     "tw": "./node_modules/babel-cli/bin/babel-node.js --presets env app/js/node/tw.js"
@@ -22,7 +23,8 @@
     "tiny-worker": "^2.0.1",
     "vue": "^2.1.10",
     "vue-template-compiler": "^2.1.10",
-    "twitter": "^1.7.0"
+    "twitter": "^1.7.0",
+    "moment": "^2.18.1"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
@@ -44,7 +46,6 @@
     "html-webpack-plugin": "^2.28.0",
     "less": "^2.7.2",
     "less-loader": "^2.2.3",
-    "moment": "^2.18.1",
     "style-loader": "^0.13.1",
     "vue-loader": "^10.3.0",
     "webpack": "^2.2.1",

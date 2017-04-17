@@ -9,12 +9,13 @@
 * keyboard shortcuts for UI
 * Allow to go further than limit
 
-* BUG : Reset affine transform on fractal change
 * BUG : Social button for email should open in new frame
 * BUG : iteration decrement does not work
 
 ## DONE
 
+* 04.17 : BUG : Affine transform in URL
+* 04.17 : BUG : Reset affine transform on fractal change
 * 03.01 : Color slider not saved in URL
 * 02.23 : Order tiling according to movement
 * 02.23 : Prevent supersampling inside set areas (huge performance gain)

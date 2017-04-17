@@ -14,11 +14,33 @@ const reload = (vue) => {
   }, {});
 };
 
-const indexDates = (storage) => {
-  return storage.reduce((obj, cur) => {
-    obj[cur.date] = cur;
-    return obj;
-  }, {});
+const initDates = (storage) => {
+  const min = moment.unix(storage.reduce((min, val) => {
+    return Math.min(min, moment(val.date).unix());
+  }, moment().unix())).day(1).startOf('day');
+  const max = moment().add(1, 'year').day(1).startOf('day');
+  const res = {};
+  let m = min;
+  while (m.isBefore(max)) {
+    res[m.unix()] = {
+      unix: m.unix(),
+      dateh: m.format('ddd D MMM Y'),
+      location: null,
+      img: null,
+    };
+    m = m.add(1, 'd');
+  }
+  console.log(Object.keys(res).slice(0,10));
+  storage.forEach((o) => {
+    const d = moment.unix(o.unix);
+    res[d.unix()] = {
+      unix: d.unix(),
+      dateh: m.format('ddd D MMM Y'),
+      location: o.location,
+      img: o.img,
+    };
+  });
+  return res;
 };
 
 const saveScheduling = (dates) => {
@@ -26,6 +48,7 @@ const saveScheduling = (dates) => {
   localStorage.setItem('schedule', JSON.stringify(toSave));
   const toSaveSimple = toSave.map(d => util.omit(d, 'img'));
   localStorage.setItem('schedule-simple', JSON.stringify(toSaveSimple));
+  console.log(JSON.stringify(toSaveSimple))
 };
 
 export default new Vue({
@@ -33,9 +56,8 @@ export default new Vue({
   data: {
     saved: [],
     saveByLoc: {},
-    dates: indexDates(JSON.parse(localStorage.getItem('schedule')) || []),
+    dates: initDates(JSON.parse(localStorage.getItem('schedule')) || []),
     selectedDate: null,
-    selectedSave: null,
   },
   mounted() {
     reload(this);
@@ -53,16 +75,16 @@ export default new Vue({
       reload(this);
     },
     clearDate(date) {
-      delete date.location;
-      delete date.img;
+      date.location = null;
+      date.img = null;
       saveScheduling(this.dates);
     },
     selectDate(date) {
-      this.selectedDate = date.date;
-      this.selectedSave = date.save;
+      this.selectedDate = date.unix;
     },
     selectSave(save) {
       const date = this.dates[this.selectedDate];
+      console.log('selectSave', save, this.selectedDate)
       if (date) {
         date.location = save.location;
         date.img = save.img;
@@ -70,33 +92,15 @@ export default new Vue({
       }
     },
     sortedDates() {
-      return Object.values(this.dates).sort((a,b)=>{
-        return a.sort - b.sort;
-      });
+      return Object.values(this.dates).sort((a, b) => a.unix - b.unix);
     },
-    genYear() {
-      const now = moment();
-      let date = now.day(1);
-      const set = (date) => {
-        const key = date.format().split('T')[0];
-        const dateh = date.format('ddd D MMM');
-        if (!this.dates[key]) {
-          Vue.set(this.dates, key, {
-            sort: date.unix(),
-            date: key,
-            dateh,
-            location: null,
-          });
-        }
-      }
-      for (let i = 0; i < 52; i += 1) {
-        set(date);
-        date = date.add(2, 'd');
-        set(date);
-        date = date.add(2, 'd');
-        set(date);
-        date = date.add(3, 'd');
-      }
+    isToday(date) {
+      return moment.unix(date.unix).isSame(moment(), 'day');
+    },
+    isUsedCount(save) {
+      return Object.values(this.dates).reduce((res, o) => {
+        return res + (o.location === save.location) ? 1 : 0;
+      }, 0);
     },
   }
 });

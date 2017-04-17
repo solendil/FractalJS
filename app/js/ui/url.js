@@ -3,6 +3,7 @@ import Logger from '../util/logger';
 import Matrix from '../engine/math/matrix';
 
 const log = Logger.get('ui').level(Logger.DEBUG);
+const mapNbToType = ['mandelbrot', 'mandelbrot3', 'burnngship', 'tippetts', '', '', 'mandelbrot4'];
 
 export default class Url {
 
@@ -86,6 +87,7 @@ export default class Url {
       type: map.t,
       smooth: parseInt(map.fs, 10) === 1,
     };
+    if (!isNaN(desc.type)) desc.type = mapNbToType[desc.type];
     if ('va' in map) {
       desc.viewport = new Matrix(parseFloat(map.va), parseFloat(map.vb),
         parseFloat(map.vc), parseFloat(map.vd), 0, 0);

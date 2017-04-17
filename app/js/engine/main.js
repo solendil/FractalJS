@@ -17,7 +17,7 @@ export default class FractalJS {
     this.nbThreads = p.nbThreads || navigator.hardwareConcurrency || 4;
 
     this.event = new Event();
-    this.camera = new Camera(p.canvas.width, p.canvas.height, p.x, p.y, p.w);
+    this.camera = new Camera(p.canvas.width, p.canvas.height, p.x, p.y, p.w, p.viewport);
     this.painter = new Painter(p.colors);
     this.renderer = new Renderer(this.canvas, this.nbThreads, this.painter, this);
 

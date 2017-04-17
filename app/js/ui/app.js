@@ -62,6 +62,7 @@ export default new Vue({
       log.info('change fractal type', type);
       this.param.type = type;
       helper.setDensitySlider(100);
+      engine.camera.affineReset();
       engine.set({ colors: { density: 20 } });
       engine.set(presets.config[type]);
       engine.draw();
