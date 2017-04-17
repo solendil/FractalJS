@@ -5,6 +5,7 @@ const webpack = require('webpack');
 const config = {
   entry: {
     app: './app/js/ui/app.js',
+    dev: './app/js/dev/dev.js',
     scheduler: './app/js/scheduler/scheduler.js',
   },
   output: {
@@ -50,6 +51,11 @@ const config = {
       chunks: ['scheduler'],
       template: './app/html/scheduler.html',
       filename: 'scheduler.html',
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['dev'],
+      template: './app/html/dev.html',
+      filename: 'dev.html',
     }),
     new webpack.DefinePlugin({
       'process.env': {

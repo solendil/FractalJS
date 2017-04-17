@@ -5,8 +5,8 @@ import Engine from '../engine/main';
 import Palette from '../util/palette';
 import Canvas from './canvas';
 
-const WIDTH = 1024;
-const HEIGHT = 512;
+const WIDTH = 2048;
+const HEIGHT = 1024;
 
 // simulate browser environment
 global.navigator = { hardwareConcurrency: 1 };
@@ -66,7 +66,7 @@ export function tweet(credentials, text) {
         };
         client.post('statuses/update', status, (error, tweet, response) => {
           if (!error) {
-            console.log(tweet);
+            console.log('tweet OK');
             resolve(tweet);
           } else {
             console.log(error);

@@ -15,6 +15,7 @@ export default class FractalJS {
     if (!p.canvas) throw new Error();
     this.canvas = p.canvas;
     this.nbThreads = p.nbThreads || navigator.hardwareConcurrency || 4;
+    this.nbTiles = p.nbTiles;
 
     this.event = new Event();
     this.camera = new Camera(p.canvas.width, p.canvas.height, p.x, p.y, p.w, p.viewport);

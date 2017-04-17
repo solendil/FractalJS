@@ -63,6 +63,7 @@ const drawSupersampled = (model, func, tile, res) => {
   var resq = res * res;
   var sss = pixelOnP / res;
   var dx = 0, sx, sy, px, py, itersum, pxs, pys, piter, ss;
+  // console.log('***', res, resq, pixelOnP, model, sss);
   for (sy = tile.y1; sy <= tile.y2; sy++) {
     for (sx = tile.x1; sx <= tile.x2; sx++) {
       // must only be activated if we're sure tile contains data from previously computed normal
@@ -79,13 +80,15 @@ const drawSupersampled = (model, func, tile, res) => {
           }
         }
       }
-      px = (sx + 0.5) * model.a + (sy + 0.5) * model.c + model.e - sss / 2;
-      py = (sx + 0.5) * model.b + (sy + 0.5) * model.d + model.f - sss / 2;
+      px = sx * model.a + sy * model.c + model.e + sss / 2;
+      py = sx * model.b + sy * model.d + model.f - sss / 2;
+      // console.log('---', sx, sy, px, py)
       itersum = 0;
       for (ss = 0; ss < resq; ss++) {
         pxs = px + Math.trunc(ss / res) * sss;
-        pys = py + (ss % res) * sss;
+        pys = py - (ss % res) * sss;
         itersum += func(pxs, pys, model.iter);
+        // console.log(pxs, pys)
       }
       piter = itersum / resq;
       buffer[dx++] = piter === model.iter ? 0 : piter;
@@ -118,6 +121,8 @@ export default class Worker {
           drawSubsampled(data.model, func, data.tile, data.params.size);
         } else if (data.params.details === 'supersampling') {
           drawSupersampled(data.model, func, data.tile, data.params.size);
+        } else {
+          throw new Error('Unknown detail');
         }
         const answer = {
           action: 'end-draw',

@@ -8,9 +8,11 @@
 * Compatibility browsers/mobile
 * keyboard shortcuts for UI
 * Allow to go further than limit
+* Some sort of build number in FJS so i know if it's been redeployed
 
 * BUG : Social button for email should open in new frame
 * BUG : iteration decrement does not work
+* BUG : when palette is in URL, wrong palette is selected in UI
 
 ## DONE
 

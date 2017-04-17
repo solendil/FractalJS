@@ -5,12 +5,12 @@ import Redrawer from './redrawer';
 import getFractalFunction from './workers/functions';
 
 const log = Logger.get('renderer').level(Logger.INFO);
-const nbTiles = 100;
 
 export default class Renderer {
 
   constructor(canvas, nbThreads, painter, engine) {
     this.canvas = canvas;
+    this.nbTiles = engine.nbTiles || 100;
     this.resize();
 
     this.callback = this.callback.bind(this);
@@ -34,10 +34,10 @@ export default class Renderer {
 
     // compute tiling
     const ratio = this.width / this.height;
-    const tileNbHeight = Math.round(Math.sqrt(nbTiles / ratio));
-    const tileNbWidth = Math.round(Math.sqrt(nbTiles / ratio) * ratio);
+    const tileNbHeight = Math.round(Math.sqrt(this.nbTiles / ratio));
+    const tileNbWidth = Math.round(Math.sqrt(this.nbTiles / ratio) * ratio);
     log.debug(`Screen ${this.width}px * ${this.height}px (ratio ${ratio.toFixed(2)}),`
-      + ` ${tileNbWidth} * ${tileNbHeight} = ${tileNbHeight * tileNbWidth} tiles (${nbTiles} asked)`
+      + ` ${tileNbWidth} * ${tileNbHeight} = ${tileNbHeight * tileNbWidth} tiles (${this.nbTiles} asked)`
       + `, each ~ ${Math.round(canvas.width / tileNbWidth)}px * ${Math.round(this.canvas.height / tileNbHeight)}px`);
 
     // instanciate tiles
