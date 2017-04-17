@@ -1,6 +1,6 @@
-node_modules
-dist
-misc
-app/libs
-app/tests
-app/TODO.txt
+node_modules/
+dist/
+local/
+credentials/
+.vscode
+stats.json
