@@ -3,7 +3,7 @@
 no-plusplus, no-continue */
 
 import Logger from '../../util/logger';
-import getFunction from './functions';
+import fractals from '../fractals';
 
 let log = Logger.get('worker').level(Logger.WARN);
 
@@ -114,7 +114,7 @@ export default class Worker {
         log.debug('changed ID');
         break;
       case 'draw': {
-        const func = getFunction(data.model);
+        const func = fractals.getFunction(data.model.type, data.model.smooth);
         if (data.params.details === 'normal') {
           draw(data.model, func, data.tile);
         } else if (data.params.details === 'subsampling') {

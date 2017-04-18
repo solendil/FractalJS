@@ -19,6 +19,7 @@ export default class Controller {
     this.camera = engine.camera;
     this.setupKeyboard();
     this.setupMouse();
+    this.setupConsole();
   }
 
   // pan the screen by the given vector (as a ratio of its size)
@@ -84,6 +85,22 @@ export default class Controller {
     binder.bind('H left', Δ => this.affineTransform('Shear', SHEAR * Δ, 0));
     binder.bind('H up', Δ => this.affineTransform('Shear', 0, -SHEAR * Δ));
     binder.bind('H down', Δ => this.affineTransform('Shear', 0, SHEAR * Δ));
+  }
+
+  setupConsole() {
+    window.set = (str) => {
+      const re = /(-?\d.\d*)/g;
+      let reres;
+      const res = [];
+      while (reres = re.exec(str)) {
+        res.push(Number(reres[0]));
+      }
+      const cam = this.camera;
+      if (res.length === 2) cam.setPos(new Vector(res[0], res[1]));
+      else if (res.length === 3) cam.setPos(new Vector(res[0], res[1]), res[3]);
+      else console.error('Did not found two or three valid numbers', res, res.length);
+      this.engine.draw();
+    };
   }
 
   setupMouse() {

@@ -2,7 +2,7 @@
 import Logger from '../util/logger';
 import Scheduler from './workers/scheduler';
 import Redrawer from './redrawer';
-import getFractalFunction from './workers/functions';
+import fractals from './fractals';
 
 const log = Logger.get('renderer').level(Logger.INFO);
 
@@ -63,7 +63,7 @@ export default class Renderer {
   }
 
   getIterationsAt(cpx) {
-    const func = getFractalFunction(this.engine);
+    const func = fractals.getFunction(this.engine.type, this.engine.smooth);
     return func(cpx.x, cpx.y, this.engine.iter);
   }
 

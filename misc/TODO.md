@@ -1,5 +1,6 @@
 ## TODO
 
+* Picture quality : something is fishy...
 * View reset button si FF (featured fractal) avec viewport --> more generally; display buttons on UI
 * Export pic at arbitrary size, inc. screen size for backgrounds
 * Share as featured fractal; user name
@@ -10,7 +11,7 @@
 * Julia Mode; phoenix
 * Touch control
 * Allow to go further than limit
-* Add instagram to share buttons
+* Add instagram to share buttons ?
 
 * BUG : Social button for email should open in new frame
 * BUG : iteration decrement does not work

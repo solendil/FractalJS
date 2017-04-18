@@ -3,7 +3,7 @@ import 'social-share-kit';
 import './css';
 import Logger from '../util/logger';
 import * as helper from './helper';
-import * as presets from './presets';
+import fractals from '../engine/fractals';
 import Palette from '../util/palette';
 import Url from './url';
 import Vector from '../engine/math/vector';
@@ -25,10 +25,10 @@ let engine;
 export default new Vue({
   el: '#fractaljs-app',
   data: {
-    fractalTypes: presets.fractalNames,
+    fractalTypes: fractals.listForUi().map(f => ({ type: f.id, name: f.name })),
     gradients: helper.createGradients(),
     ui: {
-      showSidebar: true,
+      showSidebar: false,
       showInfobox: false,
       tab: startTab,
       isMobile: !!(/Mobi/.test(navigator.userAgent)),
@@ -84,7 +84,7 @@ export default new Vue({
       helper.setDensitySlider(100);
       engine.camera.affineReset();
       engine.set({ colors: { density: 20 } });
-      engine.set(presets.config[type]);
+      engine.set(fractals.getPreset(type));
       engine.draw();
     },
     changeSmooth() {

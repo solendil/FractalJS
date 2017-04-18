@@ -7,7 +7,7 @@ import Saver from '../scheduler/saver';
 import Engine from '../engine/main';
 import Improver from '../engine/improver';
 import Controller from '../engine/controller';
-import * as presets from './presets';
+import fractals from '../engine/fractals';
 import * as util from '../util/util';
 
 const log = Logger.get('ui-help').level(Logger.DEBUG);
@@ -35,7 +35,8 @@ export function initParams() {
         buffer: Palette.getBufferFromId(0, 1000),
         id: 0,
       }
-    }, presets.config.mandelbrot);
+    },
+    fractals.getPreset('mandelbrot'));
   } else {
     // start from URL
     let colors;

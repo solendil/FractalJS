@@ -3,7 +3,7 @@ import Logger from '../util/logger';
 import Matrix from '../engine/math/matrix';
 
 const log = Logger.get('ui').level(Logger.DEBUG);
-const mapNbToType = ['mandelbrot', 'mandelbrot3', 'burnngship', 'tippetts', '', '', 'mandelbrot4'];
+const mapNbToType = ['mandelbrot', 'mandelbrot3', 'burningship', 'tippetts', '', '', 'mandelbrot4'];
 
 export default class Url {
 
