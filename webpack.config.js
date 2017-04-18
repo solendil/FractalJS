@@ -1,4 +1,5 @@
 const path = require('path');
+const moment = require('moment');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
@@ -61,6 +62,7 @@ const config = {
       'process.env': {
         BROWSER: true,
       },
+      BUILD_DATE: JSON.stringify(moment().format('llll')),
     }),
   ]
 };

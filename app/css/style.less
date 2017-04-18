@@ -12,6 +12,7 @@ body {
     margin: 0;
     box-sizing: border-box;
 }
+
 /* main canvas */
 canvas#main, canvas#graphic {
     position:fixed;
@@ -32,7 +33,7 @@ canvas#graphic {
     z-index:1;
     -webkit-user-select: none;
     font-family: 'Roboto', 'Lucida Grande', 'Lucida Sans Unicode', 'Verdana', sans-serif;
-    a{color:black;text-decoration:none}
+    a{color:@primary;text-decoration:none}
 }
 /* the burger */
 .burger {
@@ -54,14 +55,12 @@ canvas#graphic {
     position:absolute;
     display:flex;
     flex-direction:column;
-    width: 300px;
     height: 100vh;
     background-color:white;
     box-shadow:4px 0px 10px 0px rgba(0,0,0,0.4);
-    left:-320px;
     transition:left 0.3s ease-in-out;
     &.visible {
-        left:0;
+        left:0 !important;
         transition:left 0.3s ease-in-out;
     }
 }
@@ -144,6 +143,30 @@ canvas#graphic {
 }
 
 /* --------------------------------------------------------------------------------
+ * main container : welcome
+ */
+.welcome {
+  color:#333;
+  h1 {
+      margin:17px 16px 17px 16px;
+      color:@primary;
+      font-weight:500;
+      font-size:34px;
+  }
+  p {
+      margin:17px 16px 17px 16px;
+      line-height:1.33;
+      &.ex {
+        i {
+          color:@primary;
+          vertical-align:-25%;
+          margin:0 10px;
+        }
+      }
+  }
+}
+
+/* --------------------------------------------------------------------------------
  * main container : list
  */
 .list {
@@ -167,7 +190,7 @@ canvas#graphic {
         border-bottom:1px solid rgba(0,0,0,0.12);
     }
     .list-item-misc {
-      padding:16px 16px;
+      padding:8px 16px;
     }
     .list-item-slider {
       padding:8px 24px;

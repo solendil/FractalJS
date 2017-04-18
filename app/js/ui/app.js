@@ -7,9 +7,18 @@ import * as presets from './presets';
 import Palette from '../util/palette';
 import Url from './url';
 import Vector from '../engine/math/vector';
+import setupKeyboard from './keyboard';
+
+console.log(`FractalJS starting (${BUILD_DATE})`);
 
 const log = Logger.get('ui').level(Logger.INFO);
 const init = helper.initParams();
+
+// welcome page; use this command in console to display again; or click 'About'
+// localStorage.removeItem('visited')
+const startTab = localStorage.getItem('visited') ? 'fractal' : 'welcome';
+localStorage.setItem('visited', new Date().getTime());
+
 const DENSITY = (20 * 20) ** (1 / 100);
 let engine;
 
@@ -19,14 +28,15 @@ export default new Vue({
     fractalTypes: presets.fractalNames,
     gradients: helper.createGradients(),
     ui: {
-      showSidebar: false,
+      showSidebar: true,
       showInfobox: false,
-      tab: 'fractal',
+      tab: startTab,
+      isMobile: !!(/Mobi/.test(navigator.userAgent)),
     },
     param: {
       type: init.type,
       smooth: init.smooth,
-      gradientId: 0,
+      gradientId: init.colors.id,
       color: {
         offset: init.colors.offset,
         density: init.colors.density,
@@ -43,12 +53,22 @@ export default new Vue({
       isMouseOnCanvas: false,
     }
   },
+  computed: {
+    sidebarStyle() {
+      const width = this.ui.tab === 'welcome' ? 450 : 300;
+      return {
+        width: `${width}px`,
+        left: `-${width + 20}px`,
+      };
+    }
+  },
   mounted() {
     engine = helper.initEngine.call(this, init);
     engine.draw();
     window.engine = engine; // for debugging
     helper.initSliders.call(this);
     window.SocialShareKit.init();
+    setupKeyboard.call(this);
   },
   methods: {
     toggleSidebar(status) {

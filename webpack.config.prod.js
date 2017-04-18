@@ -1,4 +1,5 @@
 const path = require('path');
+const moment = require('moment');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const WebpackShellPlugin = require('webpack-shell-plugin');
@@ -55,6 +56,7 @@ const config = {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         BROWSER: true,
       },
+      BUILD_DATE: JSON.stringify(moment().format('llll')),
     }),
     new WebpackShellPlugin({
       onBuildStart: [
@@ -70,7 +72,7 @@ const config = {
         warnings: false,
       }
     }),
-    new ExtractTextPlugin("styles.css"),
+    new ExtractTextPlugin('styles.css'),
   ]
 };
 

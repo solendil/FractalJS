@@ -16,7 +16,8 @@
       <div class="burger" v-on:click="toggleSidebar(true)">
           <i class="material-icons">menu</i>
       </div>
-      <div class="sidebar" v-bind:class="{visible: ui.showSidebar}">
+
+      <div class="sidebar" v-bind:class="{visible: ui.showSidebar}" v-bind:style="sidebarStyle">
           <div class="toolbox">
             <span class="switch" v-on:click="toggleSidebar(false)">
               <i class="material-icons">arrow_back</i>
@@ -33,9 +34,33 @@
               </span>
           </div>
 
+          <div class="content" v-bind:class="{visible:ui.tab==='welcome'}">
+            <div class="welcome">
+              <p v-if="ui.isMobile" style='color:#c62828; font-weight:bold'>
+                <i class="material-icons" style="float:left; margin:0 10px">warning</i>
+                FractalJS does not work properly on mobile devices, yet. Prefer a desktop computer.
+              </p>
+              <h1>Welcome to FractalJS</h1>
+              <p><a href='https://en.wikipedia.org/wiki/Fractal'>Fractals</a> are fascinating mathematical objects
+              that exhibit repeating
+              <a href='https://en.wikipedia.org/wiki/Mandelbrot_set'>patterns</a>
+              at every scale.
+              </p>
+              <p>FractalJS is a realtime
+                <a href='https://en.wikipedia.org/wiki/Fractal-generating_software'>fractal exporer</a>.
+              <p>
+              <p>You can navigate the set with the mouse (drag, wheel) or the keyboard (+, -, arrows). Menu icons are&nbsp;:
+              <p>
+              <p class="ex"><i class="material-icons">arrow_back</i> Hide this panel<p>
+              <p class="ex"><i class="material-icons">home</i> Pick a fractal set<p>
+              <p class="ex"><i class="material-icons">palette</i> Choose a color scheme<p>
+              <p class="ex"><i class="material-icons">share</i> Share this fractal picture<p>
+            </div>
+          </div>
+
           <div class="content" v-bind:class="{visible:ui.tab==='fractal'}">
             <div class="list">
-              <div class="subheader accent">Pick a Fractal Set</div>
+              <div class="subheader accent">Pick a fractal set</div>
               <div v-for="type in fractalTypes">
                 <div class="list-item-one-line selectable"
                   v-bind:class="{selected:type.type === param.type}"
@@ -48,7 +73,7 @@
 
           <div class="content" v-bind:class="{visible:ui.tab==='palette'}">
             <div class="list">
-              <div class="subheader accent">Paint the picture</div>
+              <div class="subheader accent">Choose a color scheme</div>
               <div class="list-item-misc">
                 <div class="swatches">
                   <div class="swatch"
@@ -88,7 +113,7 @@
 
           <div class="content" v-bind:class="{visible:ui.tab==='share'}">
             <div class="list">
-              <div class="subheader accent">Share this Fractal picture</div>
+              <div class="subheader accent">Share this fractal picture</div>
               <div class="list-item-misc">
                 <p>
                 Current URL can be bookmarked and exchanged. Other options:
@@ -113,12 +138,21 @@
                   Email
                 </a>
               </div>
+              <hr />
+              <div class="subheader accent">Follow FractalJS</div>
+              <div class="list-item-misc">
+                <p>
+                <a href="https://twitter.com/solendil" class="twitter-follow-button" data-show-count="false" data-show-screen-name="true" data-size="large">Follow @solendil</a>
+                <br /><br />
+                </p>
+                <p>Enjoy featured fractal pictures.<br /> Get informed of the latest features.</p>
+              </div>
             </div>
           </div>
 
           <div class="content" v-bind:class="{visible:ui.tab==='info'}">
             <div class="list">
-              <div class="subheader accent">FractalJS</div>
+              <div class="subheader accent">Controls</div>
               <div class="list-item-more">
                   <div class="avatar">
                       <i class="material-icons">mouse</i>
@@ -153,8 +187,13 @@
                     </small>
                   </div>
               </div>
-              <hr>
+              <hr />
+              <div class="subheader accent" @click="ui.tab='welcome'">About</div>
+
               <div class="list-item-misc">
+                <p>FractalJS is open-source. You can report bugs, or add you favorite fractal set by heading to <a target='_blank' href='https://github.com/solendil/fractaljs/'>GitHub</a>.
+                  <br/><br/>
+                </p>
                 <iframe src="https://ghbtns.com/github-btn.html?user=solendil&repo=fractaljs&type=star&count=true&size=large"
                 frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
               </div>
@@ -182,5 +221,16 @@
         {{ snack.title }}
       </div>
     </div>
+    <script type="text/javascript">
+      if (document.location.hostname.search("solendil.github.io") !== -1) {
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-62026247-1', 'auto');
+        ga('send', 'pageview');
+      }
+    </script>
+    <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
   </body>
 </html>

@@ -130,8 +130,6 @@ export function createGradients() {
     const dataURL = canvas.toDataURL('image/png');
     res.push({ id, dataURL });
   });
-
-  console.timeEnd('gradients');
   return res;
 }
 

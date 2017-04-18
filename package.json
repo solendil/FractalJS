@@ -4,9 +4,8 @@
   "description": "Browse fractals!",
   "main": "entry.js",
   "scripts": {
-    "dev": "webpack-dev-server --inline",
+    "dev": "webpack-dev-server --inline --host 0.0.0.0",
     "build": "NODE_ENV='production' webpack -p --config webpack.config.prod.js",
-    "deploy": "npm run build && ./misc/deploy.sh",
     "json": "webpack --config webpack.config.prod.js --json > stats.json",
     "node": "babel-node --presets env --plugins transform-object-rest-spread app/js/node/test.js",
     "tw": "./node_modules/babel-cli/bin/babel-node.js --presets env app/js/node/tw.js"
