@@ -30,7 +30,13 @@ const config = {
         exclude: /(node_modules)/,
         loader: 'babel-loader',
         query: {
-          presets: ['es2015', 'es2016'],
+          presets: [
+            ['env', {
+              targets: {
+                browsers: ['last 2 versions', 'safari >= 7']
+              }
+            }]
+          ],
         }
       }
     ]

@@ -5,7 +5,8 @@
   "main": "entry.js",
   "scripts": {
     "dev": "webpack-dev-server --inline --host 0.0.0.0",
-    "build": "NODE_ENV='production' webpack -p --config webpack.config.prod.js",
+    "build": "NODE_ENV='production' webpack -p --config webpack.config.prod.js && ./misc/deploy.sh",
+    "build-test": "NODE_ENV='production' webpack -p --config webpack.config.prod.js && ./misc/deploy-test.sh",
     "json": "webpack --config webpack.config.prod.js --json > stats.json",
     "node": "babel-node --presets env --plugins transform-object-rest-spread app/js/node/test.js",
     "tw": "./node_modules/babel-cli/bin/babel-node.js --presets env app/js/node/tw.js"
@@ -14,16 +15,17 @@
   "author": "Matthieu Dumas",
   "license": "MIT",
   "dependencies": {
+    "babel-polyfill": "^6.23.0",
     "material-design-icons": "^3.0.1",
+    "moment": "^2.18.1",
     "node-png": "^0.4.3",
     "nouislider": "^9.2.0",
     "roboto-fontface": "^0.7.0",
     "social-share-kit": "^1.0.13",
     "tiny-worker": "^2.0.1",
-    "vue": "^2.1.10",
-    "vue-template-compiler": "^2.1.10",
     "twitter": "^1.7.0",
-    "moment": "^2.18.1"
+    "vue": "^2.1.10",
+    "vue-template-compiler": "^2.1.10"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
