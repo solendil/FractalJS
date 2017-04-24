@@ -61,14 +61,16 @@ export default class Url {
       y: -doubleArray[2],
       w: doubleArray[3],
       iter: intArray[1],
-      typeId: byteArray[4],
+      type: byteArray[4],
       smooth: (flags & 0x1) === 1 // eslint-disable-line no-bitwise
     };
+    if (!isNaN(desc.type)) desc.type = mapNbToType[desc.type];
     const color = {
       offset: intArray[3] / 10000.0,
       density: byteArray.length > 32 ? floatArray[8] : 20,
-      gradientId: byteArray[5],
+      id: byteArray[5],
     };
+    log.debug('read old URL scheme', desc, color);
     return [desc, color];
   }
 

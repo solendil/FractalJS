@@ -14,11 +14,6 @@ console.log(`FractalJS starting (${BUILD_DATE})`);
 const log = Logger.get('ui').level(Logger.INFO);
 const init = helper.initParams();
 
-// welcome page; use this command in console to display again; or click 'About'
-// localStorage.removeItem('visited')
-const startTab = localStorage.getItem('visited') ? 'fractal' : 'welcome';
-localStorage.setItem('visited', new Date().getTime());
-
 const DENSITY = (20 * 20) ** (1 / 100);
 let engine;
 
@@ -30,7 +25,7 @@ export default new Vue({
     ui: {
       showSidebar: false,
       showInfobox: false,
-      tab: startTab,
+      tab: 'fractal',
       isMobile: !!(/Mobi/.test(navigator.userAgent)),
     },
     param: {
@@ -61,6 +56,14 @@ export default new Vue({
         left: `-${width + 20}px`,
       };
     }
+  },
+  created() {
+    // welcome page; use this command in console to display again; or click 'About'
+    // localStorage.removeItem('visited')
+    const firstVisit = !localStorage.getItem('visited');
+    localStorage.setItem('visited', new Date().getTime());
+    this.ui.tab = firstVisit ? 'welcome' : 'fractal';
+    this.ui.showSidebar = firstVisit;
   },
   mounted() {
     engine = helper.initEngine.call(this, init);

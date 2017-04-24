@@ -22,8 +22,6 @@ class Fractals {
   }
 
   listForUi() {
-    console.log(this.byKey);
-    console.log(Object.values(this.byKey));
     return Object.values(this.byKey).filter(f => !f.hidden).sort((a, b) => a.uiOrder - b.uiOrder);
   }
 

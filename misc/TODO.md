@@ -15,6 +15,7 @@
 
 * BUG : Social button for email should open in new frame
 * BUG : iteration decrement does not work
+* BUG : iteration infobox not valuated after page loading
 
 ## DONE
 
@@ -51,4 +52,4 @@
 * Palette editor with multiwave, others
 * Tutorial/book Mode
 * Fractal formulaes editor/injection
-
+* FRAX like lightning (through GPU)
