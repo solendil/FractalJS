@@ -1,7 +1,6 @@
 ## TODO
 
 * Picture quality : something is fishy...
-* View reset button si FF (featured fractal) avec viewport --> more generally; display buttons on UI
 * Export pic at arbitrary size, inc. screen size for backgrounds
 * Share as featured fractal; user name
 * Drawable canvas on screen, pixel space and/or complex space; for example to have zoom guides
@@ -11,14 +10,14 @@
 * Julia Mode; phoenix
 * Touch control
 * Allow to go further than limit
-* Add instagram to share buttons ?
 
 * BUG : Social button for email should open in new frame
 * BUG : iteration decrement does not work
-* BUG : iteration infobox not valuated after page loading
 
 ## DONE
 
+* 04.25 : View reset button si FF (featured fractal) avec viewport
+* 04.24 : BUG : iteration infobox not valuated after page loading
 * 04.18 : Welcome screen, plus alert for mobile devices
 * 04.18 : Display the build DATE in the console at startup
 * 04.18 : BUG : when palette is in URL, wrong palette is selected in UI

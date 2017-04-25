@@ -46,7 +46,6 @@ export default class Camera {
     this.matrix_inv = this.matrix.inverse();
   }
 
-
   // type can be "Rotation" (valuey is ignored), "Scale", "Shear"
   affineTransform(type, valuex, valuey) {
     const func = `Get${type}Matrix`;

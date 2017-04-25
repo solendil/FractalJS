@@ -208,6 +208,14 @@
           </div>
 
       </div>
+
+      <div class="toolbar">
+          <div class="icon" v-if="misc.viewportChanged" @click="resetViewport()">
+            <i class="material-icons">screen_rotation</i>
+            <div class="tooltip">Reset Viewport</div>
+          </div>
+      </div>
+
       <div class="infobox" v-bind:class="{ visible: ui.showInfobox }">
           <div v-if="misc.isMouseOnCanvas">
             <div class="title">Mouse</div>
@@ -224,9 +232,11 @@
             extent :  {{ info.global.w }}
           </div>
       </div>
+
       <div class="snackbar" v-bind:class="{ visible: snack.visible }">
         {{ snack.title }}
       </div>
+
     </div>
     <script type="text/javascript">
       if (document.location.hostname.search("solendil.github.io") !== -1) {

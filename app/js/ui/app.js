@@ -14,7 +14,6 @@ console.log(`FractalJS starting (${BUILD_DATE})`);
 
 const log = Logger.get('ui').level(Logger.INFO);
 const init = helper.initParams();
-
 const DENSITY = (20 * 20) ** (1 / 100);
 let engine;
 
@@ -39,7 +38,7 @@ export default new Vue({
       }
     },
     info: {
-      global: { x: 0, y: 0, w: 0, iter: 0 },
+      global: { x: init.x, y: init.y, w: init.w, iter: init.iter },
       mouse: { x: 0, y: 0, iter: 0 },
     },
     snack: { title: '', visible: false },
@@ -47,6 +46,7 @@ export default new Vue({
       mouse: { x: 0, y: 0 },
       dataurl: '',
       isMouseOnCanvas: false,
+      viewportChanged: false,
     }
   },
   computed: {
@@ -121,6 +121,7 @@ export default new Vue({
     },
     onEngineDraw() {
       Url.update(engine, engine.painter);
+      this.misc.viewportChanged = !engine.camera.affineMatrix.isIdentity();
       if (this.ui.showInfobox) this.updateInfobox();
     },
     onZoomLimit() {
@@ -150,5 +151,9 @@ export default new Vue({
       log.info('showInfobox', this.ui.showInfobox);
       this.updateInfobox();
     },
+    resetViewport() {
+      engine.camera.affineReset();
+      engine.draw();
+    }
   }
 });

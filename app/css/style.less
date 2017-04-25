@@ -50,6 +50,37 @@ canvas#graphic {
         transition:all 0.2s ease-in-out;
     }
 }
+/* the toolbar */
+.toolbar {
+    position:fixed;
+    right:0;
+    color:white;
+    cursor:pointer;
+    display:flex;
+    flex-direction: column;
+    div.icon {
+      position:relative;
+      i {
+        margin: 16px;
+      }
+      div.tooltip {
+        position: absolute;
+        line-height: 56px;
+        padding: 0 8px 0px 16px;
+        top: 0;
+        right: 56px;
+        opacity: 0;
+        white-space: nowrap;
+      }
+      &:hover {
+        div.tooltip {
+          opacity: 1;
+          background-color:rgba(0,0,0,0.1);
+        }
+        background-color:rgba(0,0,0,0.1);
+      }
+    }
+}
 /* the sidebar, sidable  */
 .sidebar {
     position:absolute;
