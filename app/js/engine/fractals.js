@@ -1,13 +1,18 @@
-const context = require.context('./fractals/', true, /\.(js)$/);
+import all from './fractals/index';
+
+// quick workaround because require.context does not work with Node
+// TODO: go back to a better glob import
+// const context = require.context('./fractals/', true, /\.(js)$/);
 
 class Fractals {
 
   constructor() {
     this.byKey = {};
-    context.keys().forEach((filename) => {
-      const obj = context(filename).default;
-      this.byKey[obj.id] = obj;
-    });
+    all.forEach((f) => { this.byKey[f.id] = f; });
+    // context.keys().forEach((filename) => {
+    //   const obj = context(filename).default;
+    //   this.byKey[obj.id] = obj;
+    // });
   }
 
   getFunction(id, smooth) {
