@@ -1,28 +1,45 @@
-# FractalJS
 
-FractalJS is realtime fractal exporer running in the browser. It lets you explore many fractal sets with different color palettes, and share your discoveries through a simple URL.
+# rework of fractalJS
 
-### [Start FractalJS](http://solendil.github.io/fractaljs/)
+BIG GOAL:
+- Make FJS run as-is on a modern stack
+  - CRA + redux, MUI
+- Mobile First & PWA
 
-## Available Fractals
+SECONDARY GOALS
+- allow easier improvements in UX
+- make a Node code path with tests
+- improve old code constructs
 
-* [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set)
-* [Multibrot 3 & 4](https://en.wikipedia.org/wiki/Multibrot_set)
-* [Burning Ship](https://en.wikipedia.org/wiki/Burning_Ship_fractal)
-* [Burning Bird](http://v.rentalserver.jp/morigon.jp/Repository/SUBI0/SUBI_BurningBird2_e.html)
-* [John Tippetts Mandelbrot](http://paulbourke.net/fractals/tippetts/)
-* ... and more to come
+# TODOS
 
-## Project Setup
+- redo tab bar, fix drawer width, test on phone
+- fix tearing bug while mouse pan
+- app icon, keywords, etc...
+- build & optimize
+- "color" panel
+- "share" panel
 
-```
-$ git clone https://github.com/solendil/FractalJS.git
-$ cd FractalJS
-$ npm install
-$ npm run dev
-```
+# DONE
 
-## Help wanted !
+- zoom limit
+- UX keyboard shortcuts
+- touch set navigation; swipe; pinch
+- "about" panel
+- infobox with mouse info
+- update Redux state when controller changes engine
+- smooth rendering
+- info box
+- URL setup & init
+- multistep rendering (antialias)
+- mouse set navigation
+- keyboard set navigation
+- UX: burger & tabs & static panes (w/cra)
+- Switch to Material-UI, because of
+  - tons of perfect components
+  - slider & other
+  - future-proof
+  - mobile first
+- proper webworkers
 
-Do you want to implement a new fractal set in FractlJS? It couldn't be easier. After the project is set up, just head to `/app/js/engine/fractals/` copy `example.js` and write your own fractal function.
 

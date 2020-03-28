@@ -1,62 +1,53 @@
 {
-  "name": "FractalJS",
-  "version": "3.0.0",
-  "description": "Browse fractals!",
-  "main": "entry.js",
-  "scripts": {
-    "dev": "webpack-dev-server --inline --host 0.0.0.0",
-    "build": "NODE_ENV='production' webpack -p --config webpack.config.prod.js && ./misc/deploy.sh",
-    "build-test": "NODE_ENV='production' webpack -p --config webpack.config.prod.js && ./misc/deploy-test.sh",
-    "json": "webpack --config webpack.config.prod.js --json > stats.json",
-    "node": "babel-node --presets env --plugins transform-object-rest-spread app/js/node/test.js",
-    "http": "nodemon --exec babel-node --presets env --plugins transform-object-rest-spread app/js/node/http/server",
-    "tw": "./node_modules/babel-cli/bin/babel-node.js --presets env app/js/node/tw.js"
-  },
-  "keywords": [],
-  "author": "Matthieu Dumas",
-  "license": "MIT",
+  "name": "fractaljs2",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
-    "babel-polyfill": "^6.23.0",
-    "express": "^4.16.4",
-    "material-design-icons": "^3.0.1",
-    "moment": "^2.18.1",
-    "node-png": "^0.4.3",
-    "nouislider": "^9.2.0",
-    "require-context": "^1.1.0",
-    "require-file-directory": "^1.0.1",
-    "roboto-fontface": "^0.7.0",
-    "social-share-kit": "^1.0.13",
-    "tiny-worker": "^2.0.1",
-    "twitter": "^1.7.0",
-    "vue": "^2.1.10",
-    "vue-template-compiler": "^2.1.10"
+    "@material-ui/core": "^4.9.7",
+    "@reduxjs/toolkit": "^1.3.0",
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.5.0",
+    "@testing-library/user-event": "^7.2.1",
+    "@types/hammerjs": "^2.0.36",
+    "@types/jest": "^24.9.1",
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^12.12.31",
+    "@types/react": "^16.9.25",
+    "@types/react-dom": "^16.9.5",
+    "@types/react-redux": "^7.1.7",
+    "hammerjs": "^2.0.8",
+    "lodash": "^4.17.15",
+    "node-sass": "^4.13.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-github-btn": "^1.1.1",
+    "react-redux": "^7.2.0",
+    "react-scripts": "3.4.1",
+    "typescript": "^3.7.5"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "devDependencies": {
-    "babel-cli": "^6.23.0",
-    "babel-core": "^6.23.1",
-    "babel-loader": "^6.3.2",
-    "babel-plugin-transform-object-rest-spread": "^6.23.0",
-    "babel-preset-env": "^1.4.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-es2016": "^6.24.1",
-    "css-loader": "^0.26.1",
-    "eslint": "^3.14.1",
-    "eslint-config-airbnb": "^14.0.0",
-    "eslint-import-resolver-webpack": "^0.8.1",
-    "eslint-plugin-import": "^2.2.0",
-    "eslint-plugin-jsx-a11y": "^3.0.2",
-    "eslint-plugin-react": "^6.9.0",
-    "extract-text-webpack-plugin": "^2.0.0-rc.3",
-    "file-loader": "^0.10.0",
-    "html-webpack-plugin": "^2.28.0",
-    "less": "^2.7.2",
-    "less-loader": "^2.2.3",
-    "nodemon": "^1.18.9",
-    "style-loader": "^0.13.1",
-    "vue-loader": "^10.3.0",
-    "webpack": "^2.2.1",
-    "webpack-dev-server": "^1.16.3",
-    "webpack-shell-plugin": "^0.5.0",
-    "worker-loader": "^0.7.1"
+    "react-app-rewired": "^2.1.5",
+    "worker-loader": "^2.0.0"
   }
 }
