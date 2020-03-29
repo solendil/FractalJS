@@ -13,11 +13,13 @@ SECONDARY GOALS
 
 # TODOS
 
+- "color" panel
+  - fix complex dance between engine / redux / URL
+  - make logarithmic slider
 - redo tab bar, fix drawer width, test on phone
 - fix tearing bug while mouse pan
 - app icon, keywords, etc...
 - build & optimize
-- "color" panel
 - "share" panel
 
 # DONE

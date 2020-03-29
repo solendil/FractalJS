@@ -2,11 +2,10 @@ import { Dispatch } from "@reduxjs/toolkit";
 import { Root } from "./reducer";
 import Engine from "../to_review/engine/main";
 import fractals from "../to_review/engine/fractals";
-import Palette from "../to_review/util/palette";
-import { setSet, updateSet } from "./set";
+import { updateSet } from "./set";
 import Controller from "./controller";
 import Improver from "./improver";
-import Url from "../to_review/util/url";
+import * as url from "./url";
 import _ from "lodash";
 import Vector from "../to_review/engine/math/vector";
 import {
@@ -17,6 +16,7 @@ import {
   setSnack,
 } from "./ui";
 import binder from "../to_review/util/keybinder";
+import { setOffset, setDensitySlidebar } from "./colors";
 
 let engine: any = null;
 
@@ -54,39 +54,14 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   );
 
   // ---- read URL and infer start params
-  const init = Url.read();
-  let res: any;
-  if (!init) {
-    // cold start
-    res = Object.assign(
-      {
-        smooth: true,
-        colors: {
-          offset: 0,
-          density: 20,
-          buffer: Palette.getBufferFromId(0, 1000),
-          id: 0,
-        },
-      },
-      fractals.getPreset("mandelbrot"),
-    );
-  } else {
-    // start from URL
-    let colors: any;
-    [res, colors] = init;
-    res.colors = colors;
-    colors.buffer = Palette.getBufferFromId(colors.id, 1000);
-  }
+  const init = url.readInit(dispatch);
+  engine = new Engine({ ...init, canvas });
 
-  dispatch(setSet(_.omit(res, "colors")));
-  engine = new Engine({ ...res, canvas });
-
-  engine.on(
-    "draw.start",
-    _.debounce(() => {
-      Url.update(engine, engine.painter);
-    }, 250),
-  );
+  const urlUpdate = _.debounce(() => {
+    url.update(engine, engine.painter);
+  }, 250);
+  engine.on("draw.start", urlUpdate);
+  engine.on("draw.redraw", urlUpdate);
   engine.on("zoom.limit", () => {
     dispatch(setSnack("Sorry, FractalJS cannot zoom further..."));
   });
@@ -134,4 +109,21 @@ export const changeXY = (pt: Vector, w?: number): any => async (
     engine.camera.setPos(pt, w);
   }
   engine.draw();
+};
+
+export const setColorOffset = (val: number): any => async (
+  dispatch: Dispatch<any>,
+) => {
+  dispatch(setOffset(val));
+  engine.set({ colors: { offset: val } });
+  engine.drawColor();
+};
+
+export const setColorDensity = (val: number): any => async (
+  dispatch: Dispatch<any>,
+  getState: () => Root,
+) => {
+  dispatch(setDensitySlidebar(val));
+  engine.set({ colors: { density: getState().colors.density } });
+  engine.drawColor();
 };

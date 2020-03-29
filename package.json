@@ -47,7 +47,9 @@
     ]
   },
   "devDependencies": {
+    "fibers": "^4.0.2",
     "react-app-rewired": "^2.1.5",
+    "sass": "^1.26.3",
     "worker-loader": "^2.0.0"
   }
 }

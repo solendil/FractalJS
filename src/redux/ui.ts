@@ -17,9 +17,9 @@ interface Int {
 const ui = createSlice({
   name: "ui",
   initialState: {
-    drawer: false,
+    drawer: true,
     mouseOnCanvas: false,
-    tab: "fractal",
+    tab: "palette",
     infobox: false,
     mouse: { x: 0, y: 0, iter: 0 },
   } as Int,
