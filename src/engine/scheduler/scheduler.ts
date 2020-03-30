@@ -1,8 +1,12 @@
-import Logger from "../../util/logger";
 import Batch from "./scheduler-batch";
-import Worker from "./worker-web.worker.js";
+// @ts-ignore
+import Worker from "./worker.worker.js";
+import { DrawOrder, Order, WorkerResponse } from "./types";
 
-const log = Logger.get("scheduler").level(Logger.WARN);
+interface TWorker {
+  postMessage: (x: Order, y?: any[]) => void;
+  onmessage: (x: any) => void;
+}
 
 /*
 Maintains the list of webworkers.
@@ -11,44 +15,42 @@ Can be interrupted in the middle of a rendering.
 Deal with neutered arrays (arrays passed by reference between main thread and workers).
 */
 export default class Scheduler {
-  constructor(nbThreads, callback) {
+  private nbThreads: number;
+  private workers: TWorker[] = [];
+  private batch: Batch | null;
+  private callback: (data: WorkerResponse) => void;
+
+  constructor(nbThreads: number, callback: (data: any) => void) {
     if (!nbThreads) throw new Error();
     this.batch = null;
-    this.workers = [];
     this.onmessage = this.onmessage.bind(this);
     this.callback = callback;
     this.nbThreads = nbThreads;
-    this.createWorkers();
-  }
-
-  createWorkers() {
     for (let i = 0; i < this.nbThreads; i += 1) {
-      const worker = new Worker();
+      const worker: TWorker = new Worker();
       worker.onmessage = this.onmessage;
       worker.postMessage({ action: "init", id: i });
       this.workers.push(worker);
     }
   }
 
-  dispatchOrder(worker, order) {
+  private dispatchOrder(worker: TWorker, order: DrawOrder) {
     if (order) {
       const tile = order.tile;
       if (tile.buffer.length === 0) {
         // recreate if neutered
-        log.info("recreate neutered buffer", order);
         tile.buffer = new Float32Array(tile.width * tile.height);
       }
       worker.postMessage(order, [tile.buffer.buffer]);
     }
   }
 
-  endDraw(worker, data) {
+  private endDraw(worker: TWorker, data: WorkerResponse) {
     if (!this.batch || this.batch.id !== data.batchId) {
-      log.debug("drop old tile");
       return;
     }
     this.callback(data);
-    this.batch.done(data);
+    this.batch.done();
     if (this.batch.hasMore()) {
       const order = this.batch.nextOrder();
       this.dispatchOrder(worker, order);
@@ -56,36 +58,33 @@ export default class Scheduler {
     if (this.batch.isFinished()) this.batch = null;
   }
 
-  onmessage(event) {
-    const data = event.data;
+  private onmessage(event: any) {
+    const data: WorkerResponse = event.data;
     const worker = event.target;
-    log.debug("received", data.action, data);
     switch (data.action) {
       case "end-draw": {
         this.endDraw(worker, data);
         break;
       }
       default:
-        throw new Error("Illegal action", data);
+        throw new Error("Illegal action");
     }
   }
 
   interrupt() {
     if (this.batch) {
-      log.debug("interrupting");
       this.batch.promiseHandlers.reject();
       this.batch = null;
     }
   }
 
-  schedule(orders) {
+  schedule(orders: DrawOrder[]) {
     if (this.batch) throw new Error(); // previous not finished or interrupted
 
-    this.batch = new Batch(orders);
-    log.debug("new scheduling batch with id", this.batch.id);
-
+    const batch = new Batch(orders);
+    this.batch = batch;
     this.workers.forEach(worker => {
-      const order = this.batch.nextOrder();
+      const order = batch.nextOrder();
       this.dispatchOrder(worker, order);
     });
 

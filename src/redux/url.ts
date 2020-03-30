@@ -1,11 +1,11 @@
 import Matrix from "../engine/math/matrix";
-import fractals from "../to_review/engine/fractals";
 import { Dispatch } from "@reduxjs/toolkit";
 import { setOffset, setDensitySlidebar } from "./colors";
 import { setSet } from "./set";
-import Palette from "../to_review/util/palette";
 import _ from "lodash";
 import Camera from "../engine/math/camera";
+import { getPreset } from "../engine/fractals";
+import { getBufferFromId } from "../util/palette";
 
 const mapNbToType = [
   "mandelbrot",
@@ -28,6 +28,7 @@ export const update = (engine: any, color: any) => {
     args.push(["i", engine.iter]);
     args.push(["fs", engine.smooth ? 1 : 0]);
     if (color) {
+      if (color.id === undefined) throw new Error();
       args.push(["ct", color.id]);
       args.push(["co", Math.round(color.offset * 100)]);
       args.push(["cd", +color.density.toFixed(2)]);
@@ -96,11 +97,11 @@ export const readInit = (dispatch: Dispatch<any>) => {
   const init = read();
   if (!init) {
     // coldstart
-    let desc = { ...fractals.getPreset("mandelbrot"), smooth: true };
+    let desc = { ...getPreset("mandelbrot"), smooth: true };
     let colors = {
       offset: 0,
       density: 20,
-      buffer: Palette.getBufferFromId(0, 1000),
+      buffer: getBufferFromId(0, 1000),
       id: 0,
     };
     dispatch(setSet(_.omit(desc, "viewport")));
@@ -117,7 +118,7 @@ export const readInit = (dispatch: Dispatch<any>) => {
     );
     return {
       ...desc,
-      colors: { ...color, buffer: Palette.getBufferFromId(color.id, 1000) },
+      colors: { ...color, buffer: getBufferFromId(color.id, 1000) },
     };
   }
 };

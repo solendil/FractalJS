@@ -3,16 +3,16 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListSubheader from "@material-ui/core/ListSubheader";
-import fractals from "../to_review/engine/fractals";
 import { useSelector, useDispatch } from "react-redux";
 import { changeFractalType } from "../redux/engine";
 import { Root } from "../redux/reducer";
+import { listForUi } from "../engine/fractals";
 
 function Fractal() {
   const dispatch = useDispatch();
   const type = useSelector((state: Root) => state.set.type);
 
-  const buttons = fractals.listForUi().map(o => {
+  const buttons = listForUi().map(o => {
     return (
       <ListItem
         key={o.id}

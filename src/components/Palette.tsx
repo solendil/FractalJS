@@ -9,9 +9,9 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import { useSelector, useDispatch } from "react-redux";
 import { Root } from "../redux/reducer";
 import { setColorOffset, setColorDensity, setColorId } from "../redux/engine";
-import p from "../to_review/util/palette";
 import { makeStyles } from "@material-ui/core/styles";
 import { WIDTH } from "./Drawer";
+import { getBufferFromId } from "../util/palette";
 
 const gradients = (() => {
   const res: { id: number; dataURL: string }[] = [];
@@ -25,7 +25,7 @@ const gradients = (() => {
   const imageData = context.createImageData(canvas.width, canvas.height);
   const imageBuffer = new Uint32Array(imageData.data.buffer);
   [0, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].forEach(id => {
-    const colorBuffer = p.getBufferFromId(id, RES);
+    const colorBuffer = getBufferFromId(id, RES);
     for (let i = 0; i < WIDTH; i += 1) {
       for (let j = 0; j < HEIGHT; j += 1) {
         imageBuffer[j * WIDTH + i] = colorBuffer[(i + j) % RES];

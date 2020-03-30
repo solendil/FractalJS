@@ -1,20 +1,24 @@
-/* global document */
-// import Logger from "../util/logger";
-
-// const log = Logger.get("redrawer").level(Logger.DEBUG);
+import Matrix from "./math/matrix";
 
 export default class Redrawer {
-  constructor(canvas) {
+  private canvas: HTMLCanvasElement;
+  private offCanvas: HTMLCanvasElement;
+  private context: CanvasRenderingContext2D;
+  private lastId: number | null = null;
+  private lastType: string | null = null;
+  private lastMatrix: Matrix | null = null;
+
+  constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.context = canvas.getContext("2d");
+    this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
     this.offCanvas = document.createElement("canvas");
     this.offCanvas.width = canvas.width;
     this.offCanvas.height = canvas.height;
   }
 
-  redraw(newMatrix, model, id) {
+  redraw(newMatrix: Matrix, type: string, id: number) {
     // if type has changed, don't redraw
-    if (this.lastType !== model.type) this.lastMatrix = null;
+    if (this.lastType !== type) this.lastMatrix = null;
     if (this.lastId === id) return;
     let tileSorter;
 
@@ -32,7 +36,7 @@ export default class Redrawer {
         this.canvas.width,
         this.canvas.height,
       );
-      this.offCanvas.getContext("2d").putImageData(imageData, 0, 0);
+      this.offCanvas.getContext("2d")!.putImageData(imageData, 0, 0);
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.context.transform(m.a, m.b, m.c, m.d, m.e, m.f);
       this.context.drawImage(this.offCanvas, 0, 0);
@@ -50,7 +54,7 @@ export default class Redrawer {
       /* eslint-enable no-mixed-operators */
 
       if (m.a > 1.001 && m.d > 1.001) {
-        tileSorter = { x, y };
+        tileSorter = { x, y, reverse: false };
       } else if (m.a < 0.99 && m.d < 0.99) {
         tileSorter = { x, y, reverse: true };
       } else if (Math.abs(m.e) > 0.01 || Math.abs(m.f) > 0.01) {
@@ -65,7 +69,7 @@ export default class Redrawer {
         if (m.f > 0.01) tileSorter.y = this.canvas.height;
       }
     } else {
-      this.lastType = model.type;
+      this.lastType = type;
     }
 
     this.lastId = id;

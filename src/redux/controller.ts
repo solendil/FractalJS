@@ -1,10 +1,10 @@
-import binder from "../to_review/util/keybinder";
 import Vector from "../engine/math/vector";
 import Camera, { Affine } from "../engine/math/camera";
 import { Dispatch } from "@reduxjs/toolkit";
 import { changeXY } from "./engine";
 import Hammer from "hammerjs";
 import Matrix from "../engine/math/matrix";
+import { bindKeys } from "../util/keybinder";
 
 const ZOOM = 0.3; // 1+
 const PAN = 0.1;
@@ -65,41 +65,41 @@ export default class Controller {
   }
 
   setupKeyboard() {
-    binder.bind("up", (Δ: number) => this.pan(new Vector(0, PAN * Δ)));
-    binder.bind("down", (Δ: number) => this.pan(new Vector(0, -PAN * Δ)));
-    binder.bind("right", (Δ: number) => this.pan(new Vector(-PAN * Δ, 0)));
-    binder.bind("left", (Δ: number) => this.pan(new Vector(PAN * Δ, 0)));
-    binder.bind("+", (Δ: number) => this.zoom(1 / (1 + ZOOM * Δ)));
-    binder.bind("-", (Δ: number) => this.zoom(1 + ZOOM * Δ));
-    binder.bind("V", () => this.affineReset());
-    binder.bind("R left", (Δ: number) =>
+    bindKeys("up", (Δ: number) => this.pan(new Vector(0, PAN * Δ)));
+    bindKeys("down", (Δ: number) => this.pan(new Vector(0, -PAN * Δ)));
+    bindKeys("right", (Δ: number) => this.pan(new Vector(-PAN * Δ, 0)));
+    bindKeys("left", (Δ: number) => this.pan(new Vector(PAN * Δ, 0)));
+    bindKeys("+", (Δ: number) => this.zoom(1 / (1 + ZOOM * Δ)));
+    bindKeys("-", (Δ: number) => this.zoom(1 + ZOOM * Δ));
+    bindKeys("V", () => this.affineReset());
+    bindKeys("R left", (Δ: number) =>
       this.affineTransform("rotation", -ANGLE * Δ),
     );
-    binder.bind("R right", (Δ: number) =>
+    bindKeys("R right", (Δ: number) =>
       this.affineTransform("rotation", +ANGLE * Δ),
     );
-    binder.bind("S right", (Δ: number) =>
+    bindKeys("S right", (Δ: number) =>
       this.affineTransform("scale", 1 / (1 + SCALE * Δ), 1),
     );
-    binder.bind("S left", (Δ: number) =>
+    bindKeys("S left", (Δ: number) =>
       this.affineTransform("scale", 1 + SCALE * Δ, 1),
     );
-    binder.bind("S up", (Δ: number) =>
+    bindKeys("S up", (Δ: number) =>
       this.affineTransform("scale", 1, 1 / (1 + SCALE * Δ)),
     );
-    binder.bind("S down", (Δ: number) =>
+    bindKeys("S down", (Δ: number) =>
       this.affineTransform("scale", 1, 1 + SCALE * Δ),
     );
-    binder.bind("H right", (Δ: number) =>
+    bindKeys("H right", (Δ: number) =>
       this.affineTransform("shear", -SHEAR * Δ, 0),
     );
-    binder.bind("H left", (Δ: number) =>
+    bindKeys("H left", (Δ: number) =>
       this.affineTransform("shear", SHEAR * Δ, 0),
     );
-    binder.bind("H up", (Δ: number) =>
+    bindKeys("H up", (Δ: number) =>
       this.affineTransform("shear", 0, -SHEAR * Δ),
     );
-    binder.bind("H down", (Δ: number) =>
+    bindKeys("H down", (Δ: number) =>
       this.affineTransform("shear", 0, SHEAR * Δ),
     );
   }

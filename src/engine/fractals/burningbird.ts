@@ -1,17 +1,13 @@
-/* eslint-disable
-    no-mixed-operators, no-var, one-var, no-plusplus,
-    one-var-declaration-per-line, no-constant-condition, no-param-reassign
-*/
+import { FractalDef } from "./example";
 
 const escape = 4;
-var iLog4 = 1.0 / Math.log(4.0);
+var iLog2 = 1.0 / Math.log(2.0);
 
 export default {
-  id: "mandelbrot3",
-  uiOrder: 3,
-  numericalId: 1,
-  name: "Multibrot *3",
-  preset: { x: 0.0, y: 0.0, w: 3.0, iter: 50 },
+  id: "burningbird",
+  uiOrder: 2.5,
+  name: "Burning Bird",
+  preset: { x: -0.46, y: 0.07, w: 3.26, iter: 50 },
   fn: {
     normal: (cx, cy, iter) => {
       var zx = 0,
@@ -21,11 +17,12 @@ export default {
         i = 0,
         znx,
         zny;
+      cy = -cy; // this fractal is usually represented upside down
       while (true) {
-        znx = sqx * zx - 3 * zx * sqy + cx;
-        zny = 3 * sqx * zy - sqy * zy + cy;
+        zny = (zx + zx) * zy + cy;
+        znx = sqx - sqy + cx;
         zx = znx;
-        zy = zny;
+        zy = Math.abs(zny);
         if (++i >= iter) break;
         sqx = zx * zx;
         sqy = zy * zy;
@@ -42,11 +39,12 @@ export default {
         j,
         znx,
         zny;
+      cy = -cy; // this fractal is usually represented upside down
       while (true) {
-        znx = sqx * zx - 3 * zx * sqy + cx;
-        zny = 3 * sqx * zy - sqy * zy + cy;
+        zny = (zx + zx) * zy + cy;
+        znx = sqx - sqy + cx;
         zx = znx;
-        zy = zny;
+        zy = Math.abs(zny);
         if (++i >= iter) break;
         sqx = zx * zx;
         sqy = zy * zy;
@@ -54,14 +52,14 @@ export default {
       }
       if (i === iter) return i;
       for (j = 0; j < 4; ++j) {
-        znx = sqx * zx - 3 * zx * sqy + cx;
-        zny = 3 * sqx * zy - sqy * zy + cy;
+        zny = (zx + zx) * zy + cy;
+        znx = sqx - sqy + cx;
         zx = znx;
-        zy = zny;
+        zy = Math.abs(zny);
         sqx = zx * zx;
         sqy = zy * zy;
       }
-      return 5 + i - Math.log(Math.log(sqx + sqy)) * iLog4;
+      return 5 + i - Math.log(Math.log(sqx + sqy)) * iLog2;
     },
   },
-};
+} as FractalDef;

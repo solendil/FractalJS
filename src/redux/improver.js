@@ -1,7 +1,4 @@
-import Logger from "../to_review/util/logger";
 import { updateSet } from "./set";
-
-const log = Logger.get("improver").level(Logger.INFO);
 
 /*
 The improver hijacks engine to use a more complex rendering; so it's
@@ -77,7 +74,6 @@ export default function Improver(engineArg, dispatch) {
 
     // state detects when the fractal is drew afresh, needing a coarse rendering first
     const state = engine.type + engine.smooth;
-    log.debug("states", state, lastState);
     const start =
       state !== lastState
         ? draw({ details: "subsampling", size: 4 })
@@ -114,7 +110,7 @@ export default function Improver(engineArg, dispatch) {
       .then(() => checkInterrupt(id))
       .then(() => draw({ details: "supersampling", size: 4, id }))
       .catch(err => {
-        log.debug(`frame ${id} interrupted`, err);
+        console.debug("guh");
       });
   };
 }

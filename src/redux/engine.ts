@@ -1,7 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Root } from "./reducer";
-import Engine from "../to_review/engine/main";
-import fractals from "../to_review/engine/fractals";
+import Engine from "../engine/main";
 import { updateSet } from "./set";
 import Controller from "./controller";
 import Improver from "./improver";
@@ -15,9 +14,10 @@ import {
   setDrawer,
   setSnack,
 } from "./ui";
-import binder from "../to_review/util/keybinder";
 import * as colorActions from "./colors";
-import Palette from "../to_review/util/palette";
+import { getPreset } from "../engine/fractals";
+import { bindKeys } from "../util/keybinder";
+import { getBufferFromId } from "../util/palette";
 
 let engine: any = null;
 
@@ -26,8 +26,8 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   getState: () => Root,
 ) => {
   // ---- init global keyboard shortcuts
-  binder.bind("I", () => dispatch(setInfobox(!getState().ui.infobox)));
-  binder.bind("esc", () => dispatch(setDrawer(!getState().ui.drawer)));
+  bindKeys("I", () => dispatch(setInfobox(!getState().ui.infobox)));
+  bindKeys("esc", () => dispatch(setDrawer(!getState().ui.drawer)));
 
   // ---- init window size & capture resize events
   const getWindowSize = () => [window.innerWidth, window.innerHeight];
@@ -82,7 +82,7 @@ export const changeFractalType = (type: string): any => async (
   dispatch: Dispatch<any>,
   getState: () => Root,
 ) => {
-  const setValues = fractals.getPreset(type);
+  const setValues = getPreset(type);
   dispatch(updateSet(setValues));
   engine.camera.affineReset();
   engine.set({ colors: { density: 20 } });
@@ -134,6 +134,6 @@ export const setColorId = (id: number): any => async (
   getState: () => Root,
 ) => {
   dispatch(colorActions.setColorId(id));
-  engine.set({ colors: { id, buffer: Palette.getBufferFromId(id, 1000) } });
+  engine.set({ colors: { id, buffer: getBufferFromId(id, 1000) } });
   engine.drawColor();
 };

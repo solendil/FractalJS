@@ -1,20 +1,20 @@
-/* eslint-disable
-    no-mixed-operators, no-var, one-var, no-plusplus,
-    one-var-declaration-per-line, no-constant-condition, no-param-reassign
-*/
+import { FractalDef } from "./example";
 
 const escape = 4;
 var iLog2 = 1.0 / Math.log(2.0);
 
 export default {
-  id: 'mandelbrot',
+  id: "mandelbrot",
   uiOrder: 0,
-  numericalId: 0,
-  name: 'Mandelbrot',
+  name: "Mandelbrot",
   preset: { x: -0.7, y: 0.0, w: 2.5, iter: 50 },
   fn: {
     normal: (cx, cy, iter) => {
-      var znx = 0, zny = 0, sqx = 0, sqy = 0, i = 0;
+      var znx = 0,
+        zny = 0,
+        sqx = 0,
+        sqy = 0,
+        i = 0;
       for (; i < iter && sqx + sqy <= escape; ++i) {
         zny = (znx + znx) * zny + cy;
         znx = sqx - sqy + cx;
@@ -24,7 +24,12 @@ export default {
       return i;
     },
     smooth: (cx, cy, iter) => {
-      var znx = 0, zny = 0, sqx = 0, sqy = 0, i = 0, j = 0;
+      var znx = 0,
+        zny = 0,
+        sqx = 0,
+        sqy = 0,
+        i = 0,
+        j = 0;
       for (; i < iter && sqx + sqy <= escape; ++i) {
         zny = (znx + znx) * zny + cy;
         znx = sqx - sqy + cx;
@@ -41,5 +46,4 @@ export default {
       return 5 + i - Math.log(Math.log(sqx + sqy)) * iLog2;
     },
   },
-};
-
+} as FractalDef;

@@ -40,8 +40,8 @@ const getScreenToSquareMatrix = (
 // W is the complex size of the square
 // A viewport affine transformation can be applied on the square to rotate/scale/shear the view
 export default class Camera {
-  private matrix: Matrix;
   private matrix_inv: Matrix;
+  public matrix: Matrix;
   public affineMatrix: Matrix;
   public screen: Vector;
   public resolutionLimit: number;

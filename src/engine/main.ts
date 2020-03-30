@@ -1,21 +1,41 @@
 /* global navigator */
-import Logger from "../util/logger";
-import Event from "../util/event";
+import Event, { Callback } from "../util/event";
 import Renderer from "./renderer";
-import Painter from "./painter";
-import Camera from "../../engine/math/camera";
-import Vector from "../../engine/math/vector";
+import Painter, { Colors } from "./painter";
+import Camera from "./math/camera";
+import Vector from "./math/vector";
+import { Params } from "./scheduler/types";
+import Matrix from "./math/matrix";
 
-const log = Logger.get("engine").level(Logger.INFO);
+interface TROU {
+  canvas: HTMLCanvasElement;
+  nbThreads?: number;
+  x: number;
+  y: number;
+  w: number;
+  viewport?: Matrix;
+  colors: Colors;
+  type: string;
+  smooth: boolean;
+  iter: number;
+}
 
 export default class FractalJS {
-  constructor(p) {
-    log.debug("start", p);
+  private renderer: Renderer;
+  private canvas: HTMLCanvasElement;
+  private nbThreads: number;
+  private event: Event;
+  private painter: Painter;
 
+  public camera: Camera;
+  public type!: string;
+  public smooth!: boolean;
+  public iter!: number;
+
+  constructor(p: TROU) {
     if (!p.canvas) throw new Error();
     this.canvas = p.canvas;
     this.nbThreads = p.nbThreads || navigator.hardwareConcurrency || 4;
-    this.nbTiles = p.nbTiles;
 
     this.event = new Event();
     this.camera = new Camera(
@@ -35,15 +55,15 @@ export default class FractalJS {
     this.set(p);
   }
 
-  on(...args) {
-    this.event.on(...args);
+  on(evt: string, callback: Callback) {
+    this.event.on(evt, callback);
   }
-  notify(...args) {
-    this.event.notify(...args);
+  notify(evt: string, obj: any) {
+    this.event.notify(evt, obj);
   }
 
   // realtime modification of engine parameters
-  set(p) {
+  set(p: TROU) {
     if ("type" in p) this.type = p.type;
     if ("smooth" in p) this.smooth = p.smooth;
     if ("iter" in p) this.iter = p.iter;
@@ -51,8 +71,7 @@ export default class FractalJS {
     if ("colors" in p) this.painter.set(p.colors);
   }
 
-  draw(params) {
-    // if (!params) params = { details: "normal" };
+  draw(params: Params) {
     return this.renderer.draw(params);
   }
 
@@ -60,8 +79,8 @@ export default class FractalJS {
     this.renderer.drawColor();
   }
 
-  resize(width, height) {
+  resize(width: number, height: number) {
     this.camera.resize(width, height);
-    this.renderer.resize(width, height);
+    this.renderer.resize();
   }
 }

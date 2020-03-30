@@ -1,13 +1,8 @@
-// HIGH PERFORMANCE MODULE
-/* eslint-disable no-var, one-var, one-var-declaration-per-line, no-mixed-operators,
-no-plusplus, no-continue */
+import { getFunction } from "../../fractals";
+import { Order, Model, Tile, WorkerResponse } from "../types";
+import { RenderFn } from "../../fractals/example";
 
-import Logger from "../../util/logger";
-import fractals from "../fractals";
-
-let log = Logger.get("worker").level(Logger.WARN);
-
-const draw = (model, func, tile) => {
+const draw = (model: Model, func: RenderFn, tile: Tile) => {
   var buffer = tile.buffer;
   var dx = 0;
   var sx, sy, px, py, piter;
@@ -27,7 +22,12 @@ const draw = (model, func, tile) => {
   }
 };
 
-const drawSubsampled = (model, func, tile, res) => {
+const drawSubsampled = (
+  model: Model,
+  func: RenderFn,
+  tile: Tile,
+  res: number,
+) => {
   var buffer = tile.buffer;
   var dx = 0,
     sx,
@@ -62,34 +62,20 @@ const drawSubsampled = (model, func, tile, res) => {
   }
 };
 
-const drawSupersampled = (model, func, tile, res) => {
+// prettier-ignore
+const drawSupersampled = (model: Model, func: RenderFn, tile: Tile, res: number ) => {
   var buffer = tile.buffer;
   var pixelOnP = Math.sqrt(model.a * model.a + model.b * model.b);
   var resq = res * res;
   var sss = pixelOnP / res;
-  var dx = 0,
-    sx,
-    sy,
-    px,
-    py,
-    itersum,
-    pxs,
-    pys,
-    piter,
-    ss;
-  // console.log('***', res, resq, pixelOnP, model, sss);
+  var dx = 0, sx, sy, px, py, itersum, pxs, pys, piter, ss;
   for (sy = tile.y1; sy <= tile.y2; sy++) {
     for (sx = tile.x1; sx <= tile.x2; sx++) {
       // must only be activated if we're sure tile contains data from previously computed normal
       if (buffer[dx] === 0) {
         // if we're not on borders of tile, check if this point is inside set and skip SS
         if (
-          !(
-            sy === tile.y1 ||
-            sy === tile.y2 - 1 ||
-            sx === tile.x1 ||
-            sx === tile.y1 - 1
-          )
+          !(sy === tile.y1 || sy === tile.y2 - 1 || sx === tile.x1 || sx === tile.y1 - 1)
         ) {
           if (
             buffer[dx + 1] === 0 &&
@@ -119,43 +105,40 @@ const drawSupersampled = (model, func, tile, res) => {
 };
 
 export default class Worker {
-  constructor(postMessage) {
+  private postMessage: any;
+  private workerId: string;
+
+  constructor(postMessage: any) {
     this.postMessage = postMessage;
     this.workerId = "worker-?";
-    log.debug("definition");
   }
 
-  onmessage(event) {
-    const data = event.data;
-    log.debug("received", data.action, data);
+  onmessage(event: any) {
+    const data: Order = event.data;
     switch (data.action) {
       case "init":
         this.workerId = `worker-${data.id}`;
-        log = Logger.get(`worker-${data.id}`).level(log.currentLevel);
-        log.debug("changed ID");
         break;
       case "draw": {
-        const func = fractals.getFunction(data.model.type, data.model.smooth);
+        const func = getFunction(data.model.type, data.model.smooth);
         if (data.params.details === "normal") {
           draw(data.model, func, data.tile);
         } else if (data.params.details === "subsampling") {
           drawSubsampled(data.model, func, data.tile, data.params.size);
         } else if (data.params.details === "supersampling") {
           drawSupersampled(data.model, func, data.tile, data.params.size);
-        } else {
-          throw new Error("Unknown detail");
         }
-        const answer = {
+        const answer: WorkerResponse = {
           action: "end-draw",
           tile: data.tile,
           workerId: this.workerId,
-          batchId: data.batchId
+          batchId: data.batchId || -1,
         };
         this.postMessage(answer, [answer.tile.buffer.buffer]);
         break;
       }
       default:
-        throw new Error("Illegal action", data);
+        throw new Error("Illegal action");
     }
   }
 }
