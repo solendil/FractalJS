@@ -16,7 +16,8 @@ import {
   setSnack,
 } from "./ui";
 import binder from "../to_review/util/keybinder";
-import { setOffset, setDensitySlidebar } from "./colors";
+import * as colorActions from "./colors";
+import Palette from "../to_review/util/palette";
 
 let engine: any = null;
 
@@ -114,7 +115,7 @@ export const changeXY = (pt: Vector, w?: number): any => async (
 export const setColorOffset = (val: number): any => async (
   dispatch: Dispatch<any>,
 ) => {
-  dispatch(setOffset(val));
+  dispatch(colorActions.setOffset(val));
   engine.set({ colors: { offset: val } });
   engine.drawColor();
 };
@@ -123,7 +124,16 @@ export const setColorDensity = (val: number): any => async (
   dispatch: Dispatch<any>,
   getState: () => Root,
 ) => {
-  dispatch(setDensitySlidebar(val));
+  dispatch(colorActions.setDensitySlidebar(val));
   engine.set({ colors: { density: getState().colors.density } });
+  engine.drawColor();
+};
+
+export const setColorId = (id: number): any => async (
+  dispatch: Dispatch<any>,
+  getState: () => Root,
+) => {
+  dispatch(colorActions.setColorId(id));
+  engine.set({ colors: { id, buffer: Palette.getBufferFromId(id, 1000) } });
   engine.drawColor();
 };

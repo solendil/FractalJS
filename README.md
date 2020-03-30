@@ -13,9 +13,6 @@ SECONDARY GOALS
 
 # TODOS
 
-- "color" panel
-  - fix complex dance between engine / redux / URL
-  - make logarithmic slider
 - redo tab bar, fix drawer width, test on phone
 - fix tearing bug while mouse pan
 - app icon, keywords, etc...
@@ -24,6 +21,7 @@ SECONDARY GOALS
 
 # DONE
 
+- "color" panel
 - zoom limit
 - UX keyboard shortcuts
 - touch set navigation; swipe; pinch
