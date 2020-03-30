@@ -29,4 +29,8 @@ export default class Vector {
       ? new Vector(this.x * v.x, this.y * v.y)
       : new Vector(this.x * v, this.y * v);
   }
+
+  minVal() {
+    return Math.min(this.x, this.y);
+  }
 }

@@ -14,13 +14,13 @@ SECONDARY GOALS
 # TODOS
 
 - redo tab bar, fix drawer width, test on phone
-- fix tearing bug while mouse pan
 - app icon, keywords, etc...
 - build & optimize
 - "share" panel
 
 # DONE
 
+- fix tearing bug while mouse pan
 - "color" panel
 - zoom limit
 - UX keyboard shortcuts

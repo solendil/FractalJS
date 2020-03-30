@@ -1,10 +1,11 @@
-import Matrix from "../to_review/engine/math/matrix";
+import Matrix from "../engine/math/matrix";
 import fractals from "../to_review/engine/fractals";
 import { Dispatch } from "@reduxjs/toolkit";
 import { setOffset, setDensitySlidebar } from "./colors";
 import { setSet } from "./set";
 import Palette from "../to_review/util/palette";
 import _ from "lodash";
+import Camera from "../engine/math/camera";
 
 const mapNbToType = [
   "mandelbrot",
@@ -17,12 +18,13 @@ const mapNbToType = [
 ];
 
 export const update = (engine: any, color: any) => {
+  const camera: Camera = engine.camera;
   try {
     const args = [];
     args.push(["t", engine.type]);
-    args.push(["x", engine.camera.x]);
-    args.push(["y", engine.camera.y]);
-    args.push(["w", engine.camera.w]);
+    args.push(["x", camera.pos.x]);
+    args.push(["y", camera.pos.y]);
+    args.push(["w", camera.w]);
     args.push(["i", engine.iter]);
     args.push(["fs", engine.smooth ? 1 : 0]);
     if (color) {
@@ -30,11 +32,11 @@ export const update = (engine: any, color: any) => {
       args.push(["co", Math.round(color.offset * 100)]);
       args.push(["cd", +color.density.toFixed(2)]);
     }
-    if (!engine.camera.affineMatrix.isIdentity()) {
-      args.push(["va", engine.camera.affineMatrix.a.toFixed(4)]);
-      args.push(["vb", engine.camera.affineMatrix.b.toFixed(4)]);
-      args.push(["vc", engine.camera.affineMatrix.c.toFixed(4)]);
-      args.push(["vd", engine.camera.affineMatrix.d.toFixed(4)]);
+    if (!camera.affineMatrix.isIdentity()) {
+      args.push(["va", camera.affineMatrix.a.toFixed(4)]);
+      args.push(["vb", camera.affineMatrix.b.toFixed(4)]);
+      args.push(["vc", camera.affineMatrix.c.toFixed(4)]);
+      args.push(["vd", camera.affineMatrix.d.toFixed(4)]);
     }
     const str = args.reduce((acc, arg) => `${acc}&${arg[0]}_${arg[1]}`, "");
     window.history.replaceState("", "", `#B${str.substr(1)}`);
@@ -57,7 +59,7 @@ function readCurrentScheme(url: string) {
     iter: parseInt(map.i, 10),
     type: map.t,
     smooth: parseInt(map.fs, 10) === 1,
-    viewport: Matrix.Identity(),
+    viewport: Matrix.identity,
   };
   if (!isNaN(desc.type)) desc.type = mapNbToType[desc.type];
   if ("va" in map) {

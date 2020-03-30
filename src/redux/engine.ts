@@ -7,7 +7,7 @@ import Controller from "./controller";
 import Improver from "./improver";
 import * as url from "./url";
 import _ from "lodash";
-import Vector from "../to_review/engine/math/vector";
+import Vector from "../engine/math/vector";
 import {
   setMouseOnCanvas,
   setMouseInfo,

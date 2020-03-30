@@ -1,10 +1,10 @@
 import binder from "../to_review/util/keybinder";
-import Vector from "../to_review/engine/math/vector";
-import Camera from "../to_review/engine/math/camera";
+import Vector from "../engine/math/vector";
+import Camera, { Affine } from "../engine/math/camera";
 import { Dispatch } from "@reduxjs/toolkit";
 import { changeXY } from "./engine";
 import Hammer from "hammerjs";
-import Matrix from "../to_review/engine/math/matrix";
+import Matrix from "../engine/math/matrix";
 
 const ZOOM = 0.3; // 1+
 const PAN = 0.1;
@@ -27,7 +27,7 @@ export default class Controller {
   // pan the screen by the given vector (as a ratio of its size)
   pan(scr_vector_delta: Vector) {
     const cam = this.camera;
-    const scr_vector = cam.screenSize.times(scr_vector_delta);
+    const scr_vector = cam.screen.times(scr_vector_delta);
     const cpx_point_0 = cam.scr2cpx(new Vector(0, 0));
     const cpx_point_dest = cam.scr2cpx(scr_vector);
     const cpx_vector = cpx_point_0.minus(cpx_point_dest);
@@ -36,7 +36,7 @@ export default class Controller {
   }
 
   // transforms the current viewport
-  affineTransform(type: string, valuex: number, valuey?: number) {
+  affineTransform(type: Affine, valuex: number, valuey?: number) {
     this.camera.affineTransform(type, valuex, valuey);
     this.engine.draw();
   }
@@ -54,7 +54,7 @@ export default class Controller {
       return;
     }
     // zoom @ center of screen by default
-    const scr_point = scr_point_arg || cam.screenSize.times(0.5);
+    const scr_point = scr_point_arg || cam.screen.times(0.5);
     const cpx_point = cam.scr2cpx(scr_point);
     const cpx_center = cam.getPos();
     // complex vector from point to view center
@@ -73,34 +73,34 @@ export default class Controller {
     binder.bind("-", (Δ: number) => this.zoom(1 + ZOOM * Δ));
     binder.bind("V", () => this.affineReset());
     binder.bind("R left", (Δ: number) =>
-      this.affineTransform("Rotation", -ANGLE * Δ),
+      this.affineTransform("rotation", -ANGLE * Δ),
     );
     binder.bind("R right", (Δ: number) =>
-      this.affineTransform("Rotation", +ANGLE * Δ),
+      this.affineTransform("rotation", +ANGLE * Δ),
     );
     binder.bind("S right", (Δ: number) =>
-      this.affineTransform("Scale", 1 / (1 + SCALE * Δ), 1),
+      this.affineTransform("scale", 1 / (1 + SCALE * Δ), 1),
     );
     binder.bind("S left", (Δ: number) =>
-      this.affineTransform("Scale", 1 + SCALE * Δ, 1),
+      this.affineTransform("scale", 1 + SCALE * Δ, 1),
     );
     binder.bind("S up", (Δ: number) =>
-      this.affineTransform("Scale", 1, 1 / (1 + SCALE * Δ)),
+      this.affineTransform("scale", 1, 1 / (1 + SCALE * Δ)),
     );
     binder.bind("S down", (Δ: number) =>
-      this.affineTransform("Scale", 1, 1 + SCALE * Δ),
+      this.affineTransform("scale", 1, 1 + SCALE * Δ),
     );
     binder.bind("H right", (Δ: number) =>
-      this.affineTransform("Shear", -SHEAR * Δ, 0),
+      this.affineTransform("shear", -SHEAR * Δ, 0),
     );
     binder.bind("H left", (Δ: number) =>
-      this.affineTransform("Shear", SHEAR * Δ, 0),
+      this.affineTransform("shear", SHEAR * Δ, 0),
     );
     binder.bind("H up", (Δ: number) =>
-      this.affineTransform("Shear", 0, -SHEAR * Δ),
+      this.affineTransform("shear", 0, -SHEAR * Δ),
     );
     binder.bind("H down", (Δ: number) =>
-      this.affineTransform("Shear", 0, SHEAR * Δ),
+      this.affineTransform("shear", 0, SHEAR * Δ),
     );
   }
 
@@ -119,20 +119,17 @@ export default class Controller {
     });
 
     hammertime.on("panstart", evt => {
-      console.log("panstart", evt);
       isDragging = true;
       dragStart = new Vector(evt.center.x, evt.center.y);
       cameraStart = this.camera.clone();
     });
 
     hammertime.on("panend", evt => {
-      console.log("panend", evt);
       isDragging = false;
     });
 
     hammertime.on("panmove", evt => {
       if (isDragging) {
-        console.log("panmove", evt);
         const pos = new Vector(evt.center.x, evt.center.y);
         const scr_vector = pos.minus(dragStart);
         const cpx_point_0 = cameraStart.scr2cpx(new Vector(0, 0));
@@ -179,9 +176,7 @@ export default class Controller {
         );
 
         // apply inverse of this matrix to starting point
-        var pc0A = m
-          .inverse()
-          .transform(new Vector(cameraStart.x, cameraStart.y));
+        var pc0A = m.inverse().transform(cameraStart.pos);
 
         let z = cameraStart.w / m.a;
         if (z < this.camera.resolutionLimit) {

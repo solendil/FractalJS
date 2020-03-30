@@ -29,7 +29,7 @@ export default class Renderer {
     this.imageBuffer = new Uint32Array(this.imageData.data.buffer);
     this.width = canvas.width;
     this.height = canvas.height;
-    if (process.env.BROWSER) this.redrawer = new Redrawer(canvas);
+    this.redrawer = new Redrawer(canvas);
 
     // compute tiling
     const ratio = this.width / this.height;

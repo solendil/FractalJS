@@ -4,7 +4,6 @@ import Slider from "@material-ui/core/Slider";
 import Avatar from "@material-ui/core/Avatar";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import { useSelector, useDispatch } from "react-redux";
@@ -56,11 +55,12 @@ function Palette() {
   const colors = useSelector((state: Root) => state.colors);
   const swatches = gradients.map(g => (
     <Button
+      key={g.id}
       variant="contained"
       onClick={() => dispatch(setColorId(g.id))}
       color={g.id === colors.id ? "primary" : "default"}
     >
-      <Avatar key={g.id} src={g.dataURL} />
+      <Avatar src={g.dataURL} />
     </Button>
   ));
   return (
