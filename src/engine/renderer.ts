@@ -3,7 +3,7 @@ import Scheduler from "./scheduler/scheduler";
 import Redrawer from "./redrawer";
 import { getFunction } from "./fractals";
 import Painter from "./painter";
-import Main from "./main";
+import Main, { Context } from "./engine";
 import {
   Tile,
   WorkerResponse,
@@ -14,44 +14,37 @@ import {
 import Vector from "./math/vector";
 
 export default class Renderer {
-  private canvas: HTMLCanvasElement;
-  private nbTiles: number;
+  private readonly nbTiles: number = 100;
+  private readonly ctx: Context;
+
   private painter: Painter;
   private scheduler: Scheduler;
-  private engine: Main;
   private redrawer: Redrawer;
 
-  private context!: CanvasRenderingContext2D;
   private width!: number;
   private height!: number;
   private imageData!: ImageData;
   private imageBuffer!: Uint32Array;
 
   private tiles!: Tile[];
-  private timeStart!: number;
 
-  constructor(
-    canvas: HTMLCanvasElement,
-    nbThreads: number,
-    painter: Painter,
-    engine: any,
-  ) {
-    this.canvas = canvas;
-    this.nbTiles = engine.nbTiles || 100;
+  constructor(ctx: Context, painter: Painter, engine: Main) {
+    this.ctx = ctx;
     this.resize();
     this.callback = this.callback.bind(this);
-    this.scheduler = new Scheduler(nbThreads, this.callback);
+    this.scheduler = new Scheduler(ctx, this.callback);
     this.painter = painter;
-    this.engine = engine;
-    this.redrawer = new Redrawer(canvas);
+    this.redrawer = new Redrawer(ctx);
   }
 
   resize() {
     if (this.scheduler) this.scheduler.interrupt();
 
-    const canvas = this.canvas;
-    this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
-    this.imageData = this.context.createImageData(canvas.width, canvas.height);
+    const canvas = this.ctx.canvas;
+    this.imageData = this.ctx.context.createImageData(
+      canvas.width,
+      canvas.height,
+    );
     this.imageBuffer = new Uint32Array(this.imageData.data.buffer);
     this.width = canvas.width;
     this.height = canvas.height;
@@ -65,7 +58,7 @@ export default class Renderer {
         ` ${tileNbWidth} * ${tileNbHeight} = ${tileNbHeight *
           tileNbWidth} tiles (${this.nbTiles} asked)` +
         `, each ~ ${Math.round(canvas.width / tileNbWidth)}px * ${Math.round(
-          this.canvas.height / tileNbHeight,
+          this.ctx.canvas.height / tileNbHeight,
         )}px`,
     );
 
@@ -91,16 +84,16 @@ export default class Renderer {
   }
 
   getIterationsAt(cpx: Vector) {
-    const func = getFunction(this.engine.type, this.engine.smooth);
-    return func(cpx.x, cpx.y, this.engine.iter);
+    const func = getFunction(this.ctx.fractalId, this.ctx.smooth);
+    return func(cpx.x, cpx.y, this.ctx.iter);
   }
 
-  getHistogram() {
-    const histogram = new Array(this.engine.iter + 1).fill(0);
+  getHistogram(): number[] {
+    const histogram = new Array(this.ctx.iter + 1).fill(0);
     for (const tile of this.tiles) {
       for (let i in tile.buffer) {
         const val = Math.round(tile.buffer[i]);
-        if (val >= 0 && val <= this.engine.iter) histogram[val] += 1;
+        if (val >= 0 && val <= this.ctx.iter) histogram[val] += 1;
       }
     }
     return histogram;
@@ -108,11 +101,11 @@ export default class Renderer {
 
   // redraws the current float buffer
   drawColor() {
-    this.engine.notify("draw.redraw", {});
+    this.ctx.event.notify("draw.redraw", {});
     this.tiles.forEach(tile => {
       this.painter.paint(tile, this.imageBuffer, this.width);
     });
-    this.context.putImageData(
+    this.ctx.context.putImageData(
       this.imageData,
       0,
       0,
@@ -125,22 +118,20 @@ export default class Renderer {
 
   // performs a full draw: floatbuffer + colors
   draw(params: Params) {
-    const engine = this.engine;
-    engine.notify("draw.start", {});
+    this.ctx.event.notify("draw.start", {});
     this.scheduler.interrupt();
     const redraw = this.redrawer.redraw;
     let tileSort: ReturnType<typeof redraw>;
     if (this.redrawer)
       tileSort = this.redrawer.redraw(
-        engine.camera.matrix,
-        engine.type,
-        params.id,
+        this.ctx.camera.matrix,
+        this.ctx.fractalId,
+        params.id || -1,
       );
-    this.timeStart = performance.now();
-    const workerModel: Model = Object.assign({}, engine.camera.matrix, {
-      type: engine.type,
-      smooth: engine.smooth,
-      iter: engine.iter,
+    const workerModel: Model = Object.assign({}, this.ctx.camera.matrix, {
+      type: this.ctx.fractalId,
+      smooth: this.ctx.smooth,
+      iter: this.ctx.iter,
     });
     const orders: DrawOrder[] = this.tiles.map(tile => ({
       action: "draw",
@@ -169,7 +160,7 @@ export default class Renderer {
     const tile = data.tile;
     this.tiles[tile.id].buffer = tile.buffer;
     this.painter.paint(tile, this.imageBuffer, this.width);
-    this.context.putImageData(
+    this.ctx.context.putImageData(
       this.imageData,
       0,
       0,

@@ -1,35 +1,25 @@
 import { updateSet } from "./set";
+import { Dispatch } from "@reduxjs/toolkit";
+import Engine from "../engine/engine";
 
 /*
 The improver hijacks engine to use a more complex rendering; so it's
 implemented as a function and a closure instead of a class (whose 'this'
 would have been messy)
 */
-export default function Improver(engineArg, dispatch) {
+export default function Improver(engineArg: Engine, dispatch: Dispatch<any>) {
   const engine = engineArg;
   const draw = engine.draw.bind(engine);
   let frameId = 0;
   let lastState = "";
 
-  const checkInterrupt = id => {
-    if (frameId !== id) throw new Error("interrupted");
-  };
-
-  const sleep = duration => (...args) =>
-    new Promise(resolve => setTimeout(() => resolve(...args), duration));
-
-  const asyncWhile = (condition, action, ctx) => {
-    const whilst = data =>
-      condition.call(ctx, data)
-        ? Promise.resolve(action.call(ctx, data)).then(whilst)
-        : data;
-    return whilst();
-  };
+  const sleep = (duration: number) =>
+    new Promise(resolve => setTimeout(() => resolve(), duration));
 
   const analysePicture = () => {
     // takes the same old algorithm
-    const iter = engine.iter;
-    const histo = engine.renderer.getHistogram();
+    const iter = engine.ctx.iter;
+    const histo = engine.getHistogram();
     const nbTotal = histo.reduce((acc, val) => acc + val, 0);
     const nbInSet = histo[0];
     let minIter = Number.MAX_VALUE;
@@ -67,50 +57,43 @@ export default function Improver(engineArg, dispatch) {
     return res;
   };
 
-  engine.draw = () => {
+  // @ts-ignore
+  engine.draw = async () => {
     // ID detects when a rendering is interrupted
     frameId += 1;
     const id = frameId;
 
     // state detects when the fractal is drew afresh, needing a coarse rendering first
-    const state = engine.type + engine.smooth;
-    const start =
-      state !== lastState
-        ? draw({ details: "subsampling", size: 4 })
-        : Promise.resolve();
+    const state = engine.ctx.fractalId + engine.ctx.smooth;
+    if (state !== lastState) {
+      await draw({ details: "subsampling", size: 4 });
+      if (frameId !== id) return;
+    }
     lastState = state;
 
-    // run algorithm
-    start
-      .then(() => checkInterrupt(id))
-      .then(() => draw({ details: "normal", id }))
-      .then(() => checkInterrupt(id))
-      .then(() =>
-        asyncWhile(
-          // analyse picture and loop if we should increase iterations
-          () => {
-            checkInterrupt(id);
-            const iterState = analysePicture();
-            const iter = engine.iter;
-            if (iterState.shouldIncrease) {
-              dispatch(updateSet({ iter: iter * 1.5 }));
-              engine.iter = Math.round(iter * 1.5);
-              return true;
-            } else if (iterState.shouldDecrease) {
-              dispatch(updateSet({ iter: iter / 1.5 }));
-              engine.iter = Math.round(iter / 1.5);
-              return false; // do not redraw if decreasing is needed
-            }
-            return false;
-          },
-          () => draw({ details: "normal", id }),
-        ),
-      )
-      .then(sleep(1000))
-      .then(() => checkInterrupt(id))
-      .then(() => draw({ details: "supersampling", size: 4, id }))
-      .catch(err => {
-        console.debug("guh");
-      });
+    // first normal drawy
+    await draw({ details: "normal", id });
+    if (frameId !== id) return;
+
+    // increase/decrease iterations if required
+    let analysis = analysePicture();
+    while (analysis.shouldIncrease || analysis.shouldDecrease) {
+      if (frameId !== id) return;
+      const iter = engine.ctx.iter;
+      if (analysis.shouldIncrease) {
+        dispatch(updateSet({ iter: iter * 1.5 }));
+        engine.ctx.iter = Math.round(iter * 1.5);
+      } else if (analysis.shouldDecrease) {
+        dispatch(updateSet({ iter: iter / 1.5 }));
+        engine.ctx.iter = Math.round(iter / 1.5);
+      }
+      await draw({ details: "normal", id });
+      analysis = analysePicture();
+    }
+
+    // wait one sec, then supersample
+    await sleep(1000);
+    if (frameId !== id) return;
+    await draw({ details: "supersampling", size: 4, id });
   };
 }

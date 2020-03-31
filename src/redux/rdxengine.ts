@@ -1,6 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { Root } from "./reducer";
-import Engine from "../engine/main";
+import Engine from "../engine/engine";
 import { updateSet } from "./set";
 import Controller from "./controller";
 import Improver from "./improver";
@@ -19,7 +19,7 @@ import { getPreset } from "../engine/fractals";
 import { bindKeys } from "../util/keybinder";
 import { getBufferFromId } from "../util/palette";
 
-let engine: any = null;
+let engine: Engine;
 
 export const initEngine = (canvas: HTMLCanvasElement): any => async (
   dispatch: Dispatch<any>,
@@ -48,8 +48,10 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   canvas.addEventListener(
     "mousemove",
     _.throttle(evt => {
-      const cpx = engine.camera.scr2cpx(new Vector(evt.offsetX, evt.offsetY));
-      const iter = engine.renderer.getIterationsAt(cpx);
+      const cpx = engine.ctx.camera.scr2cpx(
+        new Vector(evt.offsetX, evt.offsetY),
+      );
+      const iter = engine.getIterationsAt(cpx);
       dispatch(setMouseInfo({ x: cpx.x, y: cpx.y, iter }));
     }, 50), // 20 fps max
   );
@@ -59,14 +61,14 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   engine = new Engine({ ...init, canvas });
 
   const urlUpdate = _.debounce(() => {
-    url.update(engine, engine.painter);
+    url.update(engine);
   }, 250);
-  engine.on("draw.start", urlUpdate);
-  engine.on("draw.redraw", urlUpdate);
-  engine.on("zoom.limit", () => {
+  engine.ctx.event.on("draw.start", urlUpdate);
+  engine.ctx.event.on("draw.redraw", urlUpdate);
+  engine.ctx.event.on("zoom.limit", () => {
     dispatch(setSnack("Sorry, FractalJS cannot zoom further..."));
   });
-  engine.on(
+  engine.ctx.event.on(
     "zoom.limit",
     _.debounce(() => {
       dispatch(setSnack(undefined));
@@ -84,7 +86,7 @@ export const changeFractalType = (type: string): any => async (
 ) => {
   const setValues = getPreset(type);
   dispatch(updateSet(setValues));
-  engine.camera.affineReset();
+  engine.ctx.camera.affineReset();
   engine.set({ colors: { density: 20 } });
   engine.set(setValues);
   engine.draw();
@@ -95,7 +97,7 @@ export const changeSmooth = (smooth: boolean): any => async (
   getState: () => Root,
 ) => {
   dispatch(updateSet({ smooth }));
-  engine.smooth = smooth;
+  engine.set({ smooth });
   engine.draw();
 };
 
@@ -104,10 +106,10 @@ export const changeXY = (pt: Vector, w?: number): any => async (
 ) => {
   if (w === undefined) {
     dispatch(updateSet({ x: pt.x, y: pt.y }));
-    engine.camera.setPos(pt);
+    engine.ctx.camera.setPos(pt);
   } else {
     dispatch(updateSet({ x: pt.x, y: pt.y, w }));
-    engine.camera.setPos(pt, w);
+    engine.ctx.camera.setPos(pt, w);
   }
   engine.draw();
 };

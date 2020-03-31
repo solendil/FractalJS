@@ -8,7 +8,11 @@ import Button from "@material-ui/core/Button";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import { useSelector, useDispatch } from "react-redux";
 import { Root } from "../redux/reducer";
-import { setColorOffset, setColorDensity, setColorId } from "../redux/engine";
+import {
+  setColorOffset,
+  setColorDensity,
+  setColorId,
+} from "../redux/rdxengine";
 import { makeStyles } from "@material-ui/core/styles";
 import { WIDTH } from "./Drawer";
 import { getBufferFromId } from "../util/palette";

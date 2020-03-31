@@ -4,7 +4,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import { useSelector, useDispatch } from "react-redux";
-import { changeFractalType } from "../redux/engine";
+import { changeFractalType } from "../redux/rdxengine";
 import { Root } from "../redux/reducer";
 import { listForUi } from "../engine/fractals";
 
@@ -15,10 +15,10 @@ function Fractal() {
   const buttons = listForUi().map(o => {
     return (
       <ListItem
-        key={o.id}
+        key={o.fractalId}
         button
-        onClick={() => dispatch(changeFractalType(o.id))}
-        selected={type === o.id}
+        onClick={() => dispatch(changeFractalType(o.fractalId))}
+        selected={type === o.fractalId}
       >
         <ListItemText primary={o.name} />
       </ListItem>

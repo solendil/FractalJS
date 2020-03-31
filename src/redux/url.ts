@@ -3,30 +3,21 @@ import { Dispatch } from "@reduxjs/toolkit";
 import { setOffset, setDensitySlidebar } from "./colors";
 import { setSet } from "./set";
 import _ from "lodash";
-import Camera from "../engine/math/camera";
 import { getPreset } from "../engine/fractals";
 import { getBufferFromId } from "../util/palette";
+import Engine from "../engine/engine";
 
-const mapNbToType = [
-  "mandelbrot",
-  "mandelbrot3",
-  "burningship",
-  "tippetts",
-  "",
-  "",
-  "mandelbrot4",
-];
-
-export const update = (engine: any, color: any) => {
-  const camera: Camera = engine.camera;
+export const update = (engine: Engine) => {
+  const camera = engine.ctx.camera;
+  const color = engine.ctx.colors;
   try {
     const args = [];
-    args.push(["t", engine.type]);
+    args.push(["t", engine.ctx.fractalId]);
     args.push(["x", camera.pos.x]);
     args.push(["y", camera.pos.y]);
     args.push(["w", camera.w]);
-    args.push(["i", engine.iter]);
-    args.push(["fs", engine.smooth ? 1 : 0]);
+    args.push(["i", engine.ctx.iter]);
+    args.push(["fs", engine.ctx.smooth ? 1 : 0]);
     if (color) {
       if (color.id === undefined) throw new Error();
       args.push(["ct", color.id]);
@@ -58,11 +49,10 @@ function readCurrentScheme(url: string) {
     y: parseFloat(map.y),
     w: parseFloat(map.w),
     iter: parseInt(map.i, 10),
-    type: map.t,
+    fractalId: map.t,
     smooth: parseInt(map.fs, 10) === 1,
     viewport: Matrix.identity,
   };
-  if (!isNaN(desc.type)) desc.type = mapNbToType[desc.type];
   if ("va" in map) {
     desc.viewport = new Matrix(
       parseFloat(map.va),

@@ -4,7 +4,7 @@ const escape = 4;
 var iLog2 = 1.0 / Math.log(2.0);
 
 export default {
-  id: "burningbird",
+  fractalId: "burningbird",
   uiOrder: 2.5,
   name: "Burning Bird",
   preset: { x: -0.46, y: 0.07, w: 3.26, iter: 50 },

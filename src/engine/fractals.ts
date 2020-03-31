@@ -6,7 +6,7 @@ const context = require.context("./fractals/", true, /\.([jt]s)$/);
 const byId: { [key: string]: FractalDef } = {};
 context.keys().forEach((filename: string) => {
   const obj = context(filename).default;
-  byId[obj.id] = obj;
+  byId[obj.fractalId] = obj;
 });
 
 export const getFunction = (id: string, smooth: boolean) => {
@@ -15,9 +15,9 @@ export const getFunction = (id: string, smooth: boolean) => {
   return res.fn.normal;
 };
 
-export const getPreset = (id: string) => {
-  const res = byId[id];
-  return { type: id, ...res.preset };
+export const getPreset = (fractalId: string) => {
+  const res = byId[fractalId];
+  return { fractalId, ...res.preset };
 };
 
 export const listForUi = () =>

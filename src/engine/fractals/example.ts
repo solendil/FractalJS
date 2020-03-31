@@ -1,6 +1,6 @@
 export type RenderFn = (cx: number, cy: number, iter: number) => number;
 export interface FractalDef {
-  id: string;
+  fractalId: string;
   hidden?: boolean;
   uiOrder?: number;
   name: string;
@@ -17,7 +17,7 @@ export interface FractalDef {
 }
 
 export default {
-  id: "example",
+  fractalId: "example",
   hidden: true,
   uiOrder: -1,
   name: "example",

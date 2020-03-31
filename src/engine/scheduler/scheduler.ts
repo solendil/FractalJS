@@ -1,5 +1,6 @@
 import Worker from "./worker";
 import { DrawOrder, WorkerResponse } from "./types";
+import { Context } from "../engine";
 
 /*
 Maintains the list of webworkers.
@@ -17,9 +18,9 @@ export default class Scheduler {
     reject: () => any;
   };
 
-  constructor(nbThreads: number, callback: (data: WorkerResponse) => void) {
+  constructor(ctx: Context, callback: (data: WorkerResponse) => void) {
     this.upperCallback = callback;
-    for (let i = 0; i < nbThreads; i += 1) {
+    for (let i = 0; i < ctx.nbThreads; i += 1) {
       this.workers.push(new Worker(i, this.callback.bind(this)));
     }
   }

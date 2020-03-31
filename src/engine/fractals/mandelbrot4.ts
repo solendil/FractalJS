@@ -4,7 +4,7 @@ const escape = 4;
 var iLog4 = 1.0 / Math.log(4.0);
 
 export default {
-  id: "mandelbrot4",
+  fractalId: "mandelbrot4",
   uiOrder: 4,
   name: "Multibrot *4",
   preset: { x: 0.0, y: 0.0, w: 3.0, iter: 50 },

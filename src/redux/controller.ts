@@ -1,10 +1,11 @@
 import Vector from "../engine/math/vector";
 import Camera, { Affine } from "../engine/math/camera";
 import { Dispatch } from "@reduxjs/toolkit";
-import { changeXY } from "./engine";
+import { changeXY } from "./rdxengine";
 import Hammer from "hammerjs";
 import Matrix from "../engine/math/matrix";
 import { bindKeys } from "../util/keybinder";
+import Engine from "../engine/engine";
 
 const ZOOM = 0.3; // 1+
 const PAN = 0.1;
@@ -13,12 +14,12 @@ const SHEAR = 0.1;
 const ANGLE = Math.PI / 18;
 
 export default class Controller {
-  private engine: any;
+  private engine: Engine;
   private camera: Camera;
 
-  constructor(engine: any, private dispatch: Dispatch<any>) {
+  constructor(engine: Engine, private dispatch: Dispatch<any>) {
     this.engine = engine;
-    this.camera = engine.camera;
+    this.camera = engine.ctx.camera;
     this.setupKeyboard();
     this.setupMouse();
     this.setupTouch();
@@ -50,7 +51,7 @@ export default class Controller {
   zoom(delta: number, scr_point_arg?: Vector) {
     const cam = this.camera;
     if (delta < 1 && cam.isZoomLimit()) {
-      this.engine.notify("zoom.limit");
+      this.engine.ctx.event.notify("zoom.limit");
       return;
     }
     // zoom @ center of screen by default
@@ -180,7 +181,7 @@ export default class Controller {
 
         let z = cameraStart.w / m.a;
         if (z < this.camera.resolutionLimit) {
-          this.engine.notify("zoom.limit");
+          this.engine.ctx.event.notify("zoom.limit");
           z = this.camera.resolutionLimit;
         }
         this.dispatch(changeXY(pc0A, z));
@@ -232,7 +233,6 @@ export default class Controller {
       this.zoom(delta, point);
     };
 
-    // TODO add event instead of surdefining
-    canvas.onmousewheel = wheelFunction;
+    canvas.addEventListener("wheel", wheelFunction);
   }
 }

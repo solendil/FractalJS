@@ -20,6 +20,7 @@ SECONDARY GOALS
 
 # DONE
 
+- Simplified scheduler
 - TSified everything... it makes types and stuff clearer inside the engine, though more cleanup work is still required
 - fix tearing bug while mouse pan
 - "color" panel

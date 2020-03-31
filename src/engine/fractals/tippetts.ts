@@ -3,7 +3,7 @@ import { FractalDef } from "./example";
 const escape = 4;
 
 export default {
-  id: "tippetts",
+  fractalId: "tippetts",
   uiOrder: 1,
   name: "Tippetts",
   preset: { x: -0.2, y: 0.0, w: 4, iter: 50 },

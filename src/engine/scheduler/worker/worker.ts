@@ -118,9 +118,9 @@ self.onmessage = (event: any) => {
       if (data.params.details === "normal") {
         draw(data.model, func, data.tile);
       } else if (data.params.details === "subsampling") {
-        drawSubsampled(data.model, func, data.tile, data.params.size);
+        drawSubsampled(data.model, func, data.tile, data.params.size || 4);
       } else if (data.params.details === "supersampling") {
-        drawSupersampled(data.model, func, data.tile, data.params.size);
+        drawSupersampled(data.model, func, data.tile, data.params.size || 4);
       }
       const answer: WorkerResponse = {
         action: "end-draw",

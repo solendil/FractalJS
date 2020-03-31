@@ -6,7 +6,7 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Switch from "@material-ui/core/Switch";
 import { useSelector, useDispatch } from "react-redux";
-import { changeSmooth } from "../redux/engine";
+import { changeSmooth } from "../redux/rdxengine";
 import { Root } from "../redux/reducer";
 import { setInfobox } from "../redux/ui";
 

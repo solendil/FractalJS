@@ -1,4 +1,5 @@
 import Matrix from "./math/matrix";
+import { Context } from "./engine";
 
 export default class Redrawer {
   private canvas: HTMLCanvasElement;
@@ -8,12 +9,12 @@ export default class Redrawer {
   private lastType: string | null = null;
   private lastMatrix: Matrix | null = null;
 
-  constructor(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
-    this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
+  constructor(ctx: Context) {
+    this.canvas = ctx.canvas;
+    this.context = ctx.context;
     this.offCanvas = document.createElement("canvas");
-    this.offCanvas.width = canvas.width;
-    this.offCanvas.height = canvas.height;
+    this.offCanvas.width = this.canvas.width;
+    this.offCanvas.height = this.canvas.height;
   }
 
   redraw(newMatrix: Matrix, type: string, id: number) {

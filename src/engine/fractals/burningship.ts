@@ -4,7 +4,7 @@ const escape = 4;
 var iLog2 = 1.0 / Math.log(2.0);
 
 export default {
-  id: "burningship",
+  fractalId: "burningship",
   uiOrder: 2,
   name: "Burning Ship",
   preset: { x: -0.4, y: 0.55, w: 3, iter: 50 },
