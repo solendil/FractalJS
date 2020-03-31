@@ -104,41 +104,35 @@ const drawSupersampled = (model: Model, func: RenderFn, tile: Tile, res: number 
   }
 };
 
-export default class Worker {
-  private postMessage: any;
-  private workerId: string;
+let workerId = "worker-?";
 
-  constructor(postMessage: any) {
-    this.postMessage = postMessage;
-    this.workerId = "worker-?";
-  }
-
-  onmessage(event: any) {
-    const data: Order = event.data;
-    switch (data.action) {
-      case "init":
-        this.workerId = `worker-${data.id}`;
-        break;
-      case "draw": {
-        const func = getFunction(data.model.type, data.model.smooth);
-        if (data.params.details === "normal") {
-          draw(data.model, func, data.tile);
-        } else if (data.params.details === "subsampling") {
-          drawSubsampled(data.model, func, data.tile, data.params.size);
-        } else if (data.params.details === "supersampling") {
-          drawSupersampled(data.model, func, data.tile, data.params.size);
-        }
-        const answer: WorkerResponse = {
-          action: "end-draw",
-          tile: data.tile,
-          workerId: this.workerId,
-          batchId: data.batchId || -1,
-        };
-        this.postMessage(answer, [answer.tile.buffer.buffer]);
-        break;
+// @ts-ignore
+self.onmessage = (event: any) => {
+  const data: Order = event.data;
+  switch (data.action) {
+    case "init":
+      workerId = `worker-${data.id}`;
+      break;
+    case "draw": {
+      const func = getFunction(data.model.type, data.model.smooth);
+      if (data.params.details === "normal") {
+        draw(data.model, func, data.tile);
+      } else if (data.params.details === "subsampling") {
+        drawSubsampled(data.model, func, data.tile, data.params.size);
+      } else if (data.params.details === "supersampling") {
+        drawSupersampled(data.model, func, data.tile, data.params.size);
       }
-      default:
-        throw new Error("Illegal action");
+      const answer: WorkerResponse = {
+        action: "end-draw",
+        tile: data.tile,
+        workerId: workerId,
+        batchId: data.batchId || -1,
+      };
+      // @ts-ignore
+      postMessage(answer, [answer.tile.buffer.buffer]);
+      break;
     }
+    default:
+      throw new Error("Illegal action");
   }
-}
+};

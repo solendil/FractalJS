@@ -6,6 +6,10 @@ $primary:#3F51B5; /* Indigo 500 */
   user-select: none;
 }
 
+body {
+  background-color: black;
+}
+
 canvas {
   position:fixed;
   left:0;
