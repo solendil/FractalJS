@@ -45,6 +45,7 @@ export default class Painter {
         if (iter === 0) {
           color = 0xff000000;
         } else {
+          // const i2 = Math.sqrt(iter);
           color = cbuffer[~~((iter * density + offset) % resolution)];
         }
         buffer[bufferIndex] = color;

@@ -1,4 +1,3 @@
-/* global performance */
 import Scheduler from "./scheduler/scheduler";
 import Redrawer from "./redrawer";
 import { getFunction } from "./fractals";

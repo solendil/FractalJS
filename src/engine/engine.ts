@@ -1,5 +1,5 @@
 /* global navigator */
-import EventBus, { Callback } from "../util/EventBus";
+import EventBus from "../util/EventBus";
 import Renderer from "./renderer";
 import Painter, { Colors } from "./painter";
 import Camera from "./math/camera";
@@ -67,7 +67,7 @@ export default class Engine {
 
   // realtime modification of engine parameters
   set(p: any) {
-    if ("type" in p) this.ctx.fractalId = p.type;
+    if ("fractalId" in p) this.ctx.fractalId = p.fractalId;
     if ("smooth" in p) this.ctx.smooth = p.smooth;
     if ("iter" in p) this.ctx.iter = p.iter;
     if ("x" in p) this.ctx.camera.setPos(new Vector(p.x, p.y), p.w);

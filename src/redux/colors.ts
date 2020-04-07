@@ -1,7 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const DENSITY = (20 * 20) ** (1 / 100);
-
 const ui = createSlice({
   name: "colors",
   initialState: {
@@ -13,13 +11,9 @@ const ui = createSlice({
   reducers: {
     setColorId: (state, action) => ({ ...state, id: action.payload }),
     setOffset: (state, action) => ({ ...state, offset: action.payload }),
-    setDensitySlidebar: (state, action) => ({
-      ...state,
-      densitySlidebar: action.payload,
-      density: (1 / 20) * DENSITY ** action.payload,
-    }),
+    setDensity: (state, action) => ({ ...state, density: action.payload }),
   },
 });
 
 export const { reducer, actions } = ui;
-export const { setOffset, setDensitySlidebar, setColorId } = actions;
+export const { setOffset, setColorId, setDensity } = actions;

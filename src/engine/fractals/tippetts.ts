@@ -6,7 +6,7 @@ export default {
   fractalId: "tippetts",
   uiOrder: 1,
   name: "Tippetts",
-  preset: { x: -0.2, y: 0.0, w: 4, iter: 50 },
+  preset: { x: -0.5, y: 0.0, w: 4, iter: 50 },
   fn: {
     normal: (cx, cy, iter) => {
       var zx = 0,

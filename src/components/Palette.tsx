@@ -17,6 +17,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { WIDTH } from "./Drawer";
 import { getBufferFromId } from "../util/palette";
 
+const DENSITY = (20 * 20) ** (1 / 100);
+
 const gradients = (() => {
   const res: { id: number; dataURL: string }[] = [];
   const WIDTH = 85;
@@ -67,6 +69,10 @@ function Palette() {
       <Avatar src={g.dataURL} />
     </Button>
   ));
+
+  const densitySlider = Math.log(20 * colors.density) / Math.log(DENSITY);
+  const getDensity = (val: number) => (1 / 20) * DENSITY ** val;
+
   return (
     <div>
       <List component="nav">
@@ -92,11 +98,11 @@ function Palette() {
             min={0}
             max={100}
             step={1}
-            value={colors.densitySlidebar}
-            onChange={_.throttle(
-              (_, v) => dispatch(setColorDensity((v as unknown) as number)),
-              50,
-            )}
+            value={densitySlider}
+            onChange={_.throttle((_, v) => {
+              let v2: number = v;
+              dispatch(setColorDensity(getDensity(v2)));
+            }, 50)}
           />
         </ListItem>
       </List>

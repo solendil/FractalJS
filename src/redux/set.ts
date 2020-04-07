@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const ui = createSlice({
   name: "set",
   initialState: {
-    type: "mandelbrot",
+    fractalId: "mandelbrot",
     smooth: true,
     x: 0,
     y: 0,

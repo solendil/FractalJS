@@ -76,7 +76,7 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   );
 
   new Controller(engine, dispatch);
-  Improver(engine, dispatch); // add improvement capabilities
+  Improver(engine, dispatch, getState); // add improvement capabilities
   engine.draw();
 };
 
@@ -126,7 +126,7 @@ export const setColorDensity = (val: number): any => async (
   dispatch: Dispatch<any>,
   getState: () => Root,
 ) => {
-  dispatch(colorActions.setDensitySlidebar(val));
+  dispatch(colorActions.setDensity(val));
   engine.set({ colors: { density: getState().colors.density } });
   engine.drawColor();
 };

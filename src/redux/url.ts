@@ -1,6 +1,6 @@
 import Matrix from "../engine/math/matrix";
 import { Dispatch } from "@reduxjs/toolkit";
-import { setOffset, setDensitySlidebar } from "./colors";
+import { setOffset, setDensity } from "./colors";
 import { setSet } from "./set";
 import _ from "lodash";
 import { getPreset } from "../engine/fractals";
@@ -96,16 +96,13 @@ export const readInit = (dispatch: Dispatch<any>) => {
     };
     dispatch(setSet(_.omit(desc, "viewport")));
     dispatch(setOffset(0));
-    dispatch(setDensitySlidebar(20));
+    dispatch(setDensity(20));
     return { ...desc, colors };
   } else {
-    const DENSITY = (20 * 20) ** (1 / 100);
     const { desc, color } = init;
     dispatch(setSet(_.omit(init.desc, "viewport")));
     dispatch(setOffset(color.offset));
-    dispatch(
-      setDensitySlidebar(Math.log(20 * color.density) / Math.log(DENSITY)),
-    );
+    dispatch(setDensity(color.density));
     return {
       ...desc,
       colors: { ...color, buffer: getBufferFromId(color.id, 1000) },

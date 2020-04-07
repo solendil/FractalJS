@@ -13,13 +13,23 @@ SECONDARY GOALS
 
 # TODOS
 
+- reinstanciate on resize
+- thread pool
+  - threads interrupted if too long
+- painter computes palette itself based on id
+
+- palette auto-adjust
+  - histogram ?
+- POIs
 - redo tab bar, fix drawer width, test on phone
+- some features not on phone
 - app icon, keywords, etc...
 - build & optimize
 - "share" panel
 
 # DONE
 
+- Aimless refactoring on Engine, contextual information, readonly or other, etc...
 - Simplified scheduler
 - TSified everything... it makes types and stuff clearer inside the engine, though more cleanup work is still required
 - fix tearing bug while mouse pan

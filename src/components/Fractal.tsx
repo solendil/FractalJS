@@ -10,9 +10,9 @@ import { listForUi } from "../engine/fractals";
 
 function Fractal() {
   const dispatch = useDispatch();
-  const type = useSelector((state: Root) => state.set.type);
+  const type = useSelector((state: Root) => state.set.fractalId);
 
-  const buttons = listForUi().map(o => {
+  const buttons = listForUi().map((o) => {
     return (
       <ListItem
         key={o.fractalId}
