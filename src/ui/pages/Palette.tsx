@@ -7,21 +7,21 @@ import ListItem from "@material-ui/core/ListItem";
 import Button from "@material-ui/core/Button";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import { useSelector, useDispatch } from "react-redux";
-import { Root } from "../redux/reducer";
+import { Root } from "../../redux/reducer";
 import {
   setColorOffset,
   setColorDensity,
   setColorId,
-} from "../redux/rdxengine";
+} from "../../redux/rdxengine";
 import { makeStyles } from "@material-ui/core/styles";
-import { WIDTH } from "./Drawer";
-import { getBufferFromId } from "../util/palette";
+import { getBufferFromId } from "../../util/palette";
+import { Typography } from "@material-ui/core";
 
 const DENSITY = (20 * 20) ** (1 / 100);
 
 const gradients = (() => {
   const res: { id: number; dataURL: string }[] = [];
-  const WIDTH = 85;
+  const WIDTH = 100;
   const HEIGHT = 50;
   const RES = WIDTH;
   const canvas = document.createElement("canvas") as HTMLCanvasElement;
@@ -30,11 +30,12 @@ const gradients = (() => {
   canvas.height = HEIGHT;
   const imageData = context.createImageData(canvas.width, canvas.height);
   const imageBuffer = new Uint32Array(imageData.data.buffer);
-  [0, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].forEach(id => {
+  [0, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].forEach((id) => {
     const colorBuffer = getBufferFromId(id, RES);
     for (let i = 0; i < WIDTH; i += 1) {
       for (let j = 0; j < HEIGHT; j += 1) {
-        imageBuffer[j * WIDTH + i] = colorBuffer[(i + j) % RES];
+        imageBuffer[j * WIDTH + i] =
+          colorBuffer[Math.round(i * 0.6 + j * 0.6) % RES];
       }
     }
     context.putImageData(imageData, 0, 0, 0, 0, canvas.width, canvas.height);
@@ -44,14 +45,35 @@ const gradients = (() => {
   return res;
 })();
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   swatches: {
     display: "flex",
     flexWrap: "wrap",
-    maxWidth: WIDTH,
+    marginRight: -theme.spacing(1),
     "& > *": {
-      margin: theme.spacing(1),
+      paddingBottom: theme.spacing(1),
+      paddingRight: theme.spacing(1),
+      width: "20%",
+      height: "56px",
+      position: "relative",
+      "& > img": {
+        width: "100%",
+        height: "100%",
+        borderRadius: "4px",
+      },
+      "& > i": {
+        position: "absolute",
+        bottom: 0,
+        right: 0,
+        color: "white",
+        fontSize: "36px",
+        padding: "0px",
+        textShadow: "2px 2px 2px #888",
+      },
     },
+  },
+  txt: {
+    width: "100px",
   },
 }));
 
@@ -59,15 +81,13 @@ function Palette() {
   const classes = useStyles();
   const dispatch = useDispatch();
   const colors = useSelector((state: Root) => state.colors);
-  const swatches = gradients.map(g => (
-    <Button
-      key={g.id}
-      variant="contained"
-      onClick={() => dispatch(setColorId(g.id))}
-      color={g.id === colors.id ? "primary" : "default"}
-    >
-      <Avatar src={g.dataURL} />
-    </Button>
+  const swatches = gradients.map((gradient) => (
+    <div key={gradient.id} onClick={() => dispatch(setColorId(gradient.id))}>
+      <img src={gradient.dataURL} />
+      {colors.id === gradient.id ? (
+        <i className="material-icons">check_circle</i>
+      ) : null}
+    </div>
   ));
 
   const densitySlider = Math.log(20 * colors.density) / Math.log(DENSITY);
@@ -75,13 +95,15 @@ function Palette() {
 
   return (
     <div>
-      <List component="nav">
-        <ListSubheader component="div">Pick a color scheme</ListSubheader>
+      <List component="nav" dense>
+        <ListSubheader component="div">
+          Pick & adjust a color palette
+        </ListSubheader>
         <ListItem>
           <div className={classes.swatches}>{swatches}</div>
         </ListItem>
-        <ListSubheader component="div">Move and stretch colors</ListSubheader>
         <ListItem>
+          <Typography className={classes.txt}>Move</Typography>
           <Slider
             min={0}
             max={1}
@@ -94,6 +116,7 @@ function Palette() {
           />
         </ListItem>
         <ListItem>
+          <Typography className={classes.txt}>Stretch</Typography>
           <Slider
             min={0}
             max={100}

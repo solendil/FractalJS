@@ -21,7 +21,7 @@ export default function Improver(
   let lastState = "";
 
   const sleep = (duration: number) =>
-    new Promise(resolve => setTimeout(() => resolve(), duration));
+    new Promise((resolve) => setTimeout(() => resolve(), duration));
 
   // array contains a count per index; total of this count is 100%
   // this function finds the range in the array that brings back perc% of the values
@@ -126,8 +126,8 @@ export default function Improver(
     } while (analysis.shouldIncrease);
 
     // wait one sec, then supersample
-    // await sleep(1000);
+    await sleep(1000);
     if (frameId !== id) return;
-    // await draw({ details: "supersampling", size: 4, id });
+    await draw({ details: "supersampling", size: 4, id });
   };
 }

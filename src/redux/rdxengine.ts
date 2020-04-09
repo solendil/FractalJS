@@ -13,11 +13,13 @@ import {
   setInfobox,
   setDrawer,
   setSnack,
+  setNarrowDevice,
 } from "./ui";
 import * as colorActions from "./colors";
 import { getPreset } from "../engine/fractals";
 import { bindKeys } from "../util/keybinder";
 import { getBufferFromId } from "../util/palette";
+import { isMobileDevice } from "../util/misc";
 
 let engine: Engine;
 
@@ -38,6 +40,13 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
     engine.draw();
   });
 
+  // ---- update ui.smallDevice boolean when device (or orientation) changes
+  const onMediaChange = (media: any) =>
+    dispatch(setNarrowDevice(media.matches));
+  const matchMedia = window.matchMedia("(max-width: 450px)");
+  onMediaChange(matchMedia);
+  matchMedia.addListener(onMediaChange);
+
   // ---- capture canvas enter & leave events for infobox
   canvas.addEventListener("mouseenter", () => {
     dispatch(setMouseOnCanvas(true));
@@ -47,7 +56,7 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   });
   canvas.addEventListener(
     "mousemove",
-    _.throttle(evt => {
+    _.throttle((evt) => {
       const cpx = engine.ctx.camera.scr2cpx(
         new Vector(evt.offsetX, evt.offsetY),
       );

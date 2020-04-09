@@ -1,0 +1,24 @@
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  background-color: black;
+}
+
+canvas {
+  position:fixed;
+  left:0;
+  transition:transform 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  // allow canvas to move when opening drawer
+  &.offset-left {
+    transform: translateX(160px);
+  }
+  &.offset-top-fractal { transform: translateY(-160px) }
+  &.offset-top-palette { transform: translateY(-173px) }
+  &.offset-top-settings { transform: translateY(-50px) }
+  &.offset-top-about { transform: translateY(-215px) }
+}

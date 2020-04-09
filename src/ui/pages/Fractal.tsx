@@ -4,9 +4,9 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import { useSelector, useDispatch } from "react-redux";
-import { changeFractalType } from "../redux/rdxengine";
-import { Root } from "../redux/reducer";
-import { listForUi } from "../engine/fractals";
+import { changeFractalType } from "../../redux/rdxengine";
+import { Root } from "../../redux/reducer";
+import { listForUi } from "../../engine/fractals";
 
 function Fractal() {
   const dispatch = useDispatch();

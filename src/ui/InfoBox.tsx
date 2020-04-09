@@ -6,7 +6,7 @@ import { Typography } from "@material-ui/core";
 import { useSelector } from "react-redux";
 import { Root } from "../redux/reducer";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   box: {
     position: "fixed",
     bottom: 0,
@@ -21,6 +21,7 @@ function InfoBox() {
   const classes = useStyles();
   const set = useSelector((state: Root) => state.set);
   const ui = useSelector((state: Root) => state.ui);
+  if (ui.smallDevice) return null;
   if (!ui.infobox) return null;
   const d: any = {};
   if (ui.mouseOnCanvas) {

@@ -9,7 +9,7 @@ import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
 import { Divider } from "@material-ui/core";
 import GitHubButton from "react-github-btn";
-import { WIDTH } from "./Drawer";
+import { isMobileDevice, isTouchDevice, isMouseDevice } from "../../util/misc";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -81,26 +81,41 @@ const Speech = () => {
 
 export default function SimpleCard() {
   const classes = useStyles();
+
   return (
     <>
-      <List component="nav" style={{ maxWidth: `${WIDTH}px` }}>
+      <List component="nav" style={{ maxWidth: `360px` }}>
         <ListSubheader component="div">Controls</ListSubheader>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar className={classes.avatar}>
-              <i className="material-icons">mouse</i>
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Mouse" secondary="Drag & wheel zoom" />
-        </ListItem>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar className={classes.avatar}>
-              <i className="material-icons">keyboard</i>
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary="Keyboard" secondary={<Keys />} />
-        </ListItem>
+        {isTouchDevice() ? (
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar className={classes.avatar}>
+                <i className="material-icons">touch_app</i>
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Touch" secondary="Swipe & Pinch to zoom" />
+          </ListItem>
+        ) : null}
+        {isMouseDevice() ? (
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar className={classes.avatar}>
+                <i className="material-icons">mouse</i>
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Mouse" secondary="Drag & wheel zoom" />
+          </ListItem>
+        ) : null}
+        {!isMobileDevice() ? (
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar className={classes.avatar}>
+                <i className="material-icons">keyboard</i>
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Keyboard" secondary={<Keys />} />
+          </ListItem>
+        ) : null}
         <Divider />
         <ListSubheader component="div">About</ListSubheader>
         <ListItem>

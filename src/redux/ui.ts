@@ -5,6 +5,7 @@ interface Int {
   drawer: boolean;
   infobox: boolean;
   mouseOnCanvas: boolean;
+  narrowDevice: boolean; // less than 450 px
   tab: Tab;
   snack?: string;
   mouse: {
@@ -17,11 +18,13 @@ interface Int {
 const ui = createSlice({
   name: "ui",
   initialState: {
-    drawer: false,
+    drawer: true,
     mouseOnCanvas: false,
-    tab: "fractal",
+    tab: "palette",
     infobox: false,
     mouse: { x: 0, y: 0, iter: 0 },
+    narrowDevice: false,
+    orientableDevice: false,
   } as Int,
   reducers: {
     setDrawer: (state, action) => ({ ...state, drawer: action.payload }),
@@ -32,6 +35,10 @@ const ui = createSlice({
       mouseOnCanvas: action.payload,
     }),
     setMouseInfo: (state, action) => ({ ...state, mouse: action.payload }),
+    setNarrowDevice: (state, action) => ({
+      ...state,
+      narrowDevice: action.payload,
+    }),
     setSnack: (state, action) => ({ ...state, snack: action.payload }),
   },
 });
@@ -44,4 +51,5 @@ export const {
   setMouseOnCanvas,
   setMouseInfo,
   setSnack,
+  setNarrowDevice,
 } = actions;

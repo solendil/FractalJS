@@ -6,14 +6,14 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Switch from "@material-ui/core/Switch";
 import { useSelector, useDispatch } from "react-redux";
-import { changeSmooth } from "../redux/rdxengine";
-import { Root } from "../redux/reducer";
-import { setInfobox } from "../redux/ui";
+import { changeSmooth } from "../../redux/rdxengine";
+import { Root } from "../../redux/reducer";
+import { setInfobox } from "../../redux/ui";
 
 function Settings() {
   const dispatch = useDispatch();
   const smooth = useSelector((state: Root) => state.set.smooth);
-  const infobox = useSelector((state: Root) => state.ui.infobox);
+  const ui = useSelector((state: Root) => state.ui);
 
   return (
     <div>
@@ -28,7 +28,7 @@ function Settings() {
           <ListItemSecondaryAction>
             <Switch
               edge="end"
-              onChange={event => {
+              onChange={(event) => {
                 dispatch(changeSmooth(event.target.checked));
               }}
               checked={smooth}
@@ -36,19 +36,21 @@ function Settings() {
             />
           </ListItemSecondaryAction>
         </ListItem>
-        <ListItem>
-          <ListItemText primary="Information box" />
-          <ListItemSecondaryAction>
-            <Switch
-              edge="end"
-              onChange={event => {
-                dispatch(setInfobox(event.target.checked));
-              }}
-              checked={infobox}
-              color="primary"
-            />
-          </ListItemSecondaryAction>
-        </ListItem>
+        {ui.narrowDevice ? null : (
+          <ListItem>
+            <ListItemText primary="Information box" />
+            <ListItemSecondaryAction>
+              <Switch
+                edge="end"
+                onChange={(event) => {
+                  dispatch(setInfobox(event.target.checked));
+                }}
+                checked={ui.infobox}
+                color="primary"
+              />
+            </ListItemSecondaryAction>
+          </ListItem>
+        )}
       </List>
     </div>
   );
