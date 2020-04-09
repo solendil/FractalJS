@@ -21,7 +21,7 @@ export default class Worker {
 
   constructor(id: number, callback: LocalCallback) {
     this.id = id;
-    this.worker = new WorkerInterface();
+    this.worker = (new WorkerInterface() as unknown) as TWorker;
     this.worker.postMessage({ action: "init", id });
     this.worker.onmessage = this.onmessage.bind(this);
     this.callback = callback;

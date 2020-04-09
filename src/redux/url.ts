@@ -2,7 +2,7 @@ import Matrix from "../engine/math/matrix";
 import { Dispatch } from "@reduxjs/toolkit";
 import { setOffset, setDensity } from "./colors";
 import { setSet } from "./set";
-import _ from "lodash";
+import omit from "lodash/omit";
 import { getPreset } from "../engine/fractals";
 import { getBufferFromId } from "../util/palette";
 import Engine from "../engine/engine";
@@ -94,13 +94,13 @@ export const readInit = (dispatch: Dispatch<any>) => {
       buffer: getBufferFromId(0, 1000),
       id: 0,
     };
-    dispatch(setSet(_.omit(desc, "viewport")));
+    dispatch(setSet(omit(desc, "viewport")));
     dispatch(setOffset(0));
     dispatch(setDensity(20));
     return { ...desc, colors };
   } else {
     const { desc, color } = init;
-    dispatch(setSet(_.omit(init.desc, "viewport")));
+    dispatch(setSet(omit(init.desc, "viewport")));
     dispatch(setOffset(color.offset));
     dispatch(setDensity(color.density));
     return {

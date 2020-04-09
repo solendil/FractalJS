@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import { getFunction } from "../../fractals";
 import { Order, Model, Tile, WorkerResponse } from "../types";
 import { RenderFn } from "../../fractals/example";

@@ -21,7 +21,7 @@ function InfoBox() {
   const classes = useStyles();
   const set = useSelector((state: Root) => state.set);
   const ui = useSelector((state: Root) => state.ui);
-  if (ui.smallDevice) return null;
+  if (ui.narrowDevice) return null;
   if (!ui.infobox) return null;
   const d: any = {};
   if (ui.mouseOnCanvas) {

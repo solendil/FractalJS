@@ -26,6 +26,9 @@ const useStyles = makeStyles((theme) => ({
   },
   drawer: {
     minWidth: "360px",
+    [theme.breakpoints.up("sm")]: {
+      width: "360px",
+    },
   },
   trans: {
     // if we wanna make a transparent background

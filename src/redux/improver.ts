@@ -1,7 +1,7 @@
 import { updateSet } from "./set";
 import { Dispatch } from "@reduxjs/toolkit";
 import Engine from "../engine/engine";
-import _ from "lodash";
+import sum from "lodash/sum";
 import { Root } from "./reducer";
 import { setColorDensity } from "./rdxengine";
 
@@ -32,7 +32,7 @@ export default function Improver(
   ): [number, number] => {
     let a = 0;
     let b = array.length - 1;
-    let count = _.sum(array);
+    let count = sum(array);
     const target = count * (perc / 100);
     while (count >= target) {
       if (array[a] < array[b]) {

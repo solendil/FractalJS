@@ -5,7 +5,8 @@ import { updateSet } from "./set";
 import Controller from "./controller";
 import Improver from "./improver";
 import * as url from "./url";
-import _ from "lodash";
+import throttle from "lodash/throttle";
+import debounce from "lodash/debounce";
 import Vector from "../engine/math/vector";
 import {
   setMouseOnCanvas,
@@ -19,7 +20,6 @@ import * as colorActions from "./colors";
 import { getPreset } from "../engine/fractals";
 import { bindKeys } from "../util/keybinder";
 import { getBufferFromId } from "../util/palette";
-import { isMobileDevice } from "../util/misc";
 
 let engine: Engine;
 
@@ -56,7 +56,7 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   });
   canvas.addEventListener(
     "mousemove",
-    _.throttle((evt) => {
+    throttle((evt) => {
       const cpx = engine.ctx.camera.scr2cpx(
         new Vector(evt.offsetX, evt.offsetY),
       );
@@ -69,7 +69,7 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   const init = url.readInit(dispatch);
   engine = new Engine({ ...init, canvas });
 
-  const urlUpdate = _.debounce(() => {
+  const urlUpdate = debounce(() => {
     url.update(engine);
   }, 250);
   engine.ctx.event.on("draw.start", urlUpdate);
@@ -79,7 +79,7 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   });
   engine.ctx.event.on(
     "zoom.limit",
-    _.debounce(() => {
+    debounce(() => {
       dispatch(setSnack(undefined));
     }, 5000),
   );

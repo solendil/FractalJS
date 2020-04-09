@@ -1,10 +1,8 @@
 import React from "react";
-import _ from "lodash";
+import throttle from "lodash/throttle";
 import Slider from "@material-ui/core/Slider";
-import Avatar from "@material-ui/core/Avatar";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import Button from "@material-ui/core/Button";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import { useSelector, useDispatch } from "react-redux";
 import { Root } from "../../redux/reducer";
@@ -83,7 +81,7 @@ function Palette() {
   const colors = useSelector((state: Root) => state.colors);
   const swatches = gradients.map((gradient) => (
     <div key={gradient.id} onClick={() => dispatch(setColorId(gradient.id))}>
-      <img src={gradient.dataURL} />
+      <img alt="" src={gradient.dataURL} />
       {colors.id === gradient.id ? (
         <i className="material-icons">check_circle</i>
       ) : null}
@@ -109,10 +107,7 @@ function Palette() {
             max={1}
             step={0.001}
             value={colors.offset}
-            onChange={_.throttle(
-              (_, v) => dispatch(setColorOffset((v as unknown) as number)),
-              50,
-            )}
+            onChange={throttle((_, v) => dispatch(setColorOffset(v)), 100)}
           />
         </ListItem>
         <ListItem>
@@ -122,10 +117,10 @@ function Palette() {
             max={100}
             step={1}
             value={densitySlider}
-            onChange={_.throttle((_, v) => {
-              let v2: number = v;
-              dispatch(setColorDensity(getDensity(v2)));
-            }, 50)}
+            onChange={throttle(
+              (_, v) => dispatch(setColorDensity(getDensity(v))),
+              100,
+            )}
           />
         </ListItem>
       </List>

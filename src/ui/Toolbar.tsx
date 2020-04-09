@@ -1,5 +1,5 @@
 import React from "react";
-import { map } from "lodash";
+import map from "lodash/map";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigation } from "./Navigation";
 import IconButton from "@material-ui/core/IconButton";

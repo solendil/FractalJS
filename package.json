@@ -23,9 +23,11 @@
     "react-github-btn": "^1.1.1",
     "react-redux": "^7.2.0",
     "react-scripts": "3.4.1",
+    "source-map-explorer": "^2.4.2",
     "typescript": "^3.7.5"
   },
   "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test --env=jsdom",
@@ -36,8 +38,9 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
+      ">0.4%",
       "not dead",
+      "not ie 11",
       "not op_mini all"
     ],
     "development": [
