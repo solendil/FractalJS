@@ -47,6 +47,16 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   onMediaChange(matchMedia);
   matchMedia.addListener(onMediaChange);
 
+  window.addEventListener(
+    "error",
+    debounce(() => {
+      console.error("error caught, resetting engine");
+      const init = url.readInit(dispatch, true);
+      engine.set({ ...init });
+      engine.draw();
+    }, 200),
+  );
+
   // ---- capture canvas enter & leave events for infobox
   canvas.addEventListener("mouseenter", () => {
     dispatch(setMouseOnCanvas(true));

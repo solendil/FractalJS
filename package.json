@@ -1,7 +1,11 @@
 {
-  "name": "fractaljs2",
-  "version": "0.1.0",
+  "name": "fratcaljs",
+  "version": "3.0.0",
+  "description": "Browse fractals !",
   "private": true,
+  "author": "Matthieu Dumas",
+  "license": "MIT",
+  "homepage": ".",
   "dependencies": {
     "@material-ui/core": "^4.9.7",
     "@reduxjs/toolkit": "^1.3.0",

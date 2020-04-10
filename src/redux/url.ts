@@ -83,9 +83,9 @@ export const read = () => {
   return null;
 };
 
-export const readInit = (dispatch: Dispatch<any>) => {
+export const readInit = (dispatch: Dispatch<any>, forceCold = false) => {
   const init = read();
-  if (!init) {
+  if (!init || forceCold) {
     // coldstart
     let desc = { ...getPreset("mandelbrot"), smooth: true };
     let colors = {

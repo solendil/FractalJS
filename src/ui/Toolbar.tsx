@@ -69,7 +69,7 @@ const ToolBar = () => {
   ));
   buttons.push(
     <div className={classes.brand} key="brand">
-      Fractal.js
+      FractalJS
     </div>,
   );
 
