@@ -6,6 +6,7 @@ import IconButton from "@material-ui/core/IconButton";
 import { useDispatch } from "react-redux";
 import { setTab, setDrawer } from "../redux/ui";
 import { fade } from "@material-ui/core/styles/colorManipulator";
+import Share from "./Share";
 
 const useStyles = makeStyles((theme) => ({
   bar: {
@@ -80,6 +81,7 @@ const ToolBar = () => {
       FractalJS
     </a>,
   );
+  buttons.splice(2, 0, <Share key="share" className={classes.icons} />);
 
   return <div className={classes.bar}>{buttons}</div>;
 };

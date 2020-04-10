@@ -16,6 +16,7 @@ import MyToolbar from "./Toolbar";
 export const navigation: { [key: string]: any } = {
   fractal: { icon: "home", component: <Fractal /> },
   palette: { icon: "invert_colors", component: <Palette /> },
+  // social: { icon: "share", component: <Social /> },
   settings: { icon: "settings", component: <Settings /> },
   about: { icon: "info_outline", component: <About /> },
   debug: { hidden: true, component: <Debug /> },

@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-type Tab = "settings" | "fractal" | "palette" | "about" | "debug";
+type Tab = "settings" | "fractal" | "palette" | "about" | "social" | "debug";
 interface Int {
   drawer: boolean;
   infobox: boolean;

@@ -1,9 +1,9 @@
 import { updateSet } from "./set";
 import { Dispatch } from "@reduxjs/toolkit";
 import Engine from "../engine/engine";
-import sum from "lodash/sum";
+// import sum from "lodash/sum";
 import { Root } from "./reducer";
-import { setColorDensity } from "./rdxengine";
+// import { setColorDensity } from "./rdxengine";
 
 /*
 The improver hijacks engine to use a more complex rendering; so it's
@@ -26,38 +26,38 @@ export default function Improver(
   // array contains a count per index; total of this count is 100%
   // this function finds the range in the array that brings back perc% of the values
   // it works by trimming smallest value from start and end until
-  const getRangeContaining = (
-    array: number[],
-    perc: number,
-  ): [number, number] => {
-    let a = 0;
-    let b = array.length - 1;
-    let count = sum(array);
-    const target = count * (perc / 100);
-    while (count >= target) {
-      if (array[a] < array[b]) {
-        count -= array[a];
-        a++;
-      } else {
-        count -= array[b];
-        b--;
-      }
-    }
-    return [a, b];
-  };
+  // const getRangeContaining = (
+  //   array: number[],
+  //   perc: number,
+  // ): [number, number] => {
+  //   let a = 0;
+  //   let b = array.length - 1;
+  //   let count = sum(array);
+  //   const target = count * (perc / 100);
+  //   while (count >= target) {
+  //     if (array[a] < array[b]) {
+  //       count -= array[a];
+  //       a++;
+  //     } else {
+  //       count -= array[b];
+  //       b--;
+  //     }
+  //   }
+  //   return [a, b];
+  // };
 
-  const analyseColors = (histo: number[]) => {
-    console.log(histo);
-    const [pa, pb] = getRangeContaining(histo.slice(1), 98);
-    console.log(pa, pb);
-    const range = pb - pa;
-    const resolution = 1000;
-    let density = resolution / range;
-    density = Math.min(20, density);
-    density = Math.max(0.05, density);
-    console.log(density);
-    dispatch(setColorDensity(density));
-  };
+  // const analyseColors = (histo: number[]) => {
+  //   console.log(histo);
+  //   const [pa, pb] = getRangeContaining(histo.slice(1), 98);
+  //   console.log(pa, pb);
+  //   const range = pb - pa;
+  //   const resolution = 1000;
+  //   let density = resolution / range;
+  //   density = Math.min(20, density);
+  //   density = Math.max(0.05, density);
+  //   console.log(density);
+  //   dispatch(setColorDensity(density));
+  // };
 
   const analysePicture = (histo: number[]) => {
     // takes the same old algorithm
