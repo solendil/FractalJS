@@ -4,7 +4,7 @@ FractalJS is a realtime fractal exporer.
 
 It lets you explore different fractal sets with different color palettes, and share your best discoveries with others. It is a progressive web app running on all your devices. The rendering, which is computationally intensive, is entirely done in multi-threaded Javascript (hence JS in the name).
 
-### [Start FractalJS](http://solendil.github.io/fractaljs/)
+### Click here to [Start FractalJS](http://solendil.github.io/fractaljs/)
 ![Start FractalJS](/public/screen.png?raw=true "FractalJS")
 
 ## Available Fractals

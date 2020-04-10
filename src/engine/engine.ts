@@ -38,7 +38,8 @@ export default class Engine {
   private painter: Painter;
 
   constructor(p: EngineInit) {
-    const nbThreads = navigator.hardwareConcurrency || 4;
+    let nbThreads = navigator.hardwareConcurrency || 4;
+    if (nbThreads >= 6) nbThreads--; // sacrifice a thread for responsiveness if we have enough
     this.ctx = {
       // readonly
       canvas: p.canvas,

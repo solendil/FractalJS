@@ -1,0 +1,22 @@
+import React from "react";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import { getEngine } from "../../redux/rdxengine";
+
+export default function Debug() {
+  const engine = getEngine();
+  const camera = engine.ctx.camera;
+  return (
+    <div>
+      <List component="nav">
+        <ListSubheader component="div">Debug</ListSubheader>
+        <ListItem>Threads: {engine.ctx.nbThreads}</ListItem>
+        <ListItem>
+          Screen: {camera.screen.x} * {camera.screen.y}
+        </ListItem>
+      </List>
+    </div>
+  );
+}

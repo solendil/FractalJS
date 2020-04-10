@@ -15,6 +15,7 @@ import {
   setDrawer,
   setSnack,
   setNarrowDevice,
+  setTab,
 } from "./ui";
 import * as colorActions from "./colors";
 import { getPreset } from "../engine/fractals";
@@ -23,6 +24,8 @@ import { getBufferFromId } from "../util/palette";
 
 let engine: Engine;
 
+export const getEngine = () => engine;
+
 export const initEngine = (canvas: HTMLCanvasElement): any => async (
   dispatch: Dispatch<any>,
   getState: () => Root,
@@ -30,6 +33,10 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   // ---- init global keyboard shortcuts
   bindKeys("I", () => dispatch(setInfobox(!getState().ui.infobox)));
   bindKeys("esc", () => dispatch(setDrawer(!getState().ui.drawer)));
+  bindKeys("D", () => {
+    dispatch(setDrawer(true));
+    dispatch(setTab("debug"));
+  });
 
   // ---- init window size & capture resize events
   const getWindowSize = () => [window.innerWidth, window.innerHeight];

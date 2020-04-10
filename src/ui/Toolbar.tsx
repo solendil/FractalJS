@@ -49,28 +49,36 @@ const useStyles = makeStyles((theme) => ({
     letterSpacing: "3px",
     fontWeight: 500,
     flexGrow: 1,
+    textDecoration: "none",
   },
 }));
 
 const ToolBar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const buttons = map(navigation, (def, tabId) => (
-    <IconButton
-      key={tabId}
-      className={classes.icons}
-      onClick={() => {
-        dispatch(setTab(tabId));
-        dispatch(setDrawer(true));
-      }}
-    >
-      <i className="material-icons">{def.icon}</i>
-    </IconButton>
-  ));
+  const buttons = map(navigation, (def, tabId) =>
+    !def.hidden ? (
+      <IconButton
+        key={tabId}
+        className={classes.icons}
+        onClick={() => {
+          dispatch(setTab(tabId));
+          dispatch(setDrawer(true));
+        }}
+      >
+        <i className="material-icons">{def.icon}</i>
+      </IconButton>
+    ) : null,
+  ).filter(Boolean);
   buttons.push(
-    <div className={classes.brand} key="brand">
+    <a
+      href="https://github.com/solendil/FractalJS"
+      target="_"
+      className={classes.brand}
+      key="brand"
+    >
       FractalJS
-    </div>,
+    </a>,
   );
 
   return <div className={classes.bar}>{buttons}</div>;

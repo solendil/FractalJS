@@ -6,6 +6,7 @@ import Fractal from "./pages/Fractal";
 import Palette from "./pages/Palette";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
+import Debug from "./pages/Debug";
 import { useDispatch, useSelector } from "react-redux";
 import { Root } from "../redux/reducer";
 import { setDrawer } from "../redux/ui";
@@ -17,6 +18,7 @@ export const navigation: { [key: string]: any } = {
   palette: { icon: "invert_colors", component: <Palette /> },
   settings: { icon: "settings", component: <Settings /> },
   about: { icon: "info_outline", component: <About /> },
+  debug: { hidden: true, component: <Debug /> },
 };
 
 const useStyles = makeStyles((theme) => ({
