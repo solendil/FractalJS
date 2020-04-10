@@ -7,7 +7,8 @@ import Matrix from "../engine/math/matrix";
 import { bindKeys } from "../util/keybinder";
 import Engine from "../engine/engine";
 
-const ZOOM = 0.3; // 1+
+const ZOOM = 1.3;
+const ZOOM_TAP = 2.5;
 const PAN = 0.1;
 const SCALE = 0.1; // 1+
 const SHEAR = 0.1;
@@ -70,8 +71,8 @@ export default class Controller {
     bindKeys("down", (Δ: number) => this.pan(new Vector(0, -PAN * Δ)));
     bindKeys("right", (Δ: number) => this.pan(new Vector(-PAN * Δ, 0)));
     bindKeys("left", (Δ: number) => this.pan(new Vector(PAN * Δ, 0)));
-    bindKeys("+", (Δ: number) => this.zoom(1 / (1 + ZOOM * Δ)));
-    bindKeys("-", (Δ: number) => this.zoom(1 + ZOOM * Δ));
+    bindKeys("+", (Δ: number) => this.zoom(1 / (ZOOM * Δ)));
+    bindKeys("-", (Δ: number) => this.zoom(ZOOM * Δ));
     bindKeys("V", () => this.affineReset());
     bindKeys("R left", (Δ: number) =>
       this.affineTransform("rotation", -ANGLE * Δ),
@@ -106,30 +107,36 @@ export default class Controller {
   }
 
   setupTouch() {
-    var hammertime = new Hammer(this.engine.canvas, {});
+    var hammer = new Hammer(this.engine.canvas, {});
     let isDragging = false;
     let dragStart: Vector;
     let cameraStart: Camera;
 
-    hammertime.get("pan").set({
+    hammer.get("pan").set({
       direction: Hammer.DIRECTION_ALL,
       threshold: 1,
     });
-    hammertime.get("pinch").set({
+    hammer.get("pinch").set({
       enable: true,
     });
 
-    hammertime.on("panstart", evt => {
+    hammer.on("doubletap", (evt) => {
+      // console.log("double", evt);
+      const pos = new Vector(evt.center.x, evt.center.y);
+      this.zoom(1 / ZOOM_TAP, new Vector(pos));
+    });
+
+    hammer.on("panstart", (evt) => {
       isDragging = true;
       dragStart = new Vector(evt.center.x, evt.center.y);
       cameraStart = this.camera.clone();
     });
 
-    hammertime.on("panend", evt => {
+    hammer.on("panend", (evt) => {
       isDragging = false;
     });
 
-    hammertime.on("panmove", evt => {
+    hammer.on("panmove", (evt) => {
       if (isDragging) {
         const pos = new Vector(evt.center.x, evt.center.y);
         const scr_vector = pos.minus(dragStart);
@@ -144,19 +151,19 @@ export default class Controller {
     var isPinching = false;
     let pinchStart: Vector;
 
-    hammertime.on("pinchstart", ev => {
+    hammer.on("pinchstart", (ev) => {
       console.log("pinchstart");
       isPinching = true;
       pinchStart = new Vector(ev.center.x, ev.center.y);
       cameraStart = this.camera.clone();
     });
 
-    hammertime.on("pinchend", function(ev) {
+    hammer.on("pinchend", function (ev) {
       console.log("pinchend");
       isPinching = false;
     });
 
-    hammertime.on("pinch", ev => {
+    hammer.on("pinch", (ev) => {
       if (isPinching) {
         // compute matrix that transforms an original triangle to the transformed triangle
         var pc1 = cameraStart.scr2cpx(pinchStart);
@@ -228,7 +235,7 @@ export default class Controller {
       evt.preventDefault();
       const modifier = evt.shiftKey ? 1 / 10 : 1;
       let delta = evt.deltaY;
-      delta = delta > 0 ? 1 + ZOOM * modifier : 1 / (1 + ZOOM * modifier);
+      delta = delta > 0 ? ZOOM * modifier : 1 / (ZOOM * modifier);
       const point = new Vector(evt.offsetX, evt.offsetY);
       this.zoom(delta, point);
     };
