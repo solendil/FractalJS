@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./ui/App";
+import Gradient from "./ui/pauldebrot/Gradient";
+import MultiWave from "./ui/pauldebrot/MultiWave";
 import { ThemeProvider } from "@material-ui/styles";
 import * as serviceWorker from "./serviceWorker";
 import { configureStore } from "@reduxjs/toolkit";
@@ -29,6 +31,8 @@ ReactDOM.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <App />
+      {/* <Gradient /> */}
+      {/* <MultiWave /> */}
     </ThemeProvider>
   </Provider>,
   document.getElementById("root"),

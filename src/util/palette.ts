@@ -25,7 +25,7 @@ const standardGradients: { [key: number]: string } = {
  *        let xSquared = f(x);
  * https://en.wikipedia.org/wiki/Monotone_cubic_interpolation
  */
-function createInterpolant(xs: number[], ys: number[]) {
+export function createInterpolant(xs: number[], ys: number[]) {
   let i,
     length = xs.length;
 
@@ -34,7 +34,7 @@ function createInterpolant(xs: number[], ys: number[]) {
     throw new Error("Need an equal count of xs and ys.");
   }
   if (length === 0) {
-    return function(x: any) {
+    return function (x: any) {
       return 0;
     };
   }
@@ -42,7 +42,7 @@ function createInterpolant(xs: number[], ys: number[]) {
     // Impl: Precomputing the result prevents problems if ys is mutated later and allows garbage collection of ys
     // Impl: Unary plus properly converts values to numbers
     const result = +ys[0];
-    return function(x: any) {
+    return function (x: any) {
       return result;
     };
   }
@@ -105,7 +105,7 @@ function createInterpolant(xs: number[], ys: number[]) {
   }
 
   // Return interpolant function
-  return function(x: number) {
+  return function (x: number) {
     // The rightmost point in the dataset should give an exact result
     let i = xs.length - 1;
     if (x === xs[i]) {
@@ -146,7 +146,7 @@ const buildBufferFromStringGradient = (
   const blues: number[] = [];
 
   const buildStops = (str: string) => {
-    str.split(";").forEach(stop => {
+    str.split(";").forEach((stop) => {
       const items = stop.split("#");
       indices.push(Number(items[0]));
       reds.push(parseInt(items[1].substring(0, 2), 16));
