@@ -20,7 +20,6 @@ import {
 import * as colorActions from "./colors";
 import { getPreset } from "../engine/fractals";
 import { bindKeys } from "../util/keybinder";
-import { getBufferFromId } from "../util/palette";
 
 let engine: Engine;
 
@@ -73,7 +72,7 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   });
   canvas.addEventListener(
     "mousemove",
-    throttle((evt) => {
+    throttle(evt => {
       const cpx = engine.ctx.camera.scr2cpx(
         new Vector(evt.offsetX, evt.offsetY),
       );
@@ -83,8 +82,10 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   );
 
   // ---- read URL and infer start params
-  const init = url.readInit(dispatch);
-  engine = new Engine({ ...init, canvas });
+  const { desc, painter } = url.readInit(dispatch);
+  engine = new Engine({ ...desc, painter, canvas });
+  // @ts-ignore
+  window.engine = engine;
 
   const urlUpdate = debounce(() => {
     url.update(engine);
@@ -113,7 +114,8 @@ export const changeFractalType = (type: string): any => async (
   const setValues = getPreset(type);
   dispatch(updateSet(setValues));
   engine.ctx.camera.affineReset();
-  engine.set({ colors: { density: 20 } });
+  dispatch(colorActions.setPaint({ density: 20 }));
+  engine.painter.set({ density: 20 });
   engine.set(setValues);
   engine.draw();
 };
@@ -144,7 +146,7 @@ export const setColorOffset = (val: number): any => async (
   dispatch: Dispatch<any>,
 ) => {
   dispatch(colorActions.setOffset(val));
-  engine.set({ colors: { offset: val } });
+  engine.painter.set({ offset: val });
   engine.drawColor();
 };
 
@@ -153,7 +155,7 @@ export const setColorDensity = (val: number): any => async (
   getState: () => Root,
 ) => {
   dispatch(colorActions.setDensity(val));
-  engine.set({ colors: { density: getState().colors.density } });
+  engine.painter.set({ density: getState().colors.density });
   engine.drawColor();
 };
 
@@ -161,7 +163,7 @@ export const setColorId = (id: number): any => async (
   dispatch: Dispatch<any>,
   getState: () => Root,
 ) => {
-  dispatch(colorActions.setColorId(id));
-  engine.set({ colors: { id, buffer: getBufferFromId(id, 1000) } });
+  dispatch(colorActions.setPaint({ id, fn: "s" }));
+  engine.painter.set({ id, fn: "s" });
   engine.drawColor();
 };

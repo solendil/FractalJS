@@ -1,29 +1,32 @@
 import { Tile } from "./scheduler/types";
+import { getBufferFromId } from "../util/palette";
 
-export interface Colors {
+export interface PainterArgs {
   offset: number;
   density: number;
   id: number;
-  buffer: Int32Array;
+  fn: "s" | "n";
 }
 
 export default class Painter {
   public id: number = 0;
-  private offset: number = 0;
-  private density: number = 0;
+  public offset: number = 0;
+  public fn: string = "s";
+  public density: number = 0;
   private resolution: number = 0;
   private buffer: Int32Array = new Int32Array();
 
-  constructor(p: Colors) {
+  constructor(p: PainterArgs) {
     this.set(p);
   }
 
-  set(p: Colors) {
+  set(p: any) {
+    if ("fn" in p) this.fn = p.fn;
     if ("offset" in p) this.offset = p.offset;
     if ("density" in p) this.density = p.density;
-    if ("id" in p) this.id = p.id;
-    if ("buffer" in p) {
-      this.buffer = p.buffer;
+    if ("id" in p) {
+      this.id = p.id;
+      this.buffer = getBufferFromId(p.id, 1000);
       this.resolution = this.buffer.length;
     }
   }
@@ -38,6 +41,12 @@ export default class Painter {
     var tileIndex = 0;
     var bufferIndex = 0;
     var tx, ty, iter, color;
+
+    if (this.fn === "s") {
+      density = density * 7;
+      offset = ((this.offset + 0.85) % 1) * this.resolution;
+    }
+
     for (ty = 0; ty < tile.height; ty += 1) {
       bufferIndex = (ty + tile.y1) * width + tile.x1;
       for (tx = 0; tx < tile.width; tx += 1) {
@@ -45,7 +54,9 @@ export default class Painter {
         if (iter === 0) {
           color = 0xff000000;
         } else {
-          // const i2 = Math.sqrt(iter);
+          if (this.fn === "s") {
+            iter = Math.sqrt(iter);
+          }
           color = cbuffer[~~((iter * density + offset) % resolution)];
         }
         buffer[bufferIndex] = color;

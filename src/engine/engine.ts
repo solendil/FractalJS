@@ -1,7 +1,7 @@
 /* global navigator */
 import EventBus from "../util/EventBus";
 import Renderer from "./renderer";
-import Painter, { Colors } from "./painter";
+import Painter, { PainterArgs } from "./painter";
 import Camera from "./math/camera";
 import Vector from "./math/vector";
 import { Params } from "./scheduler/types";
@@ -16,7 +16,6 @@ export interface Context {
   smooth: boolean;
   iter: number;
   fractalId: string;
-  colors: Colors;
 }
 
 interface EngineInit {
@@ -25,7 +24,7 @@ interface EngineInit {
   y: number;
   w: number;
   viewport?: Matrix;
-  colors: Colors;
+  painter: PainterArgs;
   fractalId: string;
   smooth: boolean;
   iter: number;
@@ -33,9 +32,9 @@ interface EngineInit {
 
 export default class Engine {
   public readonly ctx: Context;
+  public readonly painter: Painter;
 
   private renderer: Renderer;
-  private painter: Painter;
 
   constructor(p: EngineInit) {
     let nbThreads = navigator.hardwareConcurrency || 4;
@@ -56,9 +55,8 @@ export default class Engine {
       smooth: p.smooth,
       iter: p.iter,
       fractalId: p.fractalId,
-      colors: p.colors,
     };
-    this.painter = new Painter(p.colors);
+    this.painter = new Painter(p.painter);
     this.renderer = new Renderer(this.ctx, this.painter, this);
   }
 
@@ -72,9 +70,8 @@ export default class Engine {
     if ("smooth" in p) this.ctx.smooth = p.smooth;
     if ("iter" in p) this.ctx.iter = p.iter;
     if ("x" in p) this.ctx.camera.setPos(new Vector(p.x, p.y), p.w);
-    if ("colors" in p) {
-      this.ctx.colors = { ...this.ctx.colors, ...p.colors };
-      this.painter.set(p.colors);
+    if ("painter" in p) {
+      this.painter.set(p.painter);
     }
   }
 

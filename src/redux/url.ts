@@ -1,77 +1,110 @@
 import Matrix from "../engine/math/matrix";
 import { Dispatch } from "@reduxjs/toolkit";
-import { setOffset, setDensity } from "./colors";
+import { setOffset, setDensity, setColorId } from "./colors";
 import { setSet } from "./set";
 import omit from "lodash/omit";
 import { getPreset } from "../engine/fractals";
-import { getBufferFromId } from "../util/palette";
 import Engine from "../engine/engine";
+import { PainterArgs } from "../engine/painter";
+
+interface UrlOutputObject {
+  painter: PainterArgs;
+  desc: {
+    x: number;
+    y: number;
+    w: number;
+    iter: number;
+    fractalId: string;
+    smooth: boolean;
+    viewport: Matrix;
+  };
+}
+
+const defaults: any = {
+  t: "mandelbrot",
+  i: "50",
+  fs: "1",
+  ct: "0",
+  co: "0",
+  cd: "20",
+  cf: "n",
+  va: "1.0000",
+  vb: "0.0000",
+  vc: "0.0000",
+  vd: "1.0000",
+};
 
 export const update = (engine: Engine) => {
   const camera = engine.ctx.camera;
-  const color = engine.ctx.colors;
+  const painter = engine.painter;
   try {
-    const args = [];
-    args.push(["t", engine.ctx.fractalId]);
-    args.push(["x", camera.pos.x]);
-    args.push(["y", camera.pos.y]);
-    args.push(["w", camera.w]);
-    args.push(["i", engine.ctx.iter]);
-    args.push(["fs", engine.ctx.smooth ? 1 : 0]);
-    if (color) {
-      if (color.id === undefined) throw new Error();
-      args.push(["ct", color.id]);
-      args.push(["co", Math.round(color.offset * 100)]);
-      args.push(["cd", +color.density.toFixed(2)]);
-    }
-    if (!camera.affineMatrix.isIdentity()) {
-      args.push(["va", camera.affineMatrix.a.toFixed(4)]);
-      args.push(["vb", camera.affineMatrix.b.toFixed(4)]);
-      args.push(["vc", camera.affineMatrix.c.toFixed(4)]);
-      args.push(["vd", camera.affineMatrix.d.toFixed(4)]);
-    }
-    const str = args.reduce((acc, arg) => `${acc}&${arg[0]}_${arg[1]}`, "");
-    window.history.replaceState("", "", `#B${str.substr(1)}`);
+    const args: any = {};
+    // engine
+    args.t = engine.ctx.fractalId;
+    args.x = camera.pos.x;
+    args.y = camera.pos.y;
+    args.w = camera.w;
+    args.i = String(engine.ctx.iter);
+    args.fs = engine.ctx.smooth ? "1" : "0";
+    // painter
+    args.ct = String(painter.id);
+    args.co = String(Math.round(painter.offset * 100));
+    args.cd = String(+painter.density.toFixed(2));
+    args.cf = painter.fn;
+    // affine matrix
+    args.va = camera.affineMatrix.a.toFixed(4);
+    args.vb = camera.affineMatrix.b.toFixed(4);
+    args.vc = camera.affineMatrix.c.toFixed(4);
+    args.vd = camera.affineMatrix.d.toFixed(4);
+    // remove args with default values
+    for (let key in args) if (args[key] === defaults[key]) delete args[key];
+    // build url
+    const str = Object.entries(args)
+      .map(([k, v]) => `${k}_${v}`)
+      .join("&");
+    window.history.replaceState("", "", `#B${str}`);
   } catch (e) {
     console.error("Could not set URL", e);
   }
 };
 
-function readCurrentScheme(url: string) {
+function readCurrentScheme(url: string): UrlOutputObject {
+  // parse url
   const str = url.substr(2);
-  const tuples = str.split("&");
-  const map: any = tuples.reduce((acc, tuple) => {
+  const rawArgs: any = str.split("&").reduce((acc, tuple) => {
     const parts = tuple.split("_");
     return Object.assign(acc, { [parts[0]]: parts[1] });
   }, {});
+  // add default arguments
+  const args = { ...defaults, ...rawArgs };
+  // build objet
   const desc = {
-    x: parseFloat(map.x),
-    y: parseFloat(map.y),
-    w: parseFloat(map.w),
-    iter: parseInt(map.i, 10),
-    fractalId: map.t,
-    smooth: parseInt(map.fs, 10) === 1,
+    x: parseFloat(args.x),
+    y: parseFloat(args.y),
+    w: parseFloat(args.w),
+    iter: parseInt(args.i),
+    fractalId: args.t,
+    smooth: parseInt(args.fs) === 1,
     viewport: Matrix.identity,
   };
-  if ("va" in map) {
-    desc.viewport = new Matrix(
-      parseFloat(map.va),
-      parseFloat(map.vb),
-      parseFloat(map.vc),
-      parseFloat(map.vd),
-      0,
-      0,
-    );
-  }
-  const color = {
-    offset: parseInt(map.co, 10) / 100.0,
-    density: parseFloat(map.cd),
-    id: parseInt(map.ct, 10),
+  desc.viewport = new Matrix(
+    parseFloat(args.va),
+    parseFloat(args.vb),
+    parseFloat(args.vc),
+    parseFloat(args.vd),
+    0,
+    0,
+  );
+  const painter = {
+    offset: parseInt(args.co) / 100.0,
+    density: parseFloat(args.cd),
+    id: parseInt(args.ct, 10),
+    fn: args.cf,
   };
-  return { desc, color };
+  return { desc, painter };
 }
 
-export const read = () => {
+export const read = (): UrlOutputObject | null => {
   try {
     const url = document.location.hash;
     if (url.startsWith("#B")) {
@@ -83,29 +116,38 @@ export const read = () => {
   return null;
 };
 
-export const readInit = (dispatch: Dispatch<any>, forceCold = false) => {
-  const init = read();
-  if (!init || forceCold) {
+export const readInit = (
+  dispatch: Dispatch<any>,
+  forceCold = false,
+): UrlOutputObject => {
+  const urlData = read();
+  if (!urlData || forceCold) {
     // coldstart
-    let desc = { ...getPreset("mandelbrot"), smooth: true };
-    let colors = {
+    let desc = {
+      ...getPreset("mandelbrot"),
+      smooth: true,
+      viewport: Matrix.identity,
+    };
+    let painter: PainterArgs = {
       offset: 0,
       density: 20,
-      buffer: getBufferFromId(0, 1000),
       id: 0,
+      fn: "s",
     };
     dispatch(setSet(omit(desc, "viewport")));
+    dispatch(setColorId(painter.id));
     dispatch(setOffset(0));
     dispatch(setDensity(20));
-    return { ...desc, colors };
+    return { desc, painter };
   } else {
-    const { desc, color } = init;
-    dispatch(setSet(omit(init.desc, "viewport")));
-    dispatch(setOffset(color.offset));
-    dispatch(setDensity(color.density));
+    const { desc, painter } = urlData;
+    dispatch(setSet(omit(urlData.desc, "viewport")));
+    dispatch(setColorId(painter.id));
+    dispatch(setOffset(painter.offset));
+    dispatch(setDensity(painter.density));
     return {
-      ...desc,
-      colors: { ...color, buffer: getBufferFromId(color.id, 1000) },
+      desc,
+      painter,
     };
   }
 };
