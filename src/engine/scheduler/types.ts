@@ -15,7 +15,7 @@ export interface Tile {
 }
 
 export interface Params {
-  details: "supersampling" | "normal" | "subsampling";
+  details: "supersampling" | "normal" | "subsampling" | "iter-increase";
   size?: number;
   id?: number;
 }

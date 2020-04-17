@@ -1,9 +1,7 @@
 import { updateSet } from "./set";
 import { Dispatch } from "@reduxjs/toolkit";
 import Engine from "../engine/engine";
-// import sum from "lodash/sum";
 import { Root } from "./reducer";
-// import { setColorDensity } from "./rdxengine";
 
 /*
 The improver hijacks engine to use a more complex rendering; so it's
@@ -21,79 +19,23 @@ export default function Improver(
   let lastState = "";
 
   const sleep = (duration: number) =>
-    new Promise((resolve) => setTimeout(() => resolve(), duration));
+    new Promise(resolve => setTimeout(() => resolve(), duration));
 
-  // array contains a count per index; total of this count is 100%
-  // this function finds the range in the array that brings back perc% of the values
-  // it works by trimming smallest value from start and end until
-  // const getRangeContaining = (
-  //   array: number[],
-  //   perc: number,
-  // ): [number, number] => {
-  //   let a = 0;
-  //   let b = array.length - 1;
-  //   let count = sum(array);
-  //   const target = count * (perc / 100);
-  //   while (count >= target) {
-  //     if (array[a] < array[b]) {
-  //       count -= array[a];
-  //       a++;
-  //     } else {
-  //       count -= array[b];
-  //       b--;
-  //     }
-  //   }
-  //   return [a, b];
-  // };
-
-  // const analyseColors = (histo: number[]) => {
-  //   console.log(histo);
-  //   const [pa, pb] = getRangeContaining(histo.slice(1), 98);
-  //   console.log(pa, pb);
-  //   const range = pb - pa;
-  //   const resolution = 1000;
-  //   let density = resolution / range;
-  //   density = Math.min(20, density);
-  //   density = Math.max(0.05, density);
-  //   console.log(density);
-  //   dispatch(setColorDensity(density));
-  // };
-
-  const analysePicture = (histo: number[]) => {
-    // takes the same old algorithm
+  // compute number of pixels in 10% fringe and trigger a redrawing if this
+  // number is above a threshold
+  const analysePicture2 = () => {
+    const histo = engine.getHistogram();
+    const nbPixels = engine.ctx.camera.screen.x * engine.ctx.camera.screen.y;
     const iter = engine.ctx.iter;
-    const nbTotal = histo.reduce((acc, val) => acc + val, 0);
-    const nbInSet = histo[0];
-    let minIter = Number.MAX_VALUE;
-    let maxIter = -1;
-    for (let i = 1; i < histo.length; i += 1) {
-      if (histo[i] !== 0) {
-        maxIter = i;
-        minIter = Math.min(i, minIter);
-      }
+    let nb = 0;
+    for (let i = Math.round(iter * 0.9); i <= iter; i += 1) {
+      nb += histo[i];
     }
-    const iterRange = maxIter - minIter;
-    const fringe10p = iter - Math.ceil(iterRange / 10);
-    let nbFringe10p = 0;
-    for (let i = fringe10p; i < histo.length; i += 1) {
-      nbFringe10p += histo[i];
-    }
-    const percInSet = (100.0 * nbInSet) / nbTotal;
-    const percFringe10p = (100.0 * nbFringe10p) / nbInSet;
-    const res = {
-      shouldIncrease: false,
-      shouldDecrease: false,
-    };
-    if (percInSet > 1 && percFringe10p > 1) {
-      res.shouldIncrease = true;
-      // console.log("we should increase iter");
-    } else if (percInSet > 1 && percFringe10p > 1) {
-      res.shouldDecrease = true;
-      // console.log("we should decrease iter");
-    } else {
-      // console.log("iter is good");
-    }
-    return res;
+    const perc = (100 * nb) / nbPixels;
+    const shouldIncrease = perc > 0.2;
+    const shouldDecrease = perc < 0.05;
+    const txt = `10% fringe is ${nb}px or ${perc.toFixed(2)}%`;
+    return { shouldIncrease, shouldDecrease, txt };
   };
 
   // @ts-ignore
@@ -110,20 +52,27 @@ export default function Improver(
     }
     lastState = state;
 
-    // draw, then analyze, then increase iterations if needed
-    let analysis: any = {};
-    do {
+    // perform a normal drawing
+    await draw({ details: "normal", id });
+    if (frameId !== id) return;
+
+    // analyze, then increase iterations if needed
+    let analysis: any = analysePicture2();
+    while (analysis.shouldIncrease) {
+      const newIter = Math.round(engine.ctx.iter * 1.5);
+      console.log(`+ iter ${engine.ctx.iter} -> ${newIter}: ${analysis.txt}`);
+      dispatch(updateSet({ iter: newIter }));
+      engine.ctx.iter = newIter;
       await draw({ details: "normal", id });
       if (frameId !== id) return;
-      const histogram = engine.getHistogram();
-      // analyseColors(histogram);
-      analysis = analysePicture(histogram);
-      if (analysis.shouldIncrease) {
-        const iter = engine.ctx.iter;
-        dispatch(updateSet({ iter: iter * 1.5 }));
-        engine.ctx.iter = Math.round(iter * 1.5);
-      }
-    } while (analysis.shouldIncrease);
+      analysis = analysePicture2();
+    }
+    if (analysis.shouldDecrease) {
+      const newIter = Math.round(Math.max(50, engine.ctx.iter / 1.5));
+      console.log(`- iter ${engine.ctx.iter} -> ${newIter}: ${analysis.txt}`);
+      dispatch(updateSet({ iter: newIter }));
+      engine.ctx.iter = newIter;
+    }
 
     // wait one sec, then supersample
     await sleep(1000);

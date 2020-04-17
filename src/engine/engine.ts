@@ -77,7 +77,12 @@ export default class Engine {
 
   async draw(params?: Params) {
     if (!params) params = { details: "normal" };
-    return this.renderer.draw(params);
+    const start = new Date().getTime();
+    const res = await this.renderer.draw(params);
+    const end = new Date().getTime();
+    const time = end - start;
+    console.log(`Frame '${params.details}' drawn in ${time}ms`);
+    return res;
   }
 
   drawColor() {

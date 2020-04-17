@@ -23,6 +23,30 @@ const draw = (model: Model, func: RenderFn, tile: Tile) => {
   }
 };
 
+// does not seem to work well, maybe because of a tile ordering problem
+// need to sort out tiling before attempting this method again
+// a first test shows a 15% speed increase, nice but not decisive
+const drawZeroes = (model: Model, func: RenderFn, tile: Tile) => {
+  var buffer = tile.buffer;
+  var dx = 0;
+  var sx, sy, px, py, piter;
+  for (sy = tile.y1; sy <= tile.y2; sy++) {
+    px = (tile.x1 + 0.5) * model.a + (sy + 0.5) * model.c + model.e;
+    py = (tile.x1 + 0.5) * model.b + (sy + 0.5) * model.d + model.f;
+    for (sx = tile.x1; sx <= tile.x2; sx++) {
+      if (buffer[dx] === 0) {
+        piter = func(px, py, model.iter);
+        if (piter !== model.iter) {
+          buffer[dx] = piter;
+        }
+        px += model.a;
+        py += model.b;
+      }
+      dx++;
+    }
+  }
+};
+
 const drawSubsampled = (
   model: Model,
   func: RenderFn,
@@ -118,6 +142,8 @@ self.onmessage = (event: any) => {
       const func = getFunction(data.model.type, data.model.smooth);
       if (data.params.details === "normal") {
         draw(data.model, func, data.tile);
+      } else if (data.params.details === "iter-increase") {
+        drawZeroes(data.model, func, data.tile);
       } else if (data.params.details === "subsampling") {
         drawSubsampled(data.model, func, data.tile, data.params.size || 4);
       } else if (data.params.details === "supersampling") {
