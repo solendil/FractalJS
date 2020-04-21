@@ -1,11 +1,6 @@
 export type Callback = (x: any) => void;
 
-type Events =
-  | "scheduler.finished"
-  | "scheduler.interrupted"
-  | "draw.redraw"
-  | "draw.start"
-  | "zoom.limit";
+type Events = "draw.redraw" | "draw.start" | "zoom.limit";
 
 export default class EventBus {
   private listeners: {
