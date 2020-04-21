@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-globals */
 import { getFunction } from "../../fractals";
-import { Order, Model, Tile, WorkerResponse } from "../types";
+import { Order, Model, WorkerResponse } from "../types";
 import { RenderFn } from "../../fractals/example";
+import { Tile } from "../../tile";
 
 const draw = (model: Model, func: RenderFn, tile: Tile) => {
   var buffer = tile.buffer;
@@ -153,7 +154,7 @@ self.onmessage = (event: any) => {
         action: "end-draw",
         tile: data.tile,
         workerId: workerId,
-        batchId: data.batchId || -1,
+        scheduleId: data.scheduleId || -1,
       };
       // @ts-ignore
       postMessage(answer, [answer.tile.buffer.buffer]);

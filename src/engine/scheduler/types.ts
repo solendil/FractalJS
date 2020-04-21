@@ -1,18 +1,4 @@
-export interface Tile {
-  i: number;
-  j: number;
-  id: number;
-  x1: number;
-  x2: number;
-  y1: number;
-  y2: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  buffer: Float32Array;
-  indexScreen: number;
-}
+import { Tile } from "../tile";
 
 export interface Params {
   details: "supersampling" | "normal" | "subsampling" | "iter-increase";
@@ -37,7 +23,7 @@ export interface DrawOrder {
   tile: Tile;
   params: Params;
   model: Model;
-  batchId?: number;
+  scheduleId?: number;
   dist?: number; // used when computing draw order
 }
 interface InitOrder {
@@ -51,5 +37,5 @@ export type WorkerResponse = {
   action: "end-draw";
   tile: Tile;
   workerId: string;
-  batchId: number;
+  scheduleId: number;
 };

@@ -1,5 +1,5 @@
-import { Tile } from "./scheduler/types";
 import { getBufferFromId } from "../util/palette";
+import { Tile } from "./tile";
 
 export interface PainterArgs {
   offset: number;

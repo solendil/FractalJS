@@ -2,6 +2,7 @@ import { updateSet } from "./set";
 import { Dispatch } from "@reduxjs/toolkit";
 import Engine from "../engine/engine";
 import { Root } from "./reducer";
+import { param } from "../params";
 
 /*
 The improver hijacks engine to use a more complex rendering; so it's
@@ -40,43 +41,49 @@ export default function Improver(
 
   // @ts-ignore
   engine.draw = async () => {
-    // ID detects when a rendering is interrupted
-    frameId += 1;
-    const id = frameId;
+    try {
+      // ID detects when a rendering is interrupted
+      frameId += 1;
+      const id = frameId;
 
-    // state detects when the fractal is drew afresh, needing a coarse rendering first
-    const state = engine.ctx.fractalId + engine.ctx.smooth;
-    if (state !== lastState) {
-      await draw({ details: "subsampling", size: 4 });
-      if (frameId !== id) return;
-    }
-    lastState = state;
+      // state detects when the fractal is drew afresh, needing a coarse rendering first
+      const state = engine.ctx.fractalId + engine.ctx.smooth;
+      if (state !== lastState) {
+        await draw({ details: "subsampling", size: 4 });
+        if (frameId !== id) return;
+      }
+      lastState = state;
 
-    // perform a normal drawing
-    await draw({ details: "normal", id });
-    if (frameId !== id) return;
-
-    // analyze, then increase iterations if needed
-    let analysis: any = analysePicture2();
-    while (analysis.shouldIncrease) {
-      const newIter = Math.round(engine.ctx.iter * 1.5);
-      console.log(`+ iter ${engine.ctx.iter} -> ${newIter}: ${analysis.txt}`);
-      dispatch(updateSet({ iter: newIter }));
-      engine.ctx.iter = newIter;
+      // perform a normal drawing
       await draw({ details: "normal", id });
       if (frameId !== id) return;
-      analysis = analysePicture2();
-    }
-    if (analysis.shouldDecrease) {
-      const newIter = Math.round(Math.max(50, engine.ctx.iter / 1.5));
-      console.log(`- iter ${engine.ctx.iter} -> ${newIter}: ${analysis.txt}`);
-      dispatch(updateSet({ iter: newIter }));
-      engine.ctx.iter = newIter;
-    }
 
-    // wait one sec, then supersample
-    await sleep(1000);
-    if (frameId !== id) return;
-    await draw({ details: "supersampling", size: 4, id });
+      // analyze, then increase iterations if needed
+      let analysis: any = analysePicture2();
+      while (analysis.shouldIncrease) {
+        const newIter = Math.round(engine.ctx.iter * 1.5);
+        // console.log(`+ iter ${engine.ctx.iter} -> ${newIter}: ${analysis.txt}`);
+        dispatch(updateSet({ iter: newIter }));
+        engine.ctx.iter = newIter;
+        await draw({ details: "normal", id });
+        if (frameId !== id) return;
+        analysis = analysePicture2();
+      }
+      if (analysis.shouldDecrease) {
+        const newIter = Math.round(Math.max(50, engine.ctx.iter / 1.5));
+        // console.log(`- iter ${engine.ctx.iter} -> ${newIter}: ${analysis.txt}`);
+        dispatch(updateSet({ iter: newIter }));
+        engine.ctx.iter = newIter;
+      }
+
+      // wait one sec, then supersample
+      if (param.supersampling) {
+        await sleep(1000);
+        if (frameId !== id) return;
+        await draw({ details: "supersampling", size: 4, id });
+      }
+    } catch (err) {
+      // ignore interrupted frames
+    }
   };
 }
