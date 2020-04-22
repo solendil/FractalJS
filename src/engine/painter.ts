@@ -9,7 +9,7 @@ export interface PainterArgs {
 }
 
 export default class Painter {
-  public id: number = 0;
+  public id: number = NaN;
   public offset: number = 0;
   public fn: string = "s";
   public density: number = 0;
@@ -24,7 +24,7 @@ export default class Painter {
     if ("fn" in p) this.fn = p.fn;
     if ("offset" in p) this.offset = p.offset;
     if ("density" in p) this.density = p.density;
-    if ("id" in p) {
+    if (this.id !== p.id) {
       this.id = p.id;
       this.buffer = getBufferFromId(p.id, 1000);
       this.resolution = this.buffer.length;

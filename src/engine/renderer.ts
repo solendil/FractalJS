@@ -3,7 +3,12 @@ import Redrawer from "./redrawer";
 import { getFunction } from "./fractals";
 import Painter from "./painter";
 import Main, { Context } from "./engine";
-import { WorkerResponse, Params, Model, DrawOrder } from "./scheduler/types";
+import {
+  WorkerResponse,
+  DrawParams,
+  Model,
+  DrawOrder,
+} from "./scheduler/types";
 import Vector from "./math/vector";
 import { Tile } from "./tile";
 
@@ -76,7 +81,7 @@ export default class Renderer {
   }
 
   // performs a full draw: floatbuffer + colors
-  draw(params: Params) {
+  draw(params: DrawParams) {
     this.ctx.event.notify("draw.start", {});
     const redraw = this.redrawer.redraw;
     let tileSort: ReturnType<typeof redraw>;

@@ -7,16 +7,16 @@ const getSquareToComplexMatrix = (x: number, y: number, w: number) =>
     1, 0, 0, 1, 0, 0,
     x + w / 2, y, x, y + w / 2, x, y);
 
-export type Affine = "rotation" | "scale" | "shear";
+export type AffineTransform = "rotation" | "scale" | "shear";
 
 const getScreenToSquareMatrix = (
-  affineTransform: Matrix,
+  viewportTransform: Matrix,
   width: number,
   height: number,
 ) => {
-  const p = affineTransform.transform(new Vector(1, -1));
-  const q = affineTransform.transform(new Vector(-1, 1));
-  const r = affineTransform.transform(new Vector(-1, -1));
+  const p = viewportTransform.transform(new Vector(1, -1));
+  const q = viewportTransform.transform(new Vector(-1, 1));
+  const r = viewportTransform.transform(new Vector(-1, -1));
   if (width >= height) {
     const x1 = (width - height) / 2;
     const x2 = x1 + height;
@@ -42,7 +42,7 @@ const getScreenToSquareMatrix = (
 export default class Camera {
   private matrix_inv: Matrix;
   public matrix: Matrix;
-  public affineMatrix: Matrix;
+  public viewportMatrix: Matrix;
   public screen: Vector;
   public resolutionLimit: number;
   public pos: Vector;
@@ -52,9 +52,9 @@ export default class Camera {
     screenSize: Vector,
     pos: Vector,
     w: number,
-    affineMatrix = Matrix.identity,
+    viewportMatrix = Matrix.identity,
   ) {
-    this.affineMatrix = affineMatrix;
+    this.viewportMatrix = viewportMatrix;
     this.screen = screenSize;
     const extent = screenSize.minVal();
     this.resolutionLimit = extent * 1.11e-15;
@@ -68,7 +68,7 @@ export default class Camera {
   reproject() {
     this.w = Math.max(this.w, this.resolutionLimit);
     const S2Q = getScreenToSquareMatrix(
-      this.affineMatrix,
+      this.viewportMatrix,
       this.screen.x,
       this.screen.y,
     );
@@ -77,30 +77,8 @@ export default class Camera {
     this.matrix_inv = this.matrix.inverse();
   }
 
-  affineTransform(type: Affine, valuex: number, valuey?: number) {
-    let transform = Matrix.identity;
-    switch (type) {
-      case "rotation":
-        transform = Matrix.GetRotationMatrix(valuex);
-        break;
-      case "shear":
-        transform = Matrix.GetShearMatrix(valuex, valuey!);
-        break;
-      case "scale":
-        transform = Matrix.GetScaleMatrix(valuex, valuey!);
-        break;
-    }
-    this.affineMatrix = this.affineMatrix.multiply(transform);
-    this.reproject();
-  }
-
-  affineReset() {
-    this.affineMatrix = Matrix.identity;
-    this.reproject();
-  }
-
   clone() {
-    return new Camera(this.screen, this.pos, this.w, this.affineMatrix);
+    return new Camera(this.screen, this.pos, this.w, this.viewportMatrix);
   }
 
   scr2cpx(v: Vector) {
@@ -118,7 +96,6 @@ export default class Camera {
   setPos(pos: Vector, w?: number) {
     this.pos = pos;
     if (w) this.w = w;
-    this.reproject();
   }
 
   resize(width: number, height: number) {

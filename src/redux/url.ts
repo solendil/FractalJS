@@ -1,11 +1,11 @@
-import Matrix from "../engine/math/matrix";
+import Matrix, { RawMatrix } from "../engine/math/matrix";
 import { Dispatch } from "@reduxjs/toolkit";
 import { setOffset, setDensity, setColorId } from "./colors";
 import { setSet } from "./set";
-import omit from "lodash/omit";
 import { getPreset } from "../engine/fractals";
 import Engine from "../engine/engine";
 import { PainterArgs } from "../engine/painter";
+import { Root } from "./reducer";
 
 interface UrlOutputObject {
   painter: PainterArgs;
@@ -16,7 +16,7 @@ interface UrlOutputObject {
     iter: number;
     fractalId: string;
     smooth: boolean;
-    viewport: Matrix;
+    viewport: RawMatrix;
   };
 }
 
@@ -34,28 +34,26 @@ const defaults: any = {
   vd: "1.0000",
 };
 
-export const update = (engine: Engine) => {
-  const camera = engine.ctx.camera;
-  const painter = engine.painter;
+export const update = (root: Root) => {
   try {
     const args: any = {};
     // engine
-    args.t = engine.ctx.fractalId;
-    args.x = camera.pos.x;
-    args.y = camera.pos.y;
-    args.w = camera.w;
-    args.i = String(engine.ctx.iter);
-    args.fs = engine.ctx.smooth ? "1" : "0";
+    args.t = root.set.fractalId;
+    args.x = root.set.x;
+    args.y = root.set.y;
+    args.w = root.set.w;
+    args.i = String(root.set.iter);
+    args.fs = root.set.smooth ? "1" : "0";
     // painter
-    args.ct = String(painter.id);
-    args.co = String(Math.round(painter.offset * 100));
-    args.cd = String(+painter.density.toFixed(2));
-    args.cf = painter.fn;
-    // affine matrix
-    args.va = camera.affineMatrix.a.toFixed(4);
-    args.vb = camera.affineMatrix.b.toFixed(4);
-    args.vc = camera.affineMatrix.c.toFixed(4);
-    args.vd = camera.affineMatrix.d.toFixed(4);
+    args.ct = String(root.colors.id);
+    args.co = String(Math.round(root.colors.offset * 100));
+    args.cd = String(+root.colors.density.toFixed(2));
+    args.cf = root.colors.fn;
+    // viewport matrix
+    args.va = root.set.viewport.a.toFixed(4);
+    args.vb = root.set.viewport.b.toFixed(4);
+    args.vc = root.set.viewport.c.toFixed(4);
+    args.vd = root.set.viewport.d.toFixed(4);
     // remove args with default values
     for (let key in args) if (args[key] === defaults[key]) delete args[key];
     // build url
@@ -85,16 +83,16 @@ function readCurrentScheme(url: string): UrlOutputObject {
     iter: parseInt(args.i),
     fractalId: args.t,
     smooth: parseInt(args.fs) === 1,
-    viewport: Matrix.identity,
+    viewport: { ...Matrix.identity },
   };
-  desc.viewport = new Matrix(
-    parseFloat(args.va),
-    parseFloat(args.vb),
-    parseFloat(args.vc),
-    parseFloat(args.vd),
-    0,
-    0,
-  );
+  desc.viewport = {
+    a: parseFloat(args.va),
+    b: parseFloat(args.vb),
+    c: parseFloat(args.vc),
+    d: parseFloat(args.vd),
+    e: 0,
+    f: 0,
+  };
   const painter = {
     offset: parseInt(args.co) / 100.0,
     density: parseFloat(args.cd),
@@ -126,7 +124,7 @@ export const readInit = (
     let desc = {
       ...getPreset("mandelbrot"),
       smooth: true,
-      viewport: Matrix.identity,
+      viewport: { ...Matrix.identity },
     };
     let painter: PainterArgs = {
       offset: 0,
@@ -134,14 +132,14 @@ export const readInit = (
       id: 0,
       fn: "s",
     };
-    dispatch(setSet(omit(desc, "viewport")));
+    dispatch(setSet(desc));
     dispatch(setColorId(painter.id));
     dispatch(setOffset(0));
     dispatch(setDensity(20));
     return { desc, painter };
   } else {
     const { desc, painter } = urlData;
-    dispatch(setSet(omit(urlData.desc, "viewport")));
+    dispatch(setSet(urlData.desc));
     dispatch(setColorId(painter.id));
     dispatch(setOffset(painter.offset));
     dispatch(setDensity(painter.density));

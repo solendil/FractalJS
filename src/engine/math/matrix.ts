@@ -1,5 +1,14 @@
 import Vector from "./vector";
 
+export type RawMatrix = {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  e: number;
+  f: number;
+};
+
 export default class Matrix {
   public static readonly identity = new Matrix(1, 0, 0, 1, 0, 0);
 
@@ -11,6 +20,10 @@ export default class Matrix {
     public readonly e: number,
     public readonly f: number,
   ) {}
+
+  static fromRaw(raw: RawMatrix) {
+    return new Matrix(raw.a, raw.b, raw.c, raw.d, raw.e, raw.f);
+  }
 
   transform(v: Vector) {
     return new Vector(

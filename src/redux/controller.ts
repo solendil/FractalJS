@@ -1,7 +1,7 @@
 import Vector from "../engine/math/vector";
-import Camera, { Affine } from "../engine/math/camera";
+import Camera, { AffineTransform } from "../engine/math/camera";
 import { Dispatch } from "@reduxjs/toolkit";
-import { changeXY } from "./rdxengine";
+import { changeXY, viewportReset, viewportTransform } from "./rdxengine";
 import Hammer from "hammerjs";
 import Matrix from "../engine/math/matrix";
 import { bindKeys } from "../util/keybinder";
@@ -38,14 +38,8 @@ export default class Controller {
   }
 
   // transforms the current viewport
-  affineTransform(type: Affine, valuex: number, valuey?: number) {
-    this.camera.affineTransform(type, valuex, valuey);
-    this.engine.draw();
-  }
-
-  affineReset() {
-    this.camera.affineReset();
-    this.engine.draw();
+  viewportTransform(type: AffineTransform, valuex: number, valuey?: number) {
+    this.dispatch(viewportTransform(type, valuex, valuey));
   }
 
   // zoom the screen at the given screen point, using the given delta ratio
@@ -73,36 +67,36 @@ export default class Controller {
     bindKeys("left", (Δ: number) => this.pan(new Vector(PAN * Δ, 0)));
     bindKeys("+", (Δ: number) => this.zoom(1 / (ZOOM * Δ)));
     bindKeys("-", (Δ: number) => this.zoom(ZOOM * Δ));
-    bindKeys("V", () => this.affineReset());
+    bindKeys("V", () => this.dispatch(viewportReset()));
     bindKeys("R left", (Δ: number) =>
-      this.affineTransform("rotation", -ANGLE * Δ),
+      this.viewportTransform("rotation", -ANGLE * Δ),
     );
     bindKeys("R right", (Δ: number) =>
-      this.affineTransform("rotation", +ANGLE * Δ),
+      this.viewportTransform("rotation", +ANGLE * Δ),
     );
     bindKeys("S right", (Δ: number) =>
-      this.affineTransform("scale", 1 / (1 + SCALE * Δ), 1),
+      this.viewportTransform("scale", 1 / (1 + SCALE * Δ), 1),
     );
     bindKeys("S left", (Δ: number) =>
-      this.affineTransform("scale", 1 + SCALE * Δ, 1),
+      this.viewportTransform("scale", 1 + SCALE * Δ, 1),
     );
     bindKeys("S up", (Δ: number) =>
-      this.affineTransform("scale", 1, 1 / (1 + SCALE * Δ)),
+      this.viewportTransform("scale", 1, 1 / (1 + SCALE * Δ)),
     );
     bindKeys("S down", (Δ: number) =>
-      this.affineTransform("scale", 1, 1 + SCALE * Δ),
+      this.viewportTransform("scale", 1, 1 + SCALE * Δ),
     );
     bindKeys("H right", (Δ: number) =>
-      this.affineTransform("shear", -SHEAR * Δ, 0),
+      this.viewportTransform("shear", -SHEAR * Δ, 0),
     );
     bindKeys("H left", (Δ: number) =>
-      this.affineTransform("shear", SHEAR * Δ, 0),
+      this.viewportTransform("shear", SHEAR * Δ, 0),
     );
     bindKeys("H up", (Δ: number) =>
-      this.affineTransform("shear", 0, -SHEAR * Δ),
+      this.viewportTransform("shear", 0, -SHEAR * Δ),
     );
     bindKeys("H down", (Δ: number) =>
-      this.affineTransform("shear", 0, SHEAR * Δ),
+      this.viewportTransform("shear", 0, SHEAR * Δ),
     );
   }
 
@@ -120,23 +114,23 @@ export default class Controller {
       enable: true,
     });
 
-    hammer.on("doubletap", (evt) => {
+    hammer.on("doubletap", evt => {
       // console.log("double", evt);
       const pos = new Vector(evt.center.x, evt.center.y);
       this.zoom(1 / ZOOM_TAP, new Vector(pos));
     });
 
-    hammer.on("panstart", (evt) => {
+    hammer.on("panstart", evt => {
       isDragging = true;
       dragStart = new Vector(evt.center.x, evt.center.y);
       cameraStart = this.camera.clone();
     });
 
-    hammer.on("panend", (evt) => {
+    hammer.on("panend", evt => {
       isDragging = false;
     });
 
-    hammer.on("panmove", (evt) => {
+    hammer.on("panmove", evt => {
       if (isDragging) {
         const pos = new Vector(evt.center.x, evt.center.y);
         const scr_vector = pos.minus(dragStart);
@@ -151,7 +145,7 @@ export default class Controller {
     var isPinching = false;
     let pinchStart: Vector;
 
-    hammer.on("pinchstart", (ev) => {
+    hammer.on("pinchstart", ev => {
       console.log("pinchstart");
       isPinching = true;
       pinchStart = new Vector(ev.center.x, ev.center.y);
@@ -163,7 +157,7 @@ export default class Controller {
       isPinching = false;
     });
 
-    hammer.on("pinch", (ev) => {
+    hammer.on("pinch", ev => {
       if (isPinching) {
         // compute matrix that transforms an original triangle to the transformed triangle
         var pc1 = cameraStart.scr2cpx(pinchStart);

@@ -1,6 +1,6 @@
 import { Tile } from "../tile";
 
-export interface Params {
+export interface DrawParams {
   details: "supersampling" | "normal" | "subsampling" | "iter-increase";
   size?: number;
   id?: number;
@@ -21,7 +21,7 @@ export interface Model {
 export interface DrawOrder {
   action: "draw";
   tile: Tile;
-  params: Params;
+  params: DrawParams;
   model: Model;
   scheduleId?: number;
   dist?: number; // used when computing draw order

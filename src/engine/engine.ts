@@ -4,8 +4,8 @@ import Renderer from "./renderer";
 import Painter, { PainterArgs } from "./painter";
 import Camera from "./math/camera";
 import Vector from "./math/vector";
-import { Params } from "./scheduler/types";
-import Matrix from "./math/matrix";
+import { DrawParams } from "./scheduler/types";
+import Matrix, { RawMatrix } from "./math/matrix";
 
 export interface Context {
   readonly canvas: HTMLCanvasElement;
@@ -18,16 +18,15 @@ export interface Context {
   fractalId: string;
 }
 
-interface EngineInit {
-  canvas: HTMLCanvasElement;
-  x: number;
-  y: number;
-  w: number;
-  viewport?: Matrix;
-  painter: PainterArgs;
+interface Params {
   fractalId: string;
   smooth: boolean;
   iter: number;
+  x: number;
+  y: number;
+  w: number;
+  painter: PainterArgs;
+  viewport: RawMatrix;
 }
 
 export default class Engine {
@@ -35,28 +34,31 @@ export default class Engine {
   public readonly painter: Painter;
 
   private renderer: Renderer;
+  private paramsFetcher: () => Params;
 
-  constructor(p: EngineInit) {
+  constructor(canvas: HTMLCanvasElement, paramsFetcher: () => Params) {
+    this.paramsFetcher = paramsFetcher;
+    const params = paramsFetcher();
     let nbThreads = navigator.hardwareConcurrency || 4;
     if (nbThreads >= 6) nbThreads--; // sacrifice a thread for responsiveness if we have enough
     this.ctx = {
       // readonly
-      canvas: p.canvas,
-      context: p.canvas.getContext("2d") as CanvasRenderingContext2D,
+      canvas: canvas,
+      context: canvas.getContext("2d") as CanvasRenderingContext2D,
       nbThreads,
       event: new EventBus(),
       camera: new Camera(
-        new Vector(p.canvas.width, p.canvas.height),
-        new Vector(p.x, p.y),
-        p.w,
-        p.viewport,
+        new Vector(canvas.width, canvas.height),
+        new Vector(params.x, params.y),
+        params.w,
+        Matrix.fromRaw(params.viewport),
       ),
       // changeable
-      smooth: p.smooth,
-      iter: p.iter,
-      fractalId: p.fractalId,
+      smooth: params.smooth,
+      iter: params.iter,
+      fractalId: params.fractalId,
     };
-    this.painter = new Painter(p.painter);
+    this.painter = new Painter(params.painter);
     this.renderer = new Renderer(this.ctx, this.painter, this);
   }
 
@@ -64,28 +66,37 @@ export default class Engine {
     return this.ctx.canvas;
   }
 
-  // realtime modification of engine parameters
-  set(p: any) {
-    if ("fractalId" in p) this.ctx.fractalId = p.fractalId;
-    if ("smooth" in p) this.ctx.smooth = p.smooth;
-    if ("iter" in p) this.ctx.iter = p.iter;
-    if ("x" in p) this.ctx.camera.setPos(new Vector(p.x, p.y), p.w);
-    if ("painter" in p) {
-      this.painter.set(p.painter);
-    }
+  private fetchParams() {
+    const params = this.paramsFetcher();
+    this.ctx.fractalId = params.fractalId;
+    this.ctx.smooth = params.smooth;
+    this.ctx.iter = params.iter;
+    this.painter.set({
+      offset: params.painter.offset,
+      density: params.painter.density,
+      id: params.painter.id,
+      fn: params.painter.fn,
+    });
+    // update camera
+    const cam = this.ctx.camera;
+    cam.setPos(new Vector(params.x, params.y), params.w);
+    cam.viewportMatrix = Matrix.fromRaw(params.viewport);
+    cam.reproject();
   }
 
-  async draw(params?: Params) {
-    if (!params) params = { details: "normal" };
+  async draw(drawParams?: DrawParams) {
+    this.fetchParams();
+    if (!drawParams) drawParams = { details: "normal" };
     const start = new Date().getTime();
-    const res = await this.renderer.draw(params);
+    const res = await this.renderer.draw(drawParams);
     const end = new Date().getTime();
     const time = end - start;
-    console.log(`Frame '${params.details}' drawn in ${time}ms`);
+    console.log(`Frame '${drawParams.details}' drawn in ${time}ms`);
     return res;
   }
 
   drawColor() {
+    this.fetchParams();
     this.renderer.drawColor();
   }
 

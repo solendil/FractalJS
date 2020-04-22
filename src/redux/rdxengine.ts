@@ -20,13 +20,17 @@ import {
 import * as colorActions from "./colors";
 import { getPreset } from "../engine/fractals";
 import { bindKeys } from "../util/keybinder";
+import Matrix from "../engine/math/matrix";
+import { AffineTransform } from "../engine/math/camera";
+
+type D = Dispatch<any>;
 
 let engine: Engine;
 
 export const getEngine = () => engine;
 
-export const initEngine = (canvas: HTMLCanvasElement): any => async (
-  dispatch: Dispatch<any>,
+export const initEngine = (canvas: HTMLCanvasElement): any => (
+  dispatch: D,
   getState: () => Root,
 ) => {
   // ---- init global keyboard shortcuts
@@ -57,8 +61,7 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
     "error",
     debounce(() => {
       console.error("error caught, resetting engine");
-      const init = url.readInit(dispatch, true);
-      engine.set({ ...init });
+      url.readInit(dispatch, true);
       engine.draw();
     }, 200),
   );
@@ -82,13 +85,21 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   );
 
   // ---- read URL and infer start params
-  const { desc, painter } = url.readInit(dispatch);
-  engine = new Engine({ ...desc, painter, canvas });
+  const paramsFetcher = () => {
+    // convert current redux state into engine state
+    const rdx = getState();
+    return {
+      ...rdx.set,
+      painter: rdx.colors,
+    };
+  };
+  url.readInit(dispatch);
+  engine = new Engine(canvas, paramsFetcher);
   // @ts-ignore
   window.engine = engine;
 
   const urlUpdate = debounce(() => {
-    url.update(engine);
+    url.update(getState());
   }, 250);
   engine.ctx.event.on("draw.start", urlUpdate);
   engine.ctx.event.on("draw.redraw", urlUpdate);
@@ -107,63 +118,64 @@ export const initEngine = (canvas: HTMLCanvasElement): any => async (
   engine.draw();
 };
 
-export const changeFractalType = (type: string): any => async (
-  dispatch: Dispatch<any>,
-  getState: () => Root,
-) => {
+export const changeFractalType = (type: string): any => (dispatch: D) => {
   const setValues = getPreset(type);
   dispatch(updateSet(setValues));
-  engine.ctx.camera.affineReset();
+  dispatch(updateSet({ viewport: { ...Matrix.identity } }));
   dispatch(colorActions.setPaint({ density: 20 }));
-  engine.painter.set({ density: 20 });
-  engine.set(setValues);
   engine.draw();
 };
 
-export const changeSmooth = (smooth: boolean): any => async (
-  dispatch: Dispatch<any>,
-  getState: () => Root,
-) => {
+export const changeSmooth = (smooth: boolean): any => (dispatch: D) => {
   dispatch(updateSet({ smooth }));
-  engine.set({ smooth });
   engine.draw();
 };
 
-export const changeXY = (pt: Vector, w?: number): any => async (
-  dispatch: Dispatch<any>,
-) => {
-  if (w === undefined) {
-    dispatch(updateSet({ x: pt.x, y: pt.y }));
-    engine.ctx.camera.setPos(pt);
-  } else {
-    dispatch(updateSet({ x: pt.x, y: pt.y, w }));
-    engine.ctx.camera.setPos(pt, w);
-  }
+export const changeXY = (pt: Vector, w?: number): any => (dispatch: D) => {
+  if (w === undefined) dispatch(updateSet({ x: pt.x, y: pt.y }));
+  else dispatch(updateSet({ x: pt.x, y: pt.y, w }));
   engine.draw();
 };
 
-export const setColorOffset = (val: number): any => async (
-  dispatch: Dispatch<any>,
-) => {
+export const setColorOffset = (val: number): any => (dispatch: D) => {
   dispatch(colorActions.setOffset(val));
-  engine.painter.set({ offset: val });
   engine.drawColor();
 };
 
-export const setColorDensity = (val: number): any => async (
-  dispatch: Dispatch<any>,
-  getState: () => Root,
-) => {
+export const setColorDensity = (val: number): any => (dispatch: D) => {
   dispatch(colorActions.setDensity(val));
-  engine.painter.set({ density: getState().colors.density });
   engine.drawColor();
 };
 
-export const setColorId = (id: number): any => async (
-  dispatch: Dispatch<any>,
-  getState: () => Root,
-) => {
+export const setColorId = (id: number): any => (dispatch: D) => {
   dispatch(colorActions.setPaint({ id, fn: "s" }));
-  engine.painter.set({ id, fn: "s" });
   engine.drawColor();
+};
+
+export const viewportReset = (): any => (dispatch: D) => {
+  dispatch(updateSet({ viewport: { ...Matrix.identity } }));
+  engine.draw();
+};
+
+export const viewportTransform = (
+  type: AffineTransform,
+  valuex: number,
+  valuey?: number,
+): any => (dispatch: D, getState: () => Root) => {
+  let transform = Matrix.identity;
+  switch (type) {
+    case "rotation":
+      transform = Matrix.GetRotationMatrix(valuex);
+      break;
+    case "shear":
+      transform = Matrix.GetShearMatrix(valuex, valuey!);
+      break;
+    case "scale":
+      transform = Matrix.GetScaleMatrix(valuex, valuey!);
+      break;
+  }
+  let matrix = Matrix.fromRaw(getState().set.viewport);
+  matrix = matrix.multiply(transform);
+  dispatch(updateSet({ viewport: { ...matrix } }));
+  engine.draw();
 };

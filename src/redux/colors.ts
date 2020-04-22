@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { PainterArgs } from "../engine/painter";
 
 const ui = createSlice({
   name: "colors",
@@ -7,7 +8,7 @@ const ui = createSlice({
     id: 0,
     density: 20, // 0.05 - 20
     fn: "s",
-  },
+  } as PainterArgs,
   reducers: {
     setColorId: (state, action) => ({ ...state, id: action.payload }),
     setOffset: (state, action) => ({ ...state, offset: action.payload }),

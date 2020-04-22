@@ -9,6 +9,14 @@ const ui = createSlice({
     y: 0,
     w: 0,
     iter: 0,
+    viewport: {
+      a: 1,
+      b: 0,
+      c: 0,
+      d: 1,
+      e: 0,
+      f: 0,
+    },
   },
   reducers: {
     setSet: (state, action) => action.payload,
