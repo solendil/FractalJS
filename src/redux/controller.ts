@@ -1,7 +1,12 @@
 import Vector from "../engine/math/vector";
 import Camera, { AffineTransform } from "../engine/math/camera";
 import { Dispatch } from "@reduxjs/toolkit";
-import { changeXY, viewportReset, viewportTransform } from "./rdxengine";
+import {
+  changeXY,
+  viewportReset,
+  viewportTransform,
+  toggleGuide,
+} from "./rdxengine";
 import Hammer from "hammerjs";
 import Matrix from "../engine/math/matrix";
 import { bindKeys } from "../util/keybinder";
@@ -98,6 +103,7 @@ export default class Controller {
     bindKeys("H down", (Δ: number) =>
       this.viewportTransform("shear", 0, SHEAR * Δ),
     );
+    bindKeys("G", () => this.dispatch(toggleGuide()));
   }
 
   setupTouch() {

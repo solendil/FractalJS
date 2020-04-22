@@ -10,13 +10,15 @@ import Snackbar from "./Snackbar";
 
 const App = () => {
   const dispatch = useDispatch();
-  const ref = useRef(null);
+  const canvasRef = useRef(null);
+  const canvasGuideRef = useRef(null);
   const ui = useSelector((state: Root) => state.ui);
   const bigDevice = useMediaQuery("(min-width:450px)");
 
   React.useEffect(() => {
-    const canvas = (ref.current as unknown) as HTMLCanvasElement;
-    dispatch(initEngine(canvas));
+    const canvas = (canvasRef.current as unknown) as HTMLCanvasElement;
+    const canvasGuide = (canvasGuideRef.current as unknown) as HTMLCanvasElement;
+    dispatch(initEngine(canvas, canvasGuide));
   }, [dispatch]);
 
   let canvasClass = "";
@@ -25,7 +27,8 @@ const App = () => {
 
   return (
     <div>
-      <canvas ref={ref} className={canvasClass}></canvas>
+      <canvas ref={canvasRef} className={canvasClass}></canvas>
+      <canvas ref={canvasGuideRef} className={`guide ${canvasClass}`}></canvas>
       <Navigation />
       <InfoBox />
       <Snackbar />

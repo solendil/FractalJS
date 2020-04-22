@@ -22,3 +22,7 @@ canvas {
   &.offset-top-settings { transform: translateY(-50px) }
   &.offset-top-about { transform: translateY(-215px) }
 }
+
+canvas.guide {
+  pointer-events: none;
+}

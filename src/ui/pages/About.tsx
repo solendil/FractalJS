@@ -19,18 +19,21 @@ const useStyles = makeStyles((theme: Theme) =>
     inline: {
       display: "inline",
     },
-    key: {
-      display: "inline-block",
-      verticalAlign: "middle",
-      border: "1px solid #888",
-      background: "#EEE",
-      borderRadius: "4px",
-      padding: "1px 4px",
-      margin: "2px 0px",
-      fontSize: "13px",
-      minWidth: "1.8em",
-      textAlign: "center",
-      color: "black",
+    keyboard: {
+      "& > span": {
+        display: "inline-block",
+        verticalAlign: "middle",
+        border: "1px solid #888",
+        background: "#EEE",
+        borderRadius: "4px",
+        padding: "1px 4px",
+        margin: "2px 0px",
+        fontSize: "14px",
+        minWidth: "1.8em",
+        textAlign: "center",
+        color: "black",
+        marginRight: "0.4em",
+      },
     },
   }),
 );
@@ -38,21 +41,39 @@ const useStyles = makeStyles((theme: Theme) =>
 const Keys = () => {
   const classes = useStyles();
   return (
-    <small>
-      <span className={classes.key}>&#x2190;</span>{" "}
-      <span className={classes.key}>&#x2191;</span>{" "}
-      <span className={classes.key}>&#x2192;</span>{" "}
-      <span className={classes.key}>&#x2193;</span> ,{" "}
-      <span className={classes.key}>+</span>{" "}
-      <span className={classes.key}>-</span>
+    <span className={classes.keyboard}>
+      <span>🠜</span>
+      <span>🠝</span>
+      <span>🠞</span>
+      <span>🠟</span> : move
       <br />
-      (+ <span className={classes.key}>S</span>{" "}
-      <span className={classes.key}>H</span>{" "}
-      <span className={classes.key}>R</span>,{" "}
-      <span className={classes.key}>V</span> )
+      {/* zoom */}
+      <span>
+        <b>+</b>
+      </span>
+      <span>
+        <b>-</b>
+      </span>{" "}
+      : zoom
       <br />
-      (+ <span className={classes.key}>shift</span> )
-    </small>
+      {/* rotate */}
+      <span>R</span> + <span>🠜</span>
+      <span>🠞</span> : rotate
+      <br />
+      <span>S</span> + <span>🠜</span>
+      <span>🠝</span>
+      <span>🠞</span>
+      <span>🠟</span> : scale x or y
+      <br />
+      <span>H</span> + <span>🠜</span>
+      <span>🠝</span>
+      <span>🠞</span>
+      <span>🠟</span> : shear x or y
+      <br />
+      all + <span>shift</span> : smaller movement
+      <br />
+      <span>G</span> : set a guide point
+    </span>
   );
 };
 
@@ -136,45 +157,3 @@ export default function SimpleCard() {
     </>
   );
 }
-
-// const useStyles = makeStyles({
-//   bullet: {
-//     display: "inline-block",
-//     margin: "0 2px",
-//     transform: "scale(0.8)",
-//   },
-//   pos: {
-//     marginBottom: 12,
-//   },
-// });
-
-// export default function SimpleCard() {
-//   const classes = useStyles();
-//   const bull = <span className={classes.bullet}>•</span>;
-
-//   return (
-//     // <Card>
-//     <CardContent>
-//       <Typography color="textSecondary" gutterBottom>
-//         Word of the Day
-//       </Typography>
-//     </CardContent>
-//     // {/* </Card> */}
-//   );
-// }
-
-// function About() {
-//   return (
-//     <div style={{}}>
-//       <Typography component="div">
-//         FractalJS is open-source. You can report bugs, or add you favorite
-//         fractal set by heading to{" "}
-//         <a target="_blank" href="https://github.com/solendil/fractaljs/">
-//           GitHub
-//         </a>
-//       </Typography>
-//     </div>
-//   );
-// }
-
-// export default About;

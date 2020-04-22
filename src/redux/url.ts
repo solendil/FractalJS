@@ -3,12 +3,17 @@ import { Dispatch } from "@reduxjs/toolkit";
 import { setOffset, setDensity, setColorId } from "./colors";
 import { setSet } from "./set";
 import { getPreset } from "../engine/fractals";
-import Engine from "../engine/engine";
 import { PainterArgs } from "../engine/painter";
 import { Root } from "./reducer";
+import { setGuide } from "./guide";
 
 interface UrlOutputObject {
   painter: PainterArgs;
+  guide: {
+    active: boolean;
+    x: number;
+    y: number;
+  };
   desc: {
     x: number;
     y: number;
@@ -54,6 +59,11 @@ export const update = (root: Root) => {
     args.vb = root.set.viewport.b.toFixed(4);
     args.vc = root.set.viewport.c.toFixed(4);
     args.vd = root.set.viewport.d.toFixed(4);
+    // guide
+    if (root.guide.active) {
+      args.gx = root.guide.x;
+      args.gy = root.guide.y;
+    }
     // remove args with default values
     for (let key in args) if (args[key] === defaults[key]) delete args[key];
     // build url
@@ -99,7 +109,10 @@ function readCurrentScheme(url: string): UrlOutputObject {
     id: parseInt(args.ct, 10),
     fn: args.cf,
   };
-  return { desc, painter };
+  let guide = { active: false, x: 0, y: 0 };
+  if ("gx" in args)
+    guide = { active: true, x: parseFloat(args.gx), y: parseFloat(args.gy) };
+  return { desc, painter, guide };
 }
 
 export const read = (): UrlOutputObject | null => {
@@ -114,10 +127,7 @@ export const read = (): UrlOutputObject | null => {
   return null;
 };
 
-export const readInit = (
-  dispatch: Dispatch<any>,
-  forceCold = false,
-): UrlOutputObject => {
+export const readInit = (dispatch: Dispatch<any>, forceCold = false): void => {
   const urlData = read();
   if (!urlData || forceCold) {
     // coldstart
@@ -126,26 +136,17 @@ export const readInit = (
       smooth: true,
       viewport: { ...Matrix.identity },
     };
-    let painter: PainterArgs = {
-      offset: 0,
-      density: 20,
-      id: 0,
-      fn: "s",
-    };
+    let painter = { offset: 0, density: 20, id: 0, fn: "s" };
     dispatch(setSet(desc));
     dispatch(setColorId(painter.id));
     dispatch(setOffset(0));
     dispatch(setDensity(20));
-    return { desc, painter };
   } else {
-    const { desc, painter } = urlData;
-    dispatch(setSet(urlData.desc));
+    const { desc, painter, guide } = urlData;
+    dispatch(setSet(desc));
+    dispatch(setGuide(guide));
     dispatch(setColorId(painter.id));
     dispatch(setOffset(painter.offset));
     dispatch(setDensity(painter.density));
-    return {
-      desc,
-      painter,
-    };
   }
 };

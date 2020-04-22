@@ -20,19 +20,23 @@ import {
 import * as colorActions from "./colors";
 import { getPreset } from "../engine/fractals";
 import { bindKeys } from "../util/keybinder";
+import Guide from "../engine/guide";
+import { setGuide } from "./guide";
 import Matrix from "../engine/math/matrix";
 import { AffineTransform } from "../engine/math/camera";
 
 type D = Dispatch<any>;
 
 let engine: Engine;
+let guide: Guide;
+let urlUpdate: () => void;
 
 export const getEngine = () => engine;
 
-export const initEngine = (canvas: HTMLCanvasElement): any => (
-  dispatch: D,
-  getState: () => Root,
-) => {
+export const initEngine = (
+  canvas: HTMLCanvasElement,
+  canvasGuide: HTMLCanvasElement,
+): any => (dispatch: D, getState: () => Root) => {
   // ---- init global keyboard shortcuts
   bindKeys("I", () => dispatch(setInfobox(!getState().ui.infobox)));
   bindKeys("esc", () => dispatch(setDrawer(!getState().ui.drawer)));
@@ -44,8 +48,10 @@ export const initEngine = (canvas: HTMLCanvasElement): any => (
   // ---- init window size & capture resize events
   const getWindowSize = () => [window.innerWidth, window.innerHeight];
   [canvas.width, canvas.height] = getWindowSize();
+  [canvasGuide.width, canvasGuide.height] = getWindowSize();
   window.addEventListener("resize", () => {
     [canvas.width, canvas.height] = getWindowSize();
+    [canvasGuide.width, canvasGuide.height] = getWindowSize();
     engine.resize(canvas.width, canvas.height);
     engine.draw();
   });
@@ -98,7 +104,7 @@ export const initEngine = (canvas: HTMLCanvasElement): any => (
   // @ts-ignore
   window.engine = engine;
 
-  const urlUpdate = debounce(() => {
+  urlUpdate = debounce(() => {
     url.update(getState());
   }, 250);
   engine.ctx.event.on("draw.start", urlUpdate);
@@ -113,6 +119,11 @@ export const initEngine = (canvas: HTMLCanvasElement): any => (
     }, 5000),
   );
 
+  guide = new Guide(canvasGuide, engine, getState);
+  engine.ctx.event.on("draw.start", () => {
+    guide.draw();
+  });
+
   new Controller(engine, dispatch);
   Improver(engine, dispatch, getState); // add improvement capabilities
   engine.draw();
@@ -123,6 +134,7 @@ export const changeFractalType = (type: string): any => (dispatch: D) => {
   dispatch(updateSet(setValues));
   dispatch(updateSet({ viewport: { ...Matrix.identity } }));
   dispatch(colorActions.setPaint({ density: 20 }));
+  dispatch(setGuide({ active: false }));
   engine.draw();
 };
 
@@ -150,6 +162,18 @@ export const setColorDensity = (val: number): any => (dispatch: D) => {
 export const setColorId = (id: number): any => (dispatch: D) => {
   dispatch(colorActions.setPaint({ id, fn: "s" }));
   engine.drawColor();
+};
+
+export const toggleGuide = (): any => async (
+  dispatch: Dispatch<any>,
+  getState: () => Root,
+) => {
+  const ui = getState().ui;
+  if (ui.mouseOnCanvas) {
+    dispatch(setGuide({ active: true, x: ui.mouse.x, y: ui.mouse.y }));
+    guide.draw();
+    urlUpdate();
+  }
 };
 
 export const viewportReset = (): any => (dispatch: D) => {
