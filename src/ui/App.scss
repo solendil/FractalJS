@@ -9,18 +9,124 @@ body {
   background-color: black;
 }
 
+.main {
+  &.offset-left {
+    .offset {transform: translateX(160px)};
+  }
+  &.offset-top-fractal {
+    .offset {transform: translateY(-130px)};
+  }
+  &.offset-top-palette {
+    .offset {transform: translateY(-173px)};
+  }
+  &.offset-top-settings {
+    .offset {transform: translateY(-50px)};
+  }
+  &.offset-top-about {
+    .offset {transform: translateY(-215px)};
+  }
+}
+
+.offset {
+  transition:transform 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+}
+
 canvas {
   position:fixed;
   left:0;
-  transition:transform 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-  // allow canvas to move when opening drawer
-  &.offset-left {
-    transform: translateX(160px);
+}
+
+div.pois {
+  position:fixed;
+  left:0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+div.squares {
+  div.square {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vmin;
+    height: 100vmin;
+    transform: translateX(-50%) translateY(-50%);
+    margin: auto auto;
+    border: 2px solid #FFFC;
   }
-  &.offset-top-fractal { transform: translateY(-130px) }
-  &.offset-top-palette { transform: translateY(-173px) }
-  &.offset-top-settings { transform: translateY(-50px) }
-  &.offset-top-about { transform: translateY(-215px) }
+  div.third {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vmin;
+    height: 75vmin;
+    transform: translateX(-50%) translateY(-50%);
+    margin: auto auto;
+    border: 2px solid #FFFC;
+  }
+}
+
+$poi-size: 360px;
+$poi-border-radius: 6px;
+$poi-border-width: 3px;
+$poi-bottom-height: 56px;
+
+div.poi {
+  position:absolute;
+  top: 0px;
+  left: 0px;
+  display: inline-block;
+  width: $poi-size;
+  height: $poi-size + $poi-bottom-height - $poi-border-radius;
+  transform-origin: top left;
+  box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+  & .frame, & .bottom {
+    position: absolute;
+    width: $poi-size + 2 * $poi-border-width;
+    margin-left: -$poi-border-width;
+    border: $poi-border-width solid #FFFFFF;
+  }
+  & .frame {
+    margin-top: -$poi-border-width;
+    border-bottom: none;
+    border-top-left-radius: $poi-border-radius;
+    border-top-right-radius: $poi-border-radius;
+    height: $poi-size + 2 * $poi-border-width;
+  }
+  & .bottom {
+    top: $poi-size;
+    height: $poi-bottom-height;
+    // background-color: #3f51b5AA;
+    background-color: white;
+    backdrop-filter: blur(8px);
+    border-top: none;
+    border-bottom-left-radius: $poi-border-radius;
+    border-bottom-right-radius: $poi-border-radius;
+    line-height: $poi-bottom-height;
+    font-family: roboto;
+    font-size: 20px;
+    color: black;
+    padding: 0px 0.5em;
+    & button {
+      pointer-events: all;
+      &:focus { outline: none }
+      background-color: transparent;
+      float: right;
+      height: $poi-bottom-height;
+      width: 48px;
+      border: none;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      & i {
+        color: black;
+        line-height: $poi-bottom-height;
+        font-size: 24px;
+      }
+    }
+  }
 }
 
 canvas.guide {

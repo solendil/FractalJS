@@ -34,13 +34,15 @@ const getScreenToSquareMatrix = (
   }
 };
 
+const limit = 7e-16;
+
 // The camera projects view space on complex space and vice-verse.
 // The "square" or Q is the maximum centered square that can be inscribed in the view.
 // X and Y are the complex coordinates @ the center of the view
 // W is the complex size of the square
 // A viewport affine transformation can be applied on the square to rotate/scale/shear the view
 export default class Camera {
-  private matrix_inv: Matrix;
+  public matrix_inv: Matrix;
   public matrix: Matrix;
   public viewportMatrix: Matrix;
   public screen: Vector;
@@ -57,7 +59,7 @@ export default class Camera {
     this.viewportMatrix = viewportMatrix;
     this.screen = screenSize;
     const extent = screenSize.minVal();
-    this.resolutionLimit = extent * 1.11e-15;
+    this.resolutionLimit = extent * limit;
     this.pos = pos;
     this.w = w;
     this.matrix = Matrix.identity;
@@ -101,7 +103,7 @@ export default class Camera {
   resize(width: number, height: number) {
     this.screen = new Vector(width, height);
     const extent = Math.min(width, height); // extent of the min square
-    this.resolutionLimit = extent * 1.11e-15;
+    this.resolutionLimit = extent * limit;
     this.reproject();
   }
 

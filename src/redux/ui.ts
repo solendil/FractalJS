@@ -8,6 +8,12 @@ interface Int {
   narrowDevice: boolean; // less than 450 px
   tab: Tab;
   snack?: string;
+  square: boolean; // should a square layer be displayed ('s' key)
+  showPois: boolean;
+  screen: {
+    width: number;
+    height: number;
+  };
   mouse: {
     x: number;
     y: number;
@@ -22,13 +28,19 @@ const ui = createSlice({
     mouseOnCanvas: false,
     tab: "fractal",
     infobox: false,
+    square: false,
+    showPois: true,
     mouse: { x: 0, y: 0, iter: 0 },
     narrowDevice: false,
     orientableDevice: false,
+    screen: { width: 0, height: 0 },
   } as Int,
   reducers: {
+    setUi: (state, action) => ({ ...state, ...action.payload }),
+    toggleSquare: state => ({ ...state, square: !state.square }),
     setDrawer: (state, action) => ({ ...state, drawer: action.payload }),
     setTab: (state, action) => ({ ...state, tab: action.payload }),
+    setScreenSize: (state, action) => ({ ...state, screen: action.payload }),
     setInfobox: (state, action) => ({ ...state, infobox: action.payload }),
     setMouseOnCanvas: (state, action) => ({
       ...state,
@@ -45,6 +57,7 @@ const ui = createSlice({
 
 export const { reducer, actions } = ui;
 export const {
+  setUi,
   setDrawer,
   setTab,
   setInfobox,
@@ -52,4 +65,6 @@ export const {
   setMouseInfo,
   setSnack,
   setNarrowDevice,
+  toggleSquare,
+  setScreenSize,
 } = actions;

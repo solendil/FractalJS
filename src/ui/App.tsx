@@ -7,12 +7,14 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { initEngine } from "../redux/rdxengine";
 import InfoBox from "./InfoBox";
 import Snackbar from "./Snackbar";
+import Overlay from "./Overlay";
 
 const App = () => {
   const dispatch = useDispatch();
   const canvasRef = useRef(null);
   const canvasGuideRef = useRef(null);
-  const ui = useSelector((state: Root) => state.ui);
+  const drawer = useSelector((state: Root) => state.ui.drawer);
+  const tab = useSelector((state: Root) => state.ui.tab);
   const bigDevice = useMediaQuery("(min-width:450px)");
 
   React.useEffect(() => {
@@ -21,14 +23,14 @@ const App = () => {
     dispatch(initEngine(canvas, canvasGuide));
   }, [dispatch]);
 
-  let canvasClass = "";
-  if (ui.drawer)
-    canvasClass = bigDevice ? "offset-left" : `offset-top-${ui.tab}`;
+  let offsetClass = "";
+  if (drawer) offsetClass = bigDevice ? "offset-left" : `offset-top-${tab}`;
 
   return (
-    <div>
-      <canvas ref={canvasRef} className={canvasClass}></canvas>
-      <canvas ref={canvasGuideRef} className={`guide ${canvasClass}`}></canvas>
+    <div className={`main ${offsetClass}`}>
+      <canvas ref={canvasRef} className="offset"></canvas>
+      <canvas ref={canvasGuideRef} className="offset guide"></canvas>
+      <Overlay />
       <Navigation />
       <InfoBox />
       <Snackbar />

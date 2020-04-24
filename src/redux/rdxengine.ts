@@ -16,6 +16,8 @@ import {
   setSnack,
   setNarrowDevice,
   setTab,
+  setScreenSize,
+  toggleSquare,
 } from "./ui";
 import * as colorActions from "./colors";
 import { getPreset } from "../engine/fractals";
@@ -24,14 +26,27 @@ import Guide from "../engine/guide";
 import { setGuide } from "./guide";
 import Matrix from "../engine/math/matrix";
 import { AffineTransform } from "../engine/math/camera";
+import Pois from "../engine/pois";
 
 type D = Dispatch<any>;
 
 let engine: Engine;
 let guide: Guide;
+let pois: Pois;
 let urlUpdate: () => void;
 
 export const getEngine = () => engine;
+
+export const displayPoi = (state: Root) => {
+  const obj = {
+    name: "",
+    x: state.set.x,
+    y: state.set.y,
+    w: state.set.w,
+  };
+  console.log("---- POI");
+  console.log(JSON.stringify(obj, null, 2));
+};
 
 export const initEngine = (
   canvas: HTMLCanvasElement,
@@ -44,14 +59,20 @@ export const initEngine = (
     dispatch(setDrawer(true));
     dispatch(setTab("debug"));
   });
+  bindKeys("S", () => dispatch(toggleSquare()));
+  bindKeys("P", () => displayPoi(getState()));
 
   // ---- init window size & capture resize events
   const getWindowSize = () => [window.innerWidth, window.innerHeight];
-  [canvas.width, canvas.height] = getWindowSize();
-  [canvasGuide.width, canvasGuide.height] = getWindowSize();
-  window.addEventListener("resize", () => {
+  const onResize = () => {
+    const [width, height] = getWindowSize();
     [canvas.width, canvas.height] = getWindowSize();
     [canvasGuide.width, canvasGuide.height] = getWindowSize();
+    dispatch(setScreenSize({ width, height }));
+  };
+  onResize();
+  window.addEventListener("resize", () => {
+    onResize();
     engine.resize(canvas.width, canvas.height);
     engine.draw();
   });
@@ -122,6 +143,11 @@ export const initEngine = (
   guide = new Guide(canvasGuide, engine, getState);
   engine.ctx.event.on("draw.start", () => {
     guide.draw();
+  });
+
+  pois = new Pois(canvasGuide, engine, getState);
+  engine.ctx.event.on("draw.start", () => {
+    pois.draw();
   });
 
   new Controller(engine, dispatch);

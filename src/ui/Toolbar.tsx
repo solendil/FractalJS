@@ -3,12 +3,13 @@ import map from "lodash/map";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigation } from "./Navigation";
 import IconButton from "@material-ui/core/IconButton";
-import { useDispatch } from "react-redux";
-import { setTab, setDrawer } from "../redux/ui";
+import { useDispatch, useSelector } from "react-redux";
+import { setTab, setDrawer, setUi } from "../redux/ui";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import Share from "./Share";
+import { Root } from "../redux/reducer";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   bar: {
     backgroundColor: fade(theme.palette.primary.main, 0.8),
     backdropFilter: "blur(8px)",
@@ -29,11 +30,14 @@ const useStyles = makeStyles((theme) => ({
   icons: {
     color: "white",
     [theme.breakpoints.only("xs")]: {
-      width: "64px",
+      width: "60px",
     },
     [theme.breakpoints.up("sm")]: {
       width: "56px",
     },
+  },
+  selected: {
+    color: theme.palette.secondary.main,
   },
   brand: {
     [theme.breakpoints.only("xs")]: {
@@ -57,6 +61,8 @@ const useStyles = makeStyles((theme) => ({
 const ToolBar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const showPois = useSelector((state: Root) => state.ui.showPois);
+
   const buttons = map(navigation, (def, tabId) =>
     !def.hidden ? (
       <IconButton
@@ -81,6 +87,17 @@ const ToolBar = () => {
       FractalJS
     </a>,
   );
+  const poi = (
+    <IconButton
+      className={`${classes.icons} ${showPois ? classes.selected : ""}`}
+      key="pois"
+      onClick={() => dispatch(setUi({ showPois: !showPois }))}
+    >
+      <i className="material-icons">map</i>
+    </IconButton>
+  );
+
+  buttons.splice(2, 0, poi);
   buttons.splice(2, 0, <Share key="share" className={classes.icons} />);
 
   return <div className={classes.bar}>{buttons}</div>;

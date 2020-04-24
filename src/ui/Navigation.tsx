@@ -14,15 +14,14 @@ import Divider from "@material-ui/core/Divider";
 import MyToolbar from "./Toolbar";
 
 export const navigation: { [key: string]: any } = {
-  fractal: { icon: "home", component: <Fractal /> },
-  palette: { icon: "invert_colors", component: <Palette /> },
-  // social: { icon: "share", component: <Social /> },
+  fractal: { icon: "collections", component: <Fractal /> },
+  palette: { icon: "format_paint", component: <Palette /> },
   settings: { icon: "settings", component: <Settings /> },
-  about: { icon: "info_outline", component: <About /> },
+  about: { icon: "help", component: <About /> },
   debug: { hidden: true, component: <Debug /> },
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   appBar: {
     top: "auto",
     bottom: 0,

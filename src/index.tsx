@@ -8,11 +8,19 @@ import reducer from "./redux/reducer";
 import { Provider } from "react-redux";
 import { createMuiTheme } from "@material-ui/core/styles";
 
+const whyDidYouRender = require("@welldone-software/why-did-you-render");
+whyDidYouRender(React, {
+  trackHooks: true,
+  trackAllPureComponents: true,
+  trackExtraHooks: [[require("react-redux/lib"), "useSelector"]],
+});
+
 const store = configureStore({ reducer });
 
 const theme = createMuiTheme({
   palette: {
-    // type: "dark",
+    primary: { main: "#1976d2" },
+    secondary: { main: "#ffeb3b" },
   },
   breakpoints: {
     values: {

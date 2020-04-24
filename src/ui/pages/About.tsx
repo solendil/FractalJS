@@ -70,6 +70,8 @@ const Keys = () => {
       <span>🠞</span>
       <span>🠟</span> : shear x or y
       <br />
+      <span>V</span> : reset viewport
+      <br />
       all + <span>shift</span> : smaller movement
       <br />
       <span>G</span> : set a guide point

@@ -70,8 +70,8 @@ export default class Controller {
     bindKeys("down", (Δ: number) => this.pan(new Vector(0, -PAN * Δ)));
     bindKeys("right", (Δ: number) => this.pan(new Vector(-PAN * Δ, 0)));
     bindKeys("left", (Δ: number) => this.pan(new Vector(PAN * Δ, 0)));
-    bindKeys("+", (Δ: number) => this.zoom(1 / (ZOOM * Δ)));
-    bindKeys("-", (Δ: number) => this.zoom(ZOOM * Δ));
+    bindKeys("+", (Δ: number) => this.zoom(1 / ((ZOOM - 1) * Δ + 1)));
+    bindKeys("-", (Δ: number) => this.zoom((ZOOM - 1) * Δ + 1));
     bindKeys("V", () => this.dispatch(viewportReset()));
     bindKeys("R left", (Δ: number) =>
       this.viewportTransform("rotation", -ANGLE * Δ),
