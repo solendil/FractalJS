@@ -26,13 +26,11 @@ import Guide from "../engine/guide";
 import { setGuide } from "./guide";
 import Matrix from "../engine/math/matrix";
 import { AffineTransform } from "../engine/math/camera";
-import Pois from "../engine/pois";
 
 type D = Dispatch<any>;
 
 let engine: Engine;
 let guide: Guide;
-let pois: Pois;
 let urlUpdate: () => void;
 
 export const getEngine = () => engine;
@@ -40,6 +38,7 @@ export const getEngine = () => engine;
 export const displayPoi = (state: Root) => {
   const obj = {
     name: "",
+    fractalId: state.set.fractalId,
     x: state.set.x,
     y: state.set.y,
     w: state.set.w,
@@ -143,11 +142,6 @@ export const initEngine = (
   guide = new Guide(canvasGuide, engine, getState);
   engine.ctx.event.on("draw.start", () => {
     guide.draw();
-  });
-
-  pois = new Pois(canvasGuide, engine, getState);
-  engine.ctx.event.on("draw.start", () => {
-    pois.draw();
   });
 
   new Controller(engine, dispatch);

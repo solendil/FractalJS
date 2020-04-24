@@ -20,7 +20,7 @@ const store = configureStore({ reducer });
 const theme = createMuiTheme({
   palette: {
     primary: { main: "#1976d2" },
-    secondary: { main: "#ffeb3b" },
+    secondary: { main: "#ffc107" },
   },
   breakpoints: {
     values: {
