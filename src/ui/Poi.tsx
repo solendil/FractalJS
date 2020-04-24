@@ -40,7 +40,7 @@ const Poi = (props: Props) => {
   const m2 = camera.matrix_inv.multiply(m);
 
   const style = {
-    transform: `matrix(${m2.a}, ${m2.c}, ${m2.b}, ${m2.d}, ${m2.e}, ${m2.f})`,
+    transform: `matrix(${m2.a}, ${m2.b}, ${m2.c}, ${m2.d}, ${m2.e}, ${m2.f})`,
   };
   return (
     <div className="poi" style={style}>
