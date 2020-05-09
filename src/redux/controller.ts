@@ -121,7 +121,6 @@ export default class Controller {
     });
 
     hammer.on("doubletap", evt => {
-      // console.log("double", evt);
       const pos = new Vector(evt.center.x, evt.center.y);
       this.zoom(1 / ZOOM_TAP, new Vector(pos));
     });
@@ -233,9 +232,9 @@ export default class Controller {
     const wheelFunction = (e: WheelEvent) => {
       const evt = e || window.event;
       evt.preventDefault();
-      const modifier = evt.shiftKey ? 1 / 10 : 1;
+      const Δ = evt.shiftKey ? 1 / 10 : 1;
       let delta = evt.deltaY;
-      delta = delta > 0 ? ZOOM * modifier : 1 / (ZOOM * modifier);
+      delta = delta > 0 ? (ZOOM - 1) * Δ + 1 : 1 / ((ZOOM - 1) * Δ + 1);
       const point = new Vector(evt.offsetX, evt.offsetY);
       this.zoom(delta, point);
     };

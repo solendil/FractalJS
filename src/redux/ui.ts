@@ -13,6 +13,7 @@ interface Int {
   screen: {
     width: number;
     height: number;
+    min: number;
   };
   mouse: {
     x: number;
@@ -33,14 +34,18 @@ const ui = createSlice({
     mouse: { x: 0, y: 0, iter: 0 },
     narrowDevice: false,
     orientableDevice: false,
-    screen: { width: 0, height: 0 },
+    screen: { width: 0, height: 0, min: 0 },
   } as Int,
   reducers: {
     setUi: (state, action) => ({ ...state, ...action.payload }),
     toggleSquare: state => ({ ...state, square: !state.square }),
     setDrawer: (state, action) => ({ ...state, drawer: action.payload }),
     setTab: (state, action) => ({ ...state, tab: action.payload }),
-    setScreenSize: (state, action) => ({ ...state, screen: action.payload }),
+    setScreenSize: (state, action) => {
+      const res = { ...state, screen: action.payload };
+      res.screen.min = Math.min(res.screen.width, res.screen.height);
+      return res;
+    },
     setInfobox: (state, action) => ({ ...state, infobox: action.payload }),
     setMouseOnCanvas: (state, action) => ({
       ...state,

@@ -7,7 +7,7 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { initEngine } from "../redux/rdxengine";
 import InfoBox from "./InfoBox";
 import Snackbar from "./Snackbar";
-import Overlay from "./Overlay";
+import Overlay from "./overlay/Overlay";
 
 const App = () => {
   const dispatch = useDispatch();

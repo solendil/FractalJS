@@ -24,6 +24,12 @@ export default class Vector {
     return new Vector(this.x + v.x, this.y + v.y);
   }
 
+  distanceTo(v: Vector) {
+    const dx = this.x - v.x;
+    const dy = this.y - v.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
   times(v: Vector | number) {
     return v instanceof Vector
       ? new Vector(this.x * v.x, this.y * v.y)

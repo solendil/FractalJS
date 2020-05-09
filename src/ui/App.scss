@@ -68,6 +68,45 @@ div.squares {
   }
 }
 
+$cross-size: 30px;
+$cross-thick: 2px;
+$cross-color: white;
+$cross-gap: 8px;
+
+div.cross {
+  position:absolute;
+  top: 0px;
+  left: 0px;
+  display: inline-block;
+  width: $cross-size;
+  height: $cross-size;
+  transform-origin: center;
+  & div {
+    position:absolute;
+    box-shadow: $cross-thick $cross-thick $cross-thick*3 $cross-thick*2 #0006;
+    // $cross-thick $cross-thick $cross-thick $cross-thick/2 #000;
+    // $cross-thick $cross-thick $cross-thick $cross-thick/2 #000;
+    // backdrop-filter: invert(0.8) brightness(200%) blur($cross-thick*2);
+    background-color: #FFF;
+  }
+  div.h1, div.h2  {
+    left: $cross-size/2 - ($cross-thick/2);
+    width: $cross-thick;
+    height: $cross-size/2 - $cross-gap/2;
+  }
+  div.h2 {
+    top: $cross-size/2 + $cross-gap/2;
+  }
+  div.v1, div.v2 {
+    top: $cross-size/2 - ($cross-thick/2);
+    height: $cross-thick;
+    width: $cross-size/2 - $cross-gap/2;
+  }
+  div.v2 {
+    left: $cross-size/2 + $cross-gap/2;
+  }
+}
+
 $poi-size: 360px;
 $poi-border-radius: 6px;
 $poi-border-width: 3px;

@@ -6,7 +6,7 @@ import IconButton from "@material-ui/core/IconButton";
 import { useDispatch, useSelector } from "react-redux";
 import { setTab, setDrawer, setUi } from "../redux/ui";
 import { fade } from "@material-ui/core/styles/colorManipulator";
-import Share from "./Share";
+import Share from "./ShareButton";
 import { Root } from "../redux/reducer";
 
 const useStyles = makeStyles(theme => ({

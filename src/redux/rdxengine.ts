@@ -18,6 +18,7 @@ import {
   setTab,
   setScreenSize,
   toggleSquare,
+  setUi,
 } from "./ui";
 import * as colorActions from "./colors";
 import { getPreset } from "../engine/fractals";
@@ -58,8 +59,9 @@ export const initEngine = (
     dispatch(setDrawer(true));
     dispatch(setTab("debug"));
   });
-  bindKeys("S", () => dispatch(toggleSquare()));
+  bindKeys("Q", () => dispatch(toggleSquare()));
   bindKeys("P", () => displayPoi(getState()));
+  bindKeys("M", () => dispatch(setUi({ showPois: !getState().ui.showPois })));
 
   // ---- init window size & capture resize events
   const getWindowSize = () => [window.innerWidth, window.innerHeight];

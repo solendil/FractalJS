@@ -141,20 +141,26 @@ const rawDb = [
   },
 ];
 
-interface Db {
-  [fractalId: string]: {
-    name: string;
-    x: number;
-    y: number;
-    w: number;
-  }[];
+export interface Poi {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+  w: number;
 }
+interface Db {
+  [fractalId: string]: Poi[];
+}
+
+let id = 0;
 
 const buildDb = (): Db => {
   const res: Db = {};
+  rawDb.sort((a, b) => a.w - b.w);
   rawDb.forEach(poi => {
     if (!(poi.fractalId in res)) res[poi.fractalId] = [];
     res[poi.fractalId].push({
+      id: id++,
       name: poi.name,
       x: poi.x,
       y: poi.y,

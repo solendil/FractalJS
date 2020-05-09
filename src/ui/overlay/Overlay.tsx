@@ -1,5 +1,5 @@
 import React from "react";
-import { Root } from "../redux/reducer";
+import { Root } from "../../redux/reducer";
 import { useSelector } from "react-redux";
 import Pois from "./Pois";
 
