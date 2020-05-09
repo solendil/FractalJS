@@ -1,7 +1,7 @@
 import Worker from "./worker";
 import { DrawOrder, WorkerResponse } from "./types";
 import { Context } from "../engine";
-import _ from "lodash";
+import throttle from "lodash/throttle";
 
 /*
 Maintains the list of webworkers.
@@ -25,7 +25,7 @@ export default class Scheduler {
       const callback = this.onWorkerResponse.bind(this);
       this.workers.push(new Worker(i, callback));
     }
-    this.throttledSchedule = _.throttle(this.throttledSchedule.bind(this), 200);
+    this.throttledSchedule = throttle(this.throttledSchedule.bind(this), 200);
   }
 
   private onWorkerResponse(worker: Worker, data: WorkerResponse) {
