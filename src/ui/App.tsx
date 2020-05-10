@@ -1,30 +1,28 @@
 import React, { useRef } from "react";
 import "./App.scss";
-import { useSelector, useDispatch } from "react-redux";
-import { Root } from "../redux/reducer";
 import Navigation from "./Navigation";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import { initEngine } from "../redux/rdxengine";
+import { initEngine } from "../logic/logic";
 import InfoBox from "./InfoBox";
 import Snackbar from "./Snackbar";
 import Overlay from "./overlay/Overlay";
+import state from "../logic/state";
+import { view } from "@risingstack/react-easy-state";
 
-const App = () => {
-  const dispatch = useDispatch();
+const App = view(() => {
   const canvasRef = useRef(null);
   const canvasGuideRef = useRef(null);
-  const drawer = useSelector((state: Root) => state.ui.drawer);
-  const tab = useSelector((state: Root) => state.ui.tab);
+  const { isDrawer, tab } = state.ui;
   const bigDevice = useMediaQuery("(min-width:450px)");
 
   React.useEffect(() => {
     const canvas = (canvasRef.current as unknown) as HTMLCanvasElement;
     const canvasGuide = (canvasGuideRef.current as unknown) as HTMLCanvasElement;
-    dispatch(initEngine(canvas, canvasGuide));
-  }, [dispatch]);
+    initEngine(canvas, canvasGuide);
+  }, []);
 
   let offsetClass = "";
-  if (drawer) offsetClass = bigDevice ? "offset-left" : `offset-top-${tab}`;
+  if (isDrawer) offsetClass = bigDevice ? "offset-left" : `offset-top-${tab}`;
 
   return (
     <div className={`main ${offsetClass}`}>
@@ -36,6 +34,6 @@ const App = () => {
       <Snackbar />
     </div>
   );
-};
+});
 
 export default App;

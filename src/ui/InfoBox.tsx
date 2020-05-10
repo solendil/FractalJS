@@ -3,10 +3,10 @@ import Paper from "@material-ui/core/Paper";
 import Box from "@material-ui/core/Box";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
-import { useSelector } from "react-redux";
-import { Root } from "../redux/reducer";
+import { view } from "@risingstack/react-easy-state";
+import state from "../logic/state";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   box: {
     position: "fixed",
     bottom: 0,
@@ -17,28 +17,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function InfoBox() {
+const InfoBox = view(() => {
   const classes = useStyles();
-  const set = useSelector((state: Root) => state.set);
-  const ui = useSelector((state: Root) => state.ui);
-  if (ui.narrowDevice) return null;
-  if (!ui.infobox) return null;
-  const d: any = {};
-  if (ui.mouseOnCanvas) {
-    d.x = ui.mouse.x;
-    d.y = ui.mouse.y;
-    d.iter = ui.mouse.iter;
-    d.w = set.w;
-  } else {
-    d.x = set.x;
-    d.y = set.y;
-    d.iter = set.iter;
-    d.w = set.w;
-  }
+  const { ui, set, mouse } = state;
+
+  if (ui.isNarrowDevice) return null;
+  if (!ui.isInfobox) return null;
+
+  const d = mouse.isOnCanvas ? { ...mouse, w: set.w } : { ...set };
+
   return (
     <Paper elevation={3} className={classes.box}>
       <Typography color="primary" gutterBottom variant="h6">
-        {ui.mouseOnCanvas ? "Mouse" : "Screen"}
+        {mouse.isOnCanvas ? "Mouse" : "Screen"}
       </Typography>
       <Typography component="div">
         <Box fontFamily="Monospace">X: {d.x.toFixed(16)}</Box>
@@ -48,6 +39,6 @@ function InfoBox() {
       </Typography>
     </Paper>
   );
-}
+});
 
 export default InfoBox;

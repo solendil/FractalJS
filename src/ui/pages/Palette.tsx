@@ -4,16 +4,12 @@ import Slider from "@material-ui/core/Slider";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListSubheader from "@material-ui/core/ListSubheader";
-import { useSelector, useDispatch } from "react-redux";
-import { Root } from "../../redux/reducer";
-import {
-  setColorOffset,
-  setColorDensity,
-  setColorId,
-} from "../../redux/rdxengine";
+import { setColorOffset, setColorDensity, setColorId } from "../../logic/logic";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBufferFromId } from "../../util/palette";
 import { Typography } from "@material-ui/core";
+import state from "../../logic/state";
+import { view } from "@risingstack/react-easy-state";
 
 const DENSITY = (20 * 20) ** (1 / 100);
 
@@ -28,7 +24,7 @@ const gradients = (() => {
   canvas.height = HEIGHT;
   const imageData = context.createImageData(canvas.width, canvas.height);
   const imageBuffer = new Uint32Array(imageData.data.buffer);
-  [0, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].forEach((id) => {
+  [0, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].forEach(id => {
     const colorBuffer = getBufferFromId(id, RES);
     for (let i = 0; i < WIDTH; i += 1) {
       for (let j = 0; j < HEIGHT; j += 1) {
@@ -43,7 +39,7 @@ const gradients = (() => {
   return res;
 })();
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   swatches: {
     display: "flex",
     flexWrap: "wrap",
@@ -75,20 +71,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Palette() {
+const Palette = view(() => {
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const colors = useSelector((state: Root) => state.colors);
-  const swatches = gradients.map((gradient) => (
-    <div key={gradient.id} onClick={() => dispatch(setColorId(gradient.id))}>
+
+  const swatches = gradients.map(gradient => (
+    <div key={gradient.id} onClick={() => setColorId(gradient.id)}>
       <img alt="" src={gradient.dataURL} />
-      {colors.id === gradient.id ? (
+      {state.painter.id === gradient.id ? (
         <i className="material-icons">check_circle</i>
       ) : null}
     </div>
   ));
 
-  const densitySlider = Math.log(20 * colors.density) / Math.log(DENSITY);
+  const densitySlider =
+    Math.log(20 * state.painter.density) / Math.log(DENSITY);
   const getDensity = (val: number) => (1 / 20) * DENSITY ** val;
 
   return (
@@ -106,8 +102,8 @@ function Palette() {
             min={0}
             max={1}
             step={0.001}
-            value={colors.offset}
-            onChange={throttle((_, v) => dispatch(setColorOffset(v)), 100)}
+            value={state.painter.offset}
+            onChange={throttle((_, v) => setColorOffset(v), 100)}
           />
         </ListItem>
         <ListItem>
@@ -117,15 +113,12 @@ function Palette() {
             max={100}
             step={1}
             value={densitySlider}
-            onChange={throttle(
-              (_, v) => dispatch(setColorDensity(getDensity(v))),
-              100,
-            )}
+            onChange={throttle((_, v) => setColorDensity(getDensity(v)), 100)}
           />
         </ListItem>
       </List>
     </div>
   );
-}
+});
 
 export default Palette;

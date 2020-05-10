@@ -3,11 +3,10 @@ import map from "lodash/map";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigation } from "./Navigation";
 import IconButton from "@material-ui/core/IconButton";
-import { useDispatch, useSelector } from "react-redux";
-import { setTab, setDrawer, setUi } from "../redux/ui";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import Share from "./ShareButton";
-import { Root } from "../redux/reducer";
+import state, { Tab } from "../logic/state";
+import { view } from "@risingstack/react-easy-state";
 
 const useStyles = makeStyles(theme => ({
   bar: {
@@ -58,10 +57,9 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const ToolBar = () => {
+const ToolBar = view(() => {
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const showPois = useSelector((state: Root) => state.ui.showPois);
+  const { ui } = state;
 
   const buttons = map(navigation, (def, tabId) =>
     !def.hidden ? (
@@ -69,8 +67,8 @@ const ToolBar = () => {
         key={tabId}
         className={classes.icons}
         onClick={() => {
-          dispatch(setTab(tabId));
-          dispatch(setDrawer(true));
+          ui.tab = tabId as Tab;
+          ui.isDrawer = true;
         }}
       >
         <i className="material-icons">{def.icon}</i>
@@ -89,9 +87,9 @@ const ToolBar = () => {
   );
   const poi = (
     <IconButton
-      className={`${classes.icons} ${showPois ? classes.selected : ""}`}
+      className={`${classes.icons} ${ui.showPois ? classes.selected : ""}`}
       key="pois"
-      onClick={() => dispatch(setUi({ showPois: !showPois }))}
+      onClick={() => (ui.showPois = !ui.showPois)}
     >
       <i className="material-icons">map</i>
     </IconButton>
@@ -101,6 +99,6 @@ const ToolBar = () => {
   buttons.splice(2, 0, <Share key="share" className={classes.icons} />);
 
   return <div className={classes.bar}>{buttons}</div>;
-};
+});
 
 export default ToolBar;

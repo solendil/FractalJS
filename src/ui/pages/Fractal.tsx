@@ -2,12 +2,11 @@ import React from "react";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListSubheader from "@material-ui/core/ListSubheader";
-import { useSelector, useDispatch } from "react-redux";
-import { changeFractalType } from "../../redux/rdxengine";
-import { Root } from "../../redux/reducer";
+import { changeFractalType } from "../../logic/logic";
 import { listForUi } from "../../engine/fractals";
 import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
+import state from "../../logic/state";
 
 const useStyles = makeStyles(theme => ({
   swatches: {
@@ -28,16 +27,16 @@ const useStyles = makeStyles(theme => ({
 
 function Fractal() {
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const type = useSelector((state: Root) => state.set.fractalId);
 
   const buttons = listForUi().map(o => {
     return (
       <div key={o.fractalId}>
         <Button
-          variant={type === o.fractalId ? "contained" : "outlined"}
-          color={type === o.fractalId ? "primary" : "default"}
-          onClick={() => dispatch(changeFractalType(o.fractalId))}
+          variant={
+            state.set.fractalId === o.fractalId ? "contained" : "outlined"
+          }
+          color={state.set.fractalId === o.fractalId ? "primary" : "default"}
+          onClick={() => changeFractalType(o.fractalId)}
         >
           {o.name}
         </Button>

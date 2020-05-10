@@ -1,10 +1,10 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { Root } from "../redux/reducer";
 import { makeStyles } from "@material-ui/core";
 import Snackbar from "@material-ui/core/Snackbar";
+import { view } from "@risingstack/react-easy-state";
+import state from "../logic/state";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   snackbar: {
     [theme.breakpoints.only("xs")]: {
       bottom: 64,
@@ -12,10 +12,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const MySnackbar = () => {
-  const ui = useSelector((state: Root) => state.ui);
+const MySnackbar = view(() => {
   const classes = useStyles();
-  if (!ui.snack) return null;
+  if (!state.ui.snackText) return null;
 
   return (
     <Snackbar
@@ -24,6 +23,6 @@ const MySnackbar = () => {
       message="Sorry, FractalJS cannot zoom further..."
     ></Snackbar>
   );
-};
+});
 
 export default MySnackbar;

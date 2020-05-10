@@ -1,35 +1,28 @@
 import React from "react";
 import Poi from "./Poi";
-import { Root } from "../../redux/reducer";
 import Camera from "../../engine/math/camera";
 import Vector from "../../engine/math/vector";
-import { createSelector } from "@reduxjs/toolkit";
 import Matrix from "../../engine/math/matrix";
-import { useSelector } from "react-redux";
 import { poiDb } from "../../engine/pois";
 import Cross from "./Cross";
-
-// create a camera reselector
-const set = (state: Root) => state.set;
-const screen = (state: Root) => state.ui.screen;
-const cameraSelector = createSelector(set, screen, (set, screen) => {
-  return new Camera(
-    new Vector(screen.width, screen.height),
-    new Vector(set.x, set.y),
-    set.w,
-    Matrix.fromRaw(set.viewport),
-  );
-});
+import state from "../../logic/state";
+import { view } from "@risingstack/react-easy-state";
 
 const CROSS_THRESHOLD = 50; // screen size of a poi before switching from cross to full
 const AGG_THRESHOLD = 15; // aggregation threshold of crosses
 
-const Pois = () => {
-  const camera = useSelector((state: Root) => cameraSelector(state));
-  const screen = useSelector((state: Root) => state.ui.screen);
-  const fractalId = useSelector((state: Root) => state.set.fractalId);
+const Pois = view(() => {
+  const { ui, set } = state;
 
-  const pois = (poiDb[fractalId] || []).map(poi => ({
+  const camera = new Camera(
+    new Vector(ui.screen.width, ui.screen.height),
+    new Vector(set.x, set.y),
+    set.w,
+    Matrix.fromRaw(set.viewport),
+  );
+  const min = Math.min(ui.screen.width, ui.screen.height);
+
+  const pois = (poiDb[set.fractalId] || []).map(poi => ({
     ...poi,
     width: poi.w * camera.matrix_inv.a,
   }));
@@ -51,10 +44,10 @@ const Pois = () => {
   const htmlCrosses = aggs.map(poi => <Cross key={poi.id} {...poi} />);
 
   const full = pois.filter(
-    poi => poi.width >= CROSS_THRESHOLD && poi.width < screen.min * 2,
+    poi => poi.width >= CROSS_THRESHOLD && poi.width < min * 2,
   );
   const htmlFullPois = full.map(poi => (
-    <Poi key={poi.id} camera={camera} screen={screen} {...poi} />
+    <Poi key={poi.id} camera={camera} screen={ui.screen} {...poi} />
   ));
   return (
     <div>
@@ -62,6 +55,6 @@ const Pois = () => {
       {htmlCrosses}
     </div>
   );
-};
+});
 
 export default Pois;

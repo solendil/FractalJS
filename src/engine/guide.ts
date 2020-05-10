@@ -1,6 +1,6 @@
 import Engine from "./engine";
 import Vector from "./math/vector";
-import { Root } from "../redux/reducer";
+import state from "../logic/state";
 
 const cross = (pos: Vector, context: CanvasRenderingContext2D) => {
   const size = 20;
@@ -15,16 +15,12 @@ const cross = (pos: Vector, context: CanvasRenderingContext2D) => {
 export default class Guide {
   private context: CanvasRenderingContext2D;
 
-  constructor(
-    public canvas: HTMLCanvasElement,
-    private engine: Engine,
-    private getState: () => Root,
-  ) {
+  constructor(public canvas: HTMLCanvasElement, private engine: Engine) {
     this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
   }
 
   draw() {
-    const guide = this.getState().guide;
+    const guide = state.guide;
     if (!guide.active) {
       this.canvas.hidden = true;
       return;

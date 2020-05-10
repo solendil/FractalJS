@@ -8,7 +8,7 @@
   "homepage": ".",
   "dependencies": {
     "@material-ui/core": "^4.9.13",
-    "@reduxjs/toolkit": "^1.3.5",
+    "@risingstack/react-easy-state": "^6.3.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
@@ -18,7 +18,6 @@
     "@types/node": "^12.12.38",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.7",
-    "@types/react-redux": "^7.1.8",
     "@welldone-software/why-did-you-render": "^4.2.0",
     "hammerjs": "^2.0.8",
     "lodash": "^4.17.15",
@@ -26,7 +25,6 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-github-btn": "^1.2.0",
-    "react-redux": "^7.2.0",
     "react-scripts": "3.4.1",
     "source-map-explorer": "^2.4.2",
     "typescript": "^3.8.3"

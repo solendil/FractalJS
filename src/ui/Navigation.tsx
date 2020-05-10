@@ -7,11 +7,10 @@ import Palette from "./pages/Palette";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
 import Debug from "./pages/Debug";
-import { useDispatch, useSelector } from "react-redux";
-import { Root } from "../redux/reducer";
-import { setDrawer } from "../redux/ui";
 import Divider from "@material-ui/core/Divider";
 import MyToolbar from "./Toolbar";
+import { view } from "@risingstack/react-easy-state";
+import state from "../logic/state";
 
 export const navigation: { [key: string]: any } = {
   fractal: { icon: "collections", component: <Fractal /> },
@@ -48,28 +47,24 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Navigation = () => {
+const Navigation = view(() => {
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const { drawer, tab } = useSelector((state: Root) => ({
-    drawer: state.ui.drawer,
-    tab: state.ui.tab,
-  }));
-  const bigDevice = useMediaQuery("(min-width:450px)");
-  const content = navigation[tab || "fractal"].component;
+  const bigDevice = useMediaQuery("(min-width:450px)"); // TODO change
+  const { ui } = state;
+  const content = navigation[ui.tab || "fractal"].component;
 
   return (
     <>
       <MyToolbar />
       <SwipeableDrawer
         anchor={bigDevice ? "left" : "bottom"}
-        open={drawer}
+        open={ui.isDrawer}
         disableDiscovery
         disableSwipeToOpen
         PaperProps={{ className: classes.trans }}
         BackdropProps={{ invisible: true }}
-        onClose={() => dispatch(setDrawer(false))}
-        onOpen={() => dispatch(setDrawer(true))}
+        onClose={() => (ui.isDrawer = false)}
+        onOpen={() => (ui.isDrawer = true)}
       >
         <div className={classes.drawer}>
           {!bigDevice ? <Divider className={classes.handle} /> : null}
@@ -78,6 +73,6 @@ const Navigation = () => {
       </SwipeableDrawer>
     </>
   );
-};
+});
 
 export default Navigation;

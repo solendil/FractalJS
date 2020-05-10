@@ -2,7 +2,7 @@ import React from "react";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListSubheader from "@material-ui/core/ListSubheader";
-import { getEngine } from "../../redux/rdxengine";
+import { getEngine } from "../../logic/logic";
 
 export default function Debug() {
   const engine = getEngine();

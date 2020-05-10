@@ -1,11 +1,7 @@
 import Matrix, { RawMatrix } from "../engine/math/matrix";
-import { Dispatch } from "@reduxjs/toolkit";
-import { setOffset, setDensity, setColorId } from "./colors";
-import { setSet } from "./set";
 import { getPreset } from "../engine/fractals";
 import { PainterArgs } from "../engine/painter";
-import { Root } from "./reducer";
-import { setGuide } from "./guide";
+import state from "./state";
 
 interface UrlOutputObject {
   painter: PainterArgs;
@@ -39,30 +35,30 @@ const defaults: any = {
   vd: "1.0000",
 };
 
-export const update = (root: Root) => {
+export const update = () => {
   try {
     const args: any = {};
     // engine
-    args.t = root.set.fractalId;
-    args.x = root.set.x;
-    args.y = root.set.y;
-    args.w = root.set.w;
-    args.i = String(root.set.iter);
-    args.fs = root.set.smooth ? "1" : "0";
+    args.t = state.set.fractalId;
+    args.x = state.set.x;
+    args.y = state.set.y;
+    args.w = state.set.w;
+    args.i = String(state.set.iter);
+    args.fs = state.set.smooth ? "1" : "0";
     // painter
-    args.ct = String(root.colors.id);
-    args.co = String(Math.round(root.colors.offset * 100));
-    args.cd = String(+root.colors.density.toFixed(2));
-    args.cf = root.colors.fn;
+    args.ct = String(state.painter.id);
+    args.co = String(Math.round(state.painter.offset * 100));
+    args.cd = String(+state.painter.density.toFixed(2));
+    args.cf = state.painter.fn;
     // viewport matrix
-    args.va = root.set.viewport.a.toFixed(4);
-    args.vb = root.set.viewport.b.toFixed(4);
-    args.vc = root.set.viewport.c.toFixed(4);
-    args.vd = root.set.viewport.d.toFixed(4);
+    args.va = state.set.viewport.a.toFixed(4);
+    args.vb = state.set.viewport.b.toFixed(4);
+    args.vc = state.set.viewport.c.toFixed(4);
+    args.vd = state.set.viewport.d.toFixed(4);
     // guide
-    if (root.guide.active) {
-      args.gx = root.guide.x;
-      args.gy = root.guide.y;
+    if (state.guide.active) {
+      args.gx = state.guide.x;
+      args.gy = state.guide.y;
     }
     // remove args with default values
     for (let key in args) if (args[key] === defaults[key]) delete args[key];
@@ -127,7 +123,7 @@ export const read = (): UrlOutputObject | null => {
   return null;
 };
 
-export const readInit = (dispatch: Dispatch<any>, forceCold = false): void => {
+export const readInit = (forceCold = false): void => {
   const urlData = read();
   if (!urlData || forceCold) {
     // coldstart
@@ -136,17 +132,15 @@ export const readInit = (dispatch: Dispatch<any>, forceCold = false): void => {
       smooth: true,
       viewport: { ...Matrix.identity },
     };
-    let painter = { offset: 0, density: 20, id: 0, fn: "s" };
-    dispatch(setSet(desc));
-    dispatch(setColorId(painter.id));
-    dispatch(setOffset(0));
-    dispatch(setDensity(20));
+    state.set = desc;
+    state.painter.id = 0;
+    state.painter.offset = 0;
+    state.painter.density = 20;
+    state.painter.fn = "s";
   } else {
     const { desc, painter, guide } = urlData;
-    dispatch(setSet(desc));
-    dispatch(setGuide(guide));
-    dispatch(setColorId(painter.id));
-    dispatch(setOffset(painter.offset));
-    dispatch(setDensity(painter.density));
+    state.set = desc;
+    state.guide = guide;
+    state.painter = painter;
   }
 };

@@ -1,19 +1,13 @@
-import { updateSet } from "./set";
-import { Dispatch } from "@reduxjs/toolkit";
 import Engine from "../engine/engine";
-import { Root } from "./reducer";
 import { param } from "../params";
+import state from "./state";
 
 /*
 The improver hijacks engine to use a more complex rendering; so it's
 implemented as a function and a closure instead of a class (whose 'this'
 would have been messy)
 */
-export default function Improver(
-  engineArg: Engine,
-  dispatch: Dispatch<any>,
-  getState: () => Root,
-) {
+export default function Improver(engineArg: Engine) {
   const engine = engineArg;
   const draw = engine.draw.bind(engine);
   let frameId = 0;
@@ -47,12 +41,12 @@ export default function Improver(
       const id = frameId;
 
       // state detects when the fractal is drew afresh, needing a coarse rendering first
-      const state = engine.ctx.fractalId + engine.ctx.smooth;
-      if (state !== lastState) {
+      const curState = engine.ctx.fractalId + engine.ctx.smooth;
+      if (curState !== lastState) {
         await draw({ details: "subsampling", size: 4 });
         if (frameId !== id) return;
       }
-      lastState = state;
+      lastState = curState;
 
       // perform a normal drawing
       await draw({ details: "normal", id });
@@ -63,8 +57,7 @@ export default function Improver(
       while (analysis.shouldIncrease) {
         const newIter = Math.round(engine.ctx.iter * 1.5);
         // console.log(`+ iter ${engine.ctx.iter} -> ${newIter}: ${analysis.txt}`);
-        dispatch(updateSet({ iter: newIter }));
-        engine.ctx.iter = newIter;
+        state.set.iter = newIter;
         await draw({ details: "normal", id });
         if (frameId !== id) return;
         analysis = analysePicture2();
@@ -72,8 +65,7 @@ export default function Improver(
       if (analysis.shouldDecrease) {
         const newIter = Math.round(Math.max(50, engine.ctx.iter / 1.5));
         // console.log(`- iter ${engine.ctx.iter} -> ${newIter}: ${analysis.txt}`);
-        dispatch(updateSet({ iter: newIter }));
-        engine.ctx.iter = newIter;
+        state.set.iter = newIter;
       }
 
       // wait one sec, then supersample

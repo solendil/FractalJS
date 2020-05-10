@@ -5,16 +5,11 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Switch from "@material-ui/core/Switch";
-import { useSelector, useDispatch } from "react-redux";
-import { changeSmooth } from "../../redux/rdxengine";
-import { Root } from "../../redux/reducer";
-import { setInfobox } from "../../redux/ui";
+import { changeSmooth } from "../../logic/logic";
+import state from "../../logic/state";
+import { view } from "@risingstack/react-easy-state";
 
-function Settings() {
-  const dispatch = useDispatch();
-  const smooth = useSelector((state: Root) => state.set.smooth);
-  const ui = useSelector((state: Root) => state.ui);
-
+const Settings = view(() => {
   return (
     <div>
       <List
@@ -28,24 +23,24 @@ function Settings() {
           <ListItemSecondaryAction>
             <Switch
               edge="end"
-              onChange={(event) => {
-                dispatch(changeSmooth(event.target.checked));
+              onChange={event => {
+                changeSmooth(event.target.checked);
               }}
-              checked={smooth}
+              checked={state.set.smooth}
               color="primary"
             />
           </ListItemSecondaryAction>
         </ListItem>
-        {ui.narrowDevice ? null : (
+        {state.ui.isNarrowDevice ? null : (
           <ListItem>
             <ListItemText primary="Information box" />
             <ListItemSecondaryAction>
               <Switch
                 edge="end"
-                onChange={(event) => {
-                  dispatch(setInfobox(event.target.checked));
+                onChange={evt => {
+                  state.ui.isInfobox = evt.target.checked;
                 }}
-                checked={ui.infobox}
+                checked={state.ui.isInfobox}
                 color="primary"
               />
             </ListItemSecondaryAction>
@@ -54,6 +49,6 @@ function Settings() {
       </List>
     </div>
   );
-}
+});
 
 export default Settings;
