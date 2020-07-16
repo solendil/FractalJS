@@ -20,7 +20,7 @@
     "@types/react-dom": "^16.9.5",
     "@types/react-redux": "^7.1.7",
     "hammerjs": "^2.0.8",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "node-sass": "^4.13.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
